@@ -193,6 +193,12 @@
         <activity android:name="org.metawatch.manager.WidgetPicker" 
         		  android:launchMode="standard">
         </activity>        
+        <activity android:name="org.metawatch.manager.ThemeContainer" 
+        		  android:launchMode="standard">
+        </activity>  
+        <activity android:name="org.metawatch.manager.ThemeGallery" 
+        		  android:launchMode="standard">
+        </activity>  
         <activity android:name="org.metawatch.manager.ThemePicker" 
         		  android:launchMode="standard">
         </activity>  

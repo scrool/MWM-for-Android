@@ -80,7 +80,7 @@ public class Settings extends PreferenceActivity {
 				
 				if (Preferences.logging) Log.d(MetaWatch.TAG, "theme click");
 				
-				startActivity(new Intent(Settings.this, ThemePicker.class));
+				startActivity(new Intent(Settings.this, ThemeContainer.class));
 				
 				return false;
 			}
