@@ -1,11 +1,18 @@
 package org.metawatch.manager;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -13,6 +20,8 @@ import java.util.zip.ZipInputStream;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -263,6 +272,98 @@ public class BitmapCache {
 		}
 		
 		return theme;
+	}
+	
+	private static String getThemeName(String uri) {
+		String filename = uri.substring( uri.lastIndexOf('/')+1, uri.length());
+		return filename.substring(0, filename.lastIndexOf('.'));
+	}
+	
+	static ProgressDialog dialog = null;
+	public static void downloadAndInstallTheme(final Activity callingActivity, final String uri) {
+		
+		Thread thread = new Thread("ThemeInstaller") {
+
+			
+			@Override
+			public void run() {
+				
+				OutputStream fOut = null;
+				try {
+		
+					final Context context = callingActivity;
+					
+				
+					callingActivity.runOnUiThread(new Runnable(){
+						
+						public void run() {
+							dialog = ProgressDialog.show(context, "", 
+									"Downloading Theme", true);
+							dialog.show();
+						}
+					} );
+					
+			    	
+				    // Create a URL for the desired page
+				    URL url = new URL(uri);
+				    
+				    String themeName = getThemeName(uri);
+				    File themeFile = getThemeFile(context, themeName);
+				    			
+				    URLConnection uc = url.openConnection();
+				    int contentLength = uc.getContentLength();
+				    
+				    InputStream raw = uc.getInputStream();
+				    InputStream in = new BufferedInputStream(raw);
+				    byte[] data = new byte[contentLength];
+				    int bytesRead=0;
+				    int offset=0;
+				    
+				    while (offset<contentLength) {
+				    	bytesRead = in.read(data, offset, data.length-offset);
+				    	if (bytesRead==-1)
+				    		break;
+				    	
+				    	offset += bytesRead;
+				    }
+				    
+				    in.close();
+				    
+				    if (offset!=contentLength)
+				    	throw new IOException();
+				    
+				    fOut = new BufferedOutputStream(new FileOutputStream(themeFile));
+				    fOut.write(data);
+				    fOut.flush();
+		            fOut.close();
+		            fOut = null;
+		            
+		        	Preferences.themeName = themeName;   	
+		        	MetaWatchService.saveTheme(context, Preferences.themeName);
+		            
+		        	Idle.updateIdle(context, true);
+		        	
+		        	callingActivity.finish();
+		        	
+		            return;
+				} catch (MalformedURLException e) {
+				} catch (IOException e) {
+				}
+				finally {
+					if (fOut!=null)
+						try {
+							fOut.close();
+						} catch (IOException e) {
+						}
+					
+					if (dialog!=null)
+						dialog.dismiss();
+					dialog = null;
+				}
+			}
+		};
+		
+		thread.start();
 	}
 	
 	
