@@ -2,6 +2,7 @@ package org.metawatch.manager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.WebView;
@@ -34,6 +35,7 @@ public class ThemeGallery extends Activity {
         
         activity = this;
         mWebView = new WebView(this);
+        mWebView.setBackgroundColor(Color.BLACK);
         mWebView.loadUrl("http://grapefruitopia.com/mwthm/");
         mWebView.setWebViewClient(new Client());
         
