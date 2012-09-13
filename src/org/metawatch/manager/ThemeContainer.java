@@ -6,12 +6,15 @@ import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.Window;
 import android.widget.TabHost;
 
 public class ThemeContainer extends TabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         
         final Resources res = getResources();
         final TabHost tabHost = getTabHost();
