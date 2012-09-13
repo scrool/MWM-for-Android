@@ -307,6 +307,10 @@ public class MetaWatch extends TabActivity {
     	
     	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
     		textView.append("\n");
+    		if (Monitors.weatherData.error) {
+    			textView.append(Monitors.weatherData.errorString);
+    			textView.append("\n");
+    		}
     		if (Monitors.weatherData.received) {
     			textView.append(res.getString(R.string.status_weather_last_updated));
     			textView.append("\n  ");

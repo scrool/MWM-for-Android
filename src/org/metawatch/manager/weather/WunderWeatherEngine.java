@@ -212,12 +212,17 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 				weatherData.received = true;
 				weatherData.timeStamp = System.currentTimeMillis();
 
+				weatherData.error = false;
+				weatherData.errorString = "";
+				
 				Idle.updateIdle(context, true);
 				MetaWatchService.notifyClients();
 
 			}
 
 		} catch (Exception e) {
+			weatherData.error = true;
+			weatherData.errorString = e.getLocalizedMessage();
 			if (Preferences.logging)
 				Log.e(MetaWatch.TAG, "Exception while retreiving weather", e);
 		} finally {

@@ -160,11 +160,16 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 				weatherData = requestWeatherFromYahooPlacefinder(placeFinderUrl,
 						weatherData);
 				
+				weatherData.error = false;
+				weatherData.errorString = "";
+				
 				Idle.updateIdle(context, true);
 				MetaWatchService.notifyClients();
 			}
 
 		} catch (Exception e) {
+			weatherData.error = false;
+			weatherData.errorString = e.getLocalizedMessage();
 			if (Preferences.logging)
 				Log.e(MetaWatch.TAG, "Exception while retreiving weather", e);
 		} finally {

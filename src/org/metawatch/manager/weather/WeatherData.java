@@ -36,5 +36,8 @@ public class WeatherData {
 				+ ", forecastTimeStamp=" + forecastTimeStamp + "]";
 	}
 	
+	public boolean error = false;
+	public String errorString = "";
+	
 	
 }
