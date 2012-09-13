@@ -126,7 +126,7 @@ public class MediaPlayerApp extends ApplicationBase {
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawColor(Color.WHITE);	
 			
-			if(lastTrack.track=="") {
+			if(lastTrack.isEmpty()) {
 				canvas.drawBitmap(Utils.getBitmap(context, "media_player_idle.png"), 0, 0, null);				
 			}
 			else {	
@@ -154,7 +154,7 @@ public class MediaPlayerApp extends ApplicationBase {
 			Canvas canvas = new Canvas(bitmap);
 			canvas.drawColor(Color.WHITE);	
 	
-			if(lastTrack.track=="") {
+			if(lastTrack.isEmpty()) {
 				canvas.drawBitmap(Utils.getBitmap(context, "media_player_idle_oled.png"), 0, 0, null);				
 			}
 			else {	

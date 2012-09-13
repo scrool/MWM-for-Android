@@ -204,10 +204,10 @@ public class MediaControl {
 		lastTrack = new TrackInfo(artist, album, track);
 		lastTimeUpdate = System.currentTimeMillis();
 		
+		Idle.updateIdle(context, true);
+		
 		int mediaPlayerState = AppManager.getAppState(MediaPlayerApp.APP_ID);
-		if (mediaPlayerState == ApplicationBase.ACTIVE_IDLE)
-			Idle.updateIdle(context, true);
-		else if (mediaPlayerState == ApplicationBase.ACTIVE_POPUP)
+		if (mediaPlayerState == ApplicationBase.ACTIVE_POPUP)
 			Application.updateAppMode(context);
 		
 		if (!MetaWatchService.Preferences.notifyMusic)

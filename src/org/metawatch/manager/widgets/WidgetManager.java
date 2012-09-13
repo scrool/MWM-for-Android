@@ -55,6 +55,7 @@ public class WidgetManager {
 			widgets.add(new PictureWidget());
 			widgets.add(new TouchDownWidget());
 			widgets.add(new VoicemailWidget());
+			widgets.add(new NowPlayingWidget());
 			//widgets.add(new TestWidget());
 		}
 		
