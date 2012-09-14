@@ -322,7 +322,6 @@ public class MetaWatch extends TabActivity {
     			textView.append(res.getString(R.string.status_weather_observation));
     			textView.append("\n    ");
     			printDate(Monitors.weatherData.timeStamp);
-    			textView.append(Monitors.weatherData.forecast == null ? "null" : Monitors.weatherData.forecast.length +  " forecast entries");
     		}
     		else {
     			textView.append(res.getString(R.string.status_weather_waiting));
