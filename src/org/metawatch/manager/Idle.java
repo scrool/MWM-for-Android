@@ -44,7 +44,6 @@ import org.metawatch.manager.apps.ActionsApp;
 import org.metawatch.manager.apps.AppManager;
 import org.metawatch.manager.apps.ApplicationBase;
 import org.metawatch.manager.apps.ApplicationBase.AppData;
-import org.metawatch.manager.weather.WeatherEngineFactory;
 import org.metawatch.manager.widgets.InternalWidget.WidgetData;
 import org.metawatch.manager.widgets.WidgetManager;
 import org.metawatch.manager.widgets.WidgetRow;
@@ -56,7 +55,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
