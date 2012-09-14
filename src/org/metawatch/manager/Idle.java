@@ -44,6 +44,7 @@ import org.metawatch.manager.apps.ActionsApp;
 import org.metawatch.manager.apps.AppManager;
 import org.metawatch.manager.apps.ApplicationBase;
 import org.metawatch.manager.apps.ApplicationBase.AppData;
+import org.metawatch.manager.weather.WeatherEngineFactory;
 import org.metawatch.manager.widgets.InternalWidget.WidgetData;
 import org.metawatch.manager.widgets.WidgetManager;
 import org.metawatch.manager.widgets.WidgetRow;
@@ -55,6 +56,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -525,15 +527,29 @@ public class Idle {
 		Protocol.enableButton(1, 3, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
 	}
 	
-	public static void updateIdle(Context context, boolean refresh) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.updateIdle()");
+	public static void updateIdle(final Context context, final boolean refresh) {
 		
-		if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE )
-			if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL)
-				sendLcdIdle(context, refresh);
-			else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
-				updateOledIdle(context, refresh);
+		if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE ) {
+			Thread thread = new Thread("UpdateIdle") {
+	
+				@Override
+				public void run() {
+					if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.updateIdle()");
+					long timestamp = System.currentTimeMillis();
+					
+					if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL)
+						sendLcdIdle(context, refresh);
+					else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
+						updateOledIdle(context, refresh);
+					
+					if (Preferences.logging) Log.d(MetaWatch.TAG, "updateIdle took " + (System.currentTimeMillis()-timestamp) + " ms" );
+				}
+			};
+			thread.start();
+		}
+		
 	}
+		
 	
 	private static void updateOledIdle(Context context, boolean refresh) {	
 		if (isBusy())
