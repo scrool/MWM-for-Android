@@ -309,7 +309,7 @@ public class MetaWatchService extends Service {
 				sharedPreferences.getString("WeatherGeolocationMode", 
 				Integer.toString(Preferences.weatherGeolocationMode)));
 		Preferences.wundergroundKey = sharedPreferences.getString(
-				"WundergroundKey", Preferences.wundergroundKey);
+				"WundergroundKey", Preferences.wundergroundKey).trim();
 		Preferences.idleMusicControlMethod = Integer.parseInt(
 				sharedPreferences.getString("IdleMusicControlMethod", 
 				Integer.toString(Preferences.idleMusicControlMethod)));
