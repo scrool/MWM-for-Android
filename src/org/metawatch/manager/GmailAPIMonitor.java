@@ -96,6 +96,7 @@ public class GmailAPIMonitor implements GmailMonitor {
 	public GmailAPIMonitor(Context ctx) {
 		super();		
 		context = ctx;
+		Utils.CursorHandler ch = new Utils.CursorHandler();
 		try {
 			final List<String> accounts = Utils.getGoogleAccountsNames(ctx);
 			if (accounts.size() == 0) {
@@ -104,7 +105,7 @@ public class GmailAPIMonitor implements GmailMonitor {
 			
 			for (String account : accounts) {
 				// find labels for the account.
-				Cursor c = context.getContentResolver().query(GmailContract.Labels.getLabelsUri(account), null, null, null, null);
+				Cursor c = ch.add(context.getContentResolver().query(GmailContract.Labels.getLabelsUri(account), null, null, null, null));
 				// loop through the cursor and find the Inbox.
 				if (c != null) {
 					// Technically, you can choose any label here, including priority inbox and all mail.
@@ -118,7 +119,6 @@ public class GmailAPIMonitor implements GmailMonitor {
 						}
 					}
 				}
-				c.close();
 				if (ListAccounts.size() == 0) {
 					throw new IllegalArgumentException("Label not found.");
 				}
@@ -128,6 +128,9 @@ public class GmailAPIMonitor implements GmailMonitor {
 		} catch (Exception e) {
 			// handle exception
 			Log.e(MetaWatch.TAG, e.getMessage());
+		}
+		finally {
+			ch.closeAll();
 		}
 	}
 
@@ -195,14 +198,16 @@ public class GmailAPIMonitor implements GmailMonitor {
 	 */
 	private int getUnreadCount(String accountName) {
 		int unreadCnt = 0;
+		Utils.CursorHandler ch = new Utils.CursorHandler();
 		try {
-			Cursor c = context.getContentResolver().query(GmailContract.Labels.getLabelsUri(accountName), null, null, null, null);
+			Cursor c = ch.add(context.getContentResolver().query(GmailContract.Labels.getLabelsUri(accountName), null, null, null, null));
 			c.moveToFirst();
 			unreadCnt += c.getInt(c.getColumnIndexOrThrow(GmailContract.Labels.NUM_UNREAD_CONVERSATIONS));
-			c.close();
 		} catch (Exception x) {
 			if (Preferences.logging)
 				Log.d(MetaWatch.TAG, "GmailAPIMonitor.getUnreadCount(): caught exception: " + x.toString());
+		} finally {
+			ch.closeAll();
 		}
 		return unreadCnt;
 	}

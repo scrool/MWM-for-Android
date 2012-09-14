@@ -107,7 +107,26 @@ public class Utils {
 	static public long Meeting_EndTimestamp;
 	static public long Meeting_StartTimestamp;
 	
+	public static class CursorHandler {
+		private List<Cursor> cursors = new ArrayList<Cursor>();
+		
+		public Cursor add(Cursor c) {
+			if (c!=null)
+				cursors.add(c);
+			return c;
+		}
+		
+		public void closeAll() {
+			for(Cursor c : cursors) {
+				if(!c.isClosed())
+					c.close();
+			}
+		}
+	}
+	
 	public static String getContactNameFromNumber(Context context, String number) {
+		
+		CursorHandler ch = new CursorHandler();
 		
 		try {
 			if (number.equals(""))
@@ -116,7 +135,7 @@ public class Utils {
 			String[] projection = new String[] { PhoneLookup.DISPLAY_NAME, PhoneLookup.NUMBER };
 			
 			Uri contactUri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
-			Cursor c = context.getContentResolver().query(contactUri, projection, null, null, null);
+			Cursor c = ch.add( context.getContentResolver().query(contactUri, projection, null, null, null) );
 			
 			if (c==null)
 				return number;
@@ -127,16 +146,20 @@ public class Utils {
 					return name;
 			}
 			
-			c.close();
 			return number;
 		}
 		catch(java.lang.IllegalStateException e) {
 			return number;
 		}
+		finally {
+			ch.closeAll();
+		}
 	}
 	
 	public static Bitmap getContactPhotoFromNumber(Context context, String number) {
 
+		CursorHandler ch = new CursorHandler();
+		
 		try {
 			if (number.equals(""))
 				return null;
@@ -148,8 +171,8 @@ public class Utils {
 					PhoneLookup.NUMBER };
 			
 		    Uri photoUri = null;
-		    Cursor c = context.getContentResolver().query(contactUri,
-		            projection, null, null, null);
+		    Cursor c = ch.add( context.getContentResolver().query(contactUri,
+		            projection, null, null, null) );
 
 		    if (c==null)
 		    	return null;
@@ -162,37 +185,35 @@ public class Utils {
 		        	InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(
 		        			context.getContentResolver(), photoUri);
 		        	if (input != null) {
-		        		c.close();
 		        		return BitmapFactory.decodeStream(input);
 		        	}
 		        }
 		        
 		        // The above failed, fallback to PHOTO_ID.
 				int photoID = c.getInt(c.getColumnIndex(PhoneLookup.PHOTO_ID));
-				c.close();
 
 				photoUri = ContactsContract.Data.CONTENT_URI;
-				c = context.getContentResolver().query(photoUri, new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO, ContactsContract.Data.PHOTO_ID}, Data.PHOTO_ID + " = " + photoID, null, null);
+				c = ch.add( context.getContentResolver().query(photoUri, new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO, ContactsContract.Data.PHOTO_ID}, Data.PHOTO_ID + " = " + photoID, null, null) );
 				
 				if (c.moveToFirst()) {
 		            try {
 		            	ByteArrayInputStream rawPhotoStream = new ByteArrayInputStream(c.getBlob(c.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO)));
 		            	Bitmap contactPhoto = BitmapFactory.decodeStream(rawPhotoStream);
-		            	c.close();
 		            	return contactPhoto;
 		            }
 		            catch (NullPointerException ex) {
-		            	c.close();
 		            	return null;
 		            }
 		        }
 			}
 			
-			c.close();
 			return null;
 		}
 		catch(java.lang.IllegalStateException e) {
 			return null;
+		}
+		finally {
+			ch.closeAll();
 		}
 
 	}
@@ -249,8 +270,10 @@ public class Utils {
 	
 	public static int getMissedCallsCount(Context context) {
 		int missed = 0;
+		CursorHandler ch = new CursorHandler();
 		try {
-			Cursor cursor = context.getContentResolver().query(android.provider.CallLog.Calls.CONTENT_URI, null, null, null, null);
+			Cursor cursor = ch.add( context.getContentResolver().query(android.provider.CallLog.Calls.CONTENT_URI, null, null, null, null) );
+			
 			cursor.moveToFirst();
 
 			while (true) {
@@ -262,9 +285,11 @@ public class Utils {
 
 				cursor.moveToNext();
 			}
-			cursor.close();
 
 		} catch (Exception x) {
+		}
+		finally {
+			ch.closeAll();
 		}
 		return missed;
 	}
@@ -273,6 +298,8 @@ public class Utils {
 		long now = new Date().getTime();
 		final long CurrentTime = System.currentTimeMillis();
 
+		CursorHandler ch = new CursorHandler();
+		
 		try {
 
 			String titletemp="";
@@ -290,7 +317,7 @@ public class Utils {
 			//location="nowhere";
 
 			ContentResolver cr = context.getContentResolver();
-			Cursor cursor = cr.query(Uri.parse("content://com.android.calendar/calendars"), new String[]{ "_id","name"}, null, null, null);
+			Cursor cursor = ch.add( cr.query(Uri.parse("content://com.android.calendar/calendars"), new String[]{ "_id","name"}, null, null, null) );
 			cursor.moveToFirst();
 			String[] CalNames = new String[cursor.getCount()];
 			int[] CalIds = new int[cursor.getCount()];
@@ -299,13 +326,12 @@ public class Utils {
 				CalNames[i] = cursor.getString(1);
 				cursor.moveToNext();
 			}
-			cursor.close();
 			Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
 
 			ContentUris.appendId(builder, now );
 			ContentUris.appendId(builder, now + DateUtils.DAY_IN_MILLIS);	        
-			Cursor eventCursor = cr.query(builder.build(),
-					new String[] { "event_id", "begin", "end", "allDay"}, null, null, "startDay ASC, startMinute ASC");
+			Cursor eventCursor = ch.add(cr.query(builder.build(),
+					new String[] { "event_id", "begin", "end", "allDay"}, null, null, "startDay ASC, startMinute ASC"));
 			// For a full list of available columns see http://tinyurl.com/yfbg76w
 			MeetingTime="None";
 			while (eventCursor.moveToNext()) {
@@ -313,7 +339,7 @@ public class Utils {
 					String uid2 = eventCursor.getString(0);	
 					Uri CALENDAR_URI = Uri.parse("content://com.android.calendar/events/" + uid2);
 					//if (Preferences.logging) Log.d(MetaWatch.TAG,"CalendarService.GetData(): Calendar URI: "+ CALENDAR_URI);
-					Cursor c = cr.query(CALENDAR_URI,new String[] { "title", "eventLocation", "description",}, null, null, null); 
+					Cursor c = ch.add(cr.query(CALENDAR_URI,new String[] { "title", "eventLocation", "description",}, null, null, null)); 
 					//if (Preferences.logging) Log.d(MetaWatch.TAG,"CalendarService.GetData(): Calendar cursor: "+ c.getCount());
 					if (c.moveToFirst())
 					{	
@@ -323,7 +349,6 @@ public class Utils {
 						locationtemp = c.getString(c.getColumnIndex("eventLocation"));    
 					}
 
-					c.close();
 					begintemp = eventCursor.getLong(1);
 					Meeting_StartTimestamp = begintemp;
 					MeetingTime = new SimpleDateFormat("HH:mm").format(begintemp);
@@ -358,8 +383,6 @@ public class Utils {
 					break;
 				}
 			}   
-			eventCursor.close();
-
 
 			/*** Schedule ending notification ***/
 			if (!MeetingTime.equals("None")){
@@ -395,6 +418,9 @@ public class Utils {
 			if (Preferences.logging) Log.d(MetaWatch.TAG, "Utils.readCalendar(): caught exception: " + x.toString());
 			return "None";
 		}
+		finally {
+			ch.closeAll();
+		}
 
 	}
 	
@@ -413,8 +439,9 @@ public class Utils {
 	}
 	
 	private static int getUnreadK9Count(Context context, int accountNumber) {
+		CursorHandler ch = new CursorHandler();
 		try {
-			Cursor cur = context.getContentResolver().query(Uri.parse(k9UnreadUri+"/"+accountNumber+"/"), null, null, null, null);
+			Cursor cur = ch.add(context.getContentResolver().query(Uri.parse(k9UnreadUri+"/"+accountNumber+"/"), null, null, null, null));
 		    if (cur!=null) {
 		    	if (Preferences.logging) Log.d(MetaWatch.TAG, "k9: "+cur.getCount()+ " unread rows returned");
 		    			    	
@@ -456,14 +483,13 @@ public class Utils {
 	}
 	
 	public static int getK9AccountCount(Context context) {
+		CursorHandler ch = new CursorHandler();
 		try {
-			Cursor cur = context.getContentResolver().query(k9AccountsUri, null, null, null, null);
+			Cursor cur = ch.add( context.getContentResolver().query(k9AccountsUri, null, null, null, null) );
 		    if (cur!=null) {
 		    	if (Preferences.logging) Log.d(MetaWatch.TAG, "k9: "+cur.getCount()+ " account rows returned");
 
 		    	int count = cur.getCount();
-		    	
-		    	cur.close();
 		    	
 		    	return count;
 		    }
@@ -476,6 +502,9 @@ public class Utils {
 		}
 		catch (java.lang.SecurityException e) {
 			if (Preferences.logging) Log.d(MetaWatch.TAG, "Permissions failure accessing k-9 databases");
+		}
+		finally {
+			ch.closeAll();
 		}
 		return 0;
 

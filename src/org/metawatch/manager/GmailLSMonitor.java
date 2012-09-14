@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.Utils.CursorHandler;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -130,12 +131,13 @@ public class GmailLSMonitor implements GmailMonitor {
 	private int getUnreadCount(String label) {
 		int intUnread = 0;
 		
+		Utils.CursorHandler ch = new Utils.CursorHandler();
 		for (String account : accounts) {
 			try {
 				
 				int nameColumn = 0;
 				
-				Cursor c = context.getContentResolver().query(Uri.parse("content://gmail-ls/labels/" + account), null, null, null, null);
+				Cursor c = ch.add(context.getContentResolver().query(Uri.parse("content://gmail-ls/labels/" + account), null, null, null, null));
 				c.moveToFirst();
 				
 				nameColumn = c.getColumnIndexOrThrow("canonicalName");
@@ -148,13 +150,14 @@ public class GmailLSMonitor implements GmailMonitor {
 					c.moveToNext();
 					
 					if (c.isLast()) {
-						c.close();
 						break;
 					}
 				}
 			} catch (Exception x) {
 				if (Preferences.logging)
 					Log.d(MetaWatch.TAG, "GmailLSMonitor.getUnreadCount(): caught exception: " + x.toString());
+			} finally {
+				ch.closeAll();
 			}
 		}
 		// if (Preferences.logging) Log.d(MetaWatch.TAG, "GmailLSMonitor.getUnreadCount(): couldn't find count, returning 0.");
@@ -163,89 +166,94 @@ public class GmailLSMonitor implements GmailMonitor {
 	
 	
 	private void sendUnreadGmail() {
-		for (String account : accounts) {
-			try {
-				int nameColumn = 0;
-				String id = "";
-				String convId = "";
-				
-				double maxDate = 0;
-				
-				Cursor c = context.getContentResolver().query(Uri.parse("content://gmail-ls/labels/" + account), null, null, null, null);
-				c.moveToFirst();
-				
-				nameColumn = c.getColumnIndexOrThrow("canonicalName");
-				
-				while (true) {
-					if (c.getString(nameColumn).equals("^u"))
-						id = c.getString(c.getColumnIndexOrThrow("_id"));
+		CursorHandler ch = new Utils.CursorHandler();
+		try {
+			for (String account : accounts) {
+				try {
+					int nameColumn = 0;
+					String id = "";
+					String convId = "";
 					
-					if (c.isLast())
-						break;
+					double maxDate = 0;
 					
-					c.moveToNext();
-				}
-				
-				Cursor c2 = context.getContentResolver().query(Uri.parse("content://gmail-ls/conversations/" + account), null, null, null, null);
-				c2.moveToLast();
-				
-				nameColumn = c2.getColumnIndexOrThrow("labelIds");
-				
-				while (true) {
-					if (c2.getString(nameColumn).indexOf(id) >= 0)
-						convId = c2.getString(c2.getColumnIndexOrThrow("conversation_id"));
+					Cursor c = ch.add(context.getContentResolver().query(Uri.parse("content://gmail-ls/labels/" + account), null, null, null, null));
+					c.moveToFirst();
 					
-					if (c2.isFirst())
-						break;
+					nameColumn = c.getColumnIndexOrThrow("canonicalName");
 					
-					c2.moveToPrevious();
-				}
-				// ///////////////
-				
-				maxDate = 0;
-				
-				String subject = "";
-				String sender = "";
-				String snippet = "";
-				
-				Cursor c3 = context.getContentResolver().query(Uri.parse("content://gmail-ls/conversations/" + account + "/" + convId + "/messages"), null, null, null, null);
-				// startManagingCursor(c3);
-				c3.moveToFirst();
-				
-				int colConvId = c3.getColumnIndexOrThrow("conversation");
-				int colSub = c3.getColumnIndexOrThrow("subject");
-				int colFrom = c3.getColumnIndexOrThrow("fromAddress");
-				int colRcv = c3.getColumnIndexOrThrow("dateReceivedMs");
-				
-				while (true) {
-					if (c3.getString(colConvId).indexOf(convId) >= 0) {
-						double thisDate = Double.parseDouble(c3.getString(colRcv));
+					while (true) {
+						if (c.getString(nameColumn).equals("^u"))
+							id = c.getString(c.getColumnIndexOrThrow("_id"));
 						
-						if (thisDate > maxDate) {
-							subject = c3.getString(colSub);
-							sender = c3.getString(colFrom);
-							snippet = c3.getString(c3.getColumnIndexOrThrow("snippet"));
-							maxDate = thisDate;
-						}
+						if (c.isLast())
+							break;
+						
+						c.moveToNext();
 					}
 					
-					if (c3.isLast())
-						break;
+					Cursor c2 = ch.add(context.getContentResolver().query(Uri.parse("content://gmail-ls/conversations/" + account), null, null, null, null));
+					c2.moveToLast();
 					
-					c3.moveToNext();
+					nameColumn = c2.getColumnIndexOrThrow("labelIds");
+					
+					while (true) {
+						if (c2.getString(nameColumn).indexOf(id) >= 0)
+							convId = c2.getString(c2.getColumnIndexOrThrow("conversation_id"));
+						
+						if (c2.isFirst())
+							break;
+						
+						c2.moveToPrevious();
+					}
+					// ///////////////
+					
+					maxDate = 0;
+					
+					String subject = "";
+					String sender = "";
+					String snippet = "";
+					
+					Cursor c3 = ch.add(context.getContentResolver().query(Uri.parse("content://gmail-ls/conversations/" + account + "/" + convId + "/messages"), null, null, null, null));
+					// startManagingCursor(c3);
+					c3.moveToFirst();
+					
+					int colConvId = c3.getColumnIndexOrThrow("conversation");
+					int colSub = c3.getColumnIndexOrThrow("subject");
+					int colFrom = c3.getColumnIndexOrThrow("fromAddress");
+					int colRcv = c3.getColumnIndexOrThrow("dateReceivedMs");
+					
+					while (true) {
+						if (c3.getString(colConvId).indexOf(convId) >= 0) {
+							double thisDate = Double.parseDouble(c3.getString(colRcv));
+							
+							if (thisDate > maxDate) {
+								subject = c3.getString(colSub);
+								sender = c3.getString(colFrom);
+								snippet = c3.getString(c3.getColumnIndexOrThrow("snippet"));
+								maxDate = thisDate;
+							}
+						}
+						
+						if (c3.isLast())
+							break;
+						
+						c3.moveToNext();
+					}
+					
+					Pattern pattern = Pattern.compile("(\"[^\"]*\") (<.*>)");
+					Matcher matcher = pattern.matcher(sender);
+					matcher.find();
+					
+					String senderName = matcher.group(1).replace("\"", "");
+					String senderMail = matcher.group(2).replace("<", "").replace(">", "");
+					
+					NotificationBuilder.createGmail(context, senderName, senderMail, subject, snippet);
+					
+				} catch (Exception x) {
 				}
-				
-				Pattern pattern = Pattern.compile("(\"[^\"]*\") (<.*>)");
-				Matcher matcher = pattern.matcher(sender);
-				matcher.find();
-				
-				String senderName = matcher.group(1).replace("\"", "");
-				String senderMail = matcher.group(2).replace("<", "").replace(">", "");
-				
-				NotificationBuilder.createGmail(context, senderName, senderMail, subject, snippet);
-				
-			} catch (Exception x) {
 			}
+		} finally {
+			ch.closeAll();
 		}
 	}
 	
