@@ -673,6 +673,26 @@ public class Protocol {
 		}
 	}
 
+	public static void setNvalLcdInvert(boolean invert) {
+		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.setNvalLcdInvert()");
+		byte[] bytes = new byte[8];
+
+		bytes[0] = eMessageType.start;
+		bytes[1] = (byte) (bytes.length+2); // length
+		bytes[2] = eMessageType.NvalOperationMsg.msg; // nval operations
+		bytes[3] = 0x02; // write
+
+		bytes[4] = 0x03;
+		bytes[5] = 0x00;
+		bytes[6] = 0x01; // size
+		if (invert)
+			bytes[7] = 0x01; // 24 hour mode
+		else
+			bytes[7] = 0x00; // 12 hour mode
+
+		enqueue(bytes);
+	}
+	
 	public static void setNvalTime(boolean militaryTime) {
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.setNvalTime()");
 		byte[] bytes = new byte[8];
