@@ -308,7 +308,8 @@ public class MetaWatch extends TabActivity {
     	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
     		textView.append("\n");
     		if (Monitors.weatherData.error) {
-    			textView.append(Monitors.weatherData.errorString);
+    			Utils.appendColoredText(textView, "ERROR: " , Color.RED);
+    			Utils.appendColoredText(textView, Monitors.weatherData.errorString, Color.RED);
     			textView.append("\n");
     		}
     		if (Monitors.weatherData.received) {

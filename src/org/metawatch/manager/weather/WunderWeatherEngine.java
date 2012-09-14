@@ -1,6 +1,7 @@
 package org.metawatch.manager.weather;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
@@ -220,9 +221,11 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 
 			}
 
-		} catch (Exception e) {
-			weatherData.error = true;
-			weatherData.errorString = e.getLocalizedMessage();
+		} catch (Exception e) {		
+			weatherData.errorString = e.getMessage();
+			if( weatherData.errorString != null )
+				weatherData.error = true;
+			
 			if (Preferences.logging)
 				Log.e(MetaWatch.TAG, "Exception while retreiving weather", e);
 		} finally {
@@ -234,7 +237,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 	}
 
 	// http://p-xr.com/android-tutorial-how-to-parse-read-json-data-into-a-android-listview/
-	public static JSONObject getJSONfromURL(String url) {
+	public static JSONObject getJSONfromURL(String url) throws IOException {
 
 		// initialize
 		InputStream is = null;
@@ -252,6 +255,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		} catch (Exception e) {
 			if (Preferences.logging)
 				Log.e(MetaWatch.TAG, "Error in http connection " + e.toString());
+			throw new IOException(e);
 		}
 
 		// convert response to string
@@ -295,6 +299,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 			} catch (JSONException e) {
 				if (Preferences.logging)
 					Log.e(MetaWatch.TAG, "Error parsing data " + e.toString());
+				throw new IOException(e);
 			}
 		}
 		return jArray;

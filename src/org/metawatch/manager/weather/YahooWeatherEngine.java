@@ -168,8 +168,10 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 			}
 
 		} catch (Exception e) {
-			weatherData.error = false;
-			weatherData.errorString = e.getLocalizedMessage();
+			weatherData.errorString = e.getMessage();
+			if( weatherData.errorString != null )
+				weatherData.error = true;
+			
 			if (Preferences.logging)
 				Log.e(MetaWatch.TAG, "Exception while retreiving weather", e);
 		} finally {
