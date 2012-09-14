@@ -261,8 +261,6 @@ public class MetaWatchService extends Service {
 			if (key.equals("InvertLCD")) {
 				Protocol.setNvalLcdInvert(Preferences.invertLCD);
 				if(watchState == WatchStates.IDLE) {
-					//Protocol.resetLCDDiffBuffer();
-					//Idle.updateIdle(context, true);
 					Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
 					Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.IDLE);
 				}
