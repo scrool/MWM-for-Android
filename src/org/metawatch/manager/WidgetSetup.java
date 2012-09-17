@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -120,11 +121,11 @@ public class WidgetSetup extends Activity {
 				boolean isLastChild, View convertView, ViewGroup parent) {
 			
 			if (convertView == null) {
-                convertView = mInflater.inflate(android.R.layout.simple_expandable_list_item_2, null);
+                convertView = mInflater.inflate(R.layout.list_item_icon_text, null);
 			}
 			
-			TextView line1 = (TextView) convertView.findViewById(android.R.id.text1);
-			TextView line2 = (TextView) convertView.findViewById(android.R.id.text2);
+			TextView label = (TextView) convertView.findViewById(R.id.text);
+			ImageView icon = (ImageView) convertView.findViewById(R.id.icon);
 			
 			String id = (String) getChild(groupPosition, childPosition);
 			String name = id;
@@ -134,11 +135,18 @@ public class WidgetSetup extends Activity {
 				name = "<Add Widget>";
 			}
 			
-            if(widgetMap.containsKey(id))
-            	name = widgetMap.get(id).description;
+			Bitmap bmp = null;
 			
-			line1.setText(name);
-			line2.setText(id);
+            if(widgetMap.containsKey(id)) {
+            	name = widgetMap.get(id).description;
+            	bmp = widgetMap.get(id).bitmap;
+            } else {
+            	bmp = Bitmap.createBitmap(1, 1, Config.ALPHA_8);
+            }
+			
+			label.setText(name);
+			if (bmp!=null)
+				icon.setImageBitmap( Bitmap.createScaledBitmap(bmp, bmp.getWidth()*2, bmp.getHeight()*2, false) );
 			
 			return convertView;
 		}
