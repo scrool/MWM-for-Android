@@ -280,7 +280,7 @@ public class ActionsApp extends ApplicationBase {
 			// Paint white over any scrolled items.
 			canvas.drawRect(0, 0, 95, textHeight+4, paintWhite);
 		}
-		String title = (containerStack==null || containerStack.isEmpty()) ? "Actions" : containerStack.peek().getTitle();
+		String title = (containerStack==null || containerStack.isEmpty() || containerStack.peek()==null) ? "Actions" : containerStack.peek().getTitle();
 		canvas.drawText((String) TextUtils.ellipsize(title, paint, 84, TruncateAt.END), 2, textHeight+1, paint);
 		canvas.drawLine(1, textHeight+2, (isToggleable() ? 79 : 87), textHeight+2, paint);
 		
