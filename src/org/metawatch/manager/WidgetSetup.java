@@ -2,7 +2,6 @@ package org.metawatch.manager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,23 +20,195 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SimpleExpandableListAdapter;
+import android.widget.TextView;
 
 public class WidgetSetup extends Activity {
 	
+	private class WidgetListAdaptor extends BaseExpandableListAdapter {
+		
+		private Map<String,WidgetData> widgetMap;
+		private List<List<String>> groups;
+		private LayoutInflater mInflater;
+		
+		public void init(Context context) {
+			
+			mInflater = LayoutInflater.from(context);
+			
+			widgetMap = WidgetManager.getCachedWidgets(context, null);
+					
+			ArrayList<String> rows = new ArrayList<String>(Arrays.asList(MetaWatchService.getWidgets(context).split("\\|")));
+			groups = new ArrayList<List<String>>();
+			
+			for(String line : rows) {
+				String[] widgets = (line).split(",");
+				List<String> list = new ArrayList<String>(Arrays.asList(widgets));
+				groups.add(list);
+			}
+			
+		}
+		
+		public void set(int groupPosition, int childPosition, String value) {
+			while (groupPosition >= groups.size()) {
+				groups.add(new ArrayList<String>());
+			}
+			
+			while (childPosition >= groups.get(groupPosition).size()) {
+				groups.get(groupPosition).add("");
+			}
+			
+			groups.get(groupPosition).set(childPosition, value);
+			
+			tidy();
+		}
+
+		private void tidy() {
+			// Tidy up any empty groups
+			for(List<String> row : groups) {
+				boolean isEmpty = true;
+				for(String entry : row) {
+					if( !entry.isEmpty() ) {
+						isEmpty = false;
+					}
+				}
+				if( isEmpty ) {
+					row.clear();
+				}
+			}
+		}
+		
+		public String get() {
+	        StringBuilder out = new StringBuilder();
+	    	for(List<String> row : groups) {
+	    		if(out.length()>0)
+	    			out.append("|");
+	    		
+	    		StringBuilder line = new StringBuilder();
+	    		for(String id : row) {
+	        		if(id!="") {
+		        		if(line.length()>0)
+		        			line.append(",");
+		        		
+		        		line.append(id);
+	        		}
+	    		}
+	    		
+	    		out.append(line);
+	    	}
+	    	
+	    	return out.toString();
+		}
+		
+		public Object getChild(int groupPosition, int childPosition) {
+			if(groupPosition>=groups.size()) {
+				return "";
+			} else if( childPosition>=groups.get(groupPosition).size()) {
+				return "";
+			}
+			return groups.get(groupPosition).get(childPosition);
+		}
+
+		public long getChildId(int groupPosition, int childPosition) {
+			return childPosition;
+		}
+
+		public View getChildView(int groupPosition, int childPosition,
+				boolean isLastChild, View convertView, ViewGroup parent) {
+			
+			if (convertView == null) {
+                convertView = mInflater.inflate(android.R.layout.simple_expandable_list_item_2, null);
+			}
+			
+			TextView line1 = (TextView) convertView.findViewById(android.R.id.text1);
+			TextView line2 = (TextView) convertView.findViewById(android.R.id.text2);
+			
+			String id = (String) getChild(groupPosition, childPosition);
+			String name = id;
+			
+			if(id.isEmpty()) {
+				id = "";
+				name = "<Add Widget>";
+			}
+			
+            if(widgetMap.containsKey(id))
+            	name = widgetMap.get(id).description;
+			
+			line1.setText(name);
+			line2.setText(id);
+			
+			return convertView;
+		}
+
+		public int getChildrenCount(int groupPosition) {
+			return groupPosition >= groups.size() ? 1 : groups.get(groupPosition).size()+1;
+		}
+
+		public Object getGroup(int groupPosition) {
+			return groupPosition >= groups.size() ? null : groups.get(groupPosition);
+		}
+
+		public int getGroupCount() {
+			return groups.size()+1;
+		}
+
+		public long getGroupId(int groupPosition) {
+			return groupPosition;
+		}
+		
+		private String getGroupName(int group) {
+	        StringBuilder nameSb = new StringBuilder();
+	        nameSb.append("Row ");
+	        nameSb.append(group+1);
+	        return nameSb.toString();
+		}
+		
+		private String getGroupLabel(int widgetCount) {
+			StringBuilder nameSb = new StringBuilder();
+	        if(widgetCount==0) {
+	        	nameSb.append("empty");
+	        }
+	        else if(widgetCount==1) {
+	        	nameSb.append("1 widget");
+	        }
+	        else {
+	        	nameSb.append(widgetCount);
+	        	nameSb.append(" widgets");
+	        }
+	        
+	        return nameSb.toString();
+		}
+
+		public View getGroupView(int groupPosition, boolean isExpanded,
+				View convertView, ViewGroup parent) {
+			if (convertView == null) {
+                convertView = mInflater.inflate(android.R.layout.simple_expandable_list_item_2, null);
+			}
+			
+			TextView line1 = (TextView) convertView.findViewById(android.R.id.text1);
+			TextView line2 = (TextView) convertView.findViewById(android.R.id.text2);
+			
+			line1.setText(getGroupName(groupPosition));
+			line2.setText(getGroupLabel(getChildrenCount(groupPosition)-1));
+			
+			return convertView;
+		}
+
+		public boolean hasStableIds() {
+			return true;
+		}
+
+		public boolean isChildSelectable(int groupPosition, int childPosition) {
+			return true;
+		}
+		
+	}
+	
 	private ExpandableListView widgetList;
-	private SimpleExpandableListAdapter adapter;
-	
-	private List<Map<String, String>> groupData;
-	private List<List<Map<String, String>>> childData;
-	
-	private Map<String,WidgetData> widgetMap;
-	
-    private static final String NAME = "NAME";
-    private static final String ID = "ID";
+	private WidgetListAdaptor adapter;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,8 +231,6 @@ public class WidgetSetup extends Activity {
 		
 		if(adapter!=null)
 			return;
-		
-		widgetMap = WidgetManager.getCachedWidgets(this, null);
 			
 		widgetList = (ExpandableListView) findViewById(R.id.widgetList);		
 		widgetList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -76,141 +245,36 @@ public class WidgetSetup extends Activity {
 			}
 		});
 				
-		groupData = new ArrayList<Map<String, String>>();
-	    childData = new ArrayList<List<Map<String, String>>>();
-
-	    // Add dummy entries at the end
-		ArrayList<String> rows = new ArrayList<String>(Arrays.asList(MetaWatchService.getWidgets(this).split("\\|")));
-		if (rows.size()>0 && rows.get(rows.size()-1).length()>0) {
-			rows.add("");
-		}
-		while(rows.size()<9)
-			rows.add("");
-			
-		int i=1;
-		for(String line : rows) {
-
-			String[] widgets = (line).split(",");
-			
-			Map<String, String> curGroupMap = new HashMap<String, String>();
-	        groupData.add(curGroupMap);
-	        
-	        List<Map<String, String>> children = new ArrayList<Map<String, String>>();
-	        
-	        int widgetCount = 0;
-	        
-			for(String widget : widgets) {
-				widget = widget.trim();
-	        	Map<String, String> curChildMap = new HashMap<String, String>();
-	            children.add(curChildMap);
-	            String name = widget;
-	            if(widget==null || widget=="")
-	            	name="<empty>";
-	            if(widgetMap.containsKey(widget)) {
-	            	name = widgetMap.get(widget).description;
-	            	widgetCount++;
-	            }
-	            curChildMap.put(NAME, name);
-	            curChildMap.put(ID, widget);
-	        }
-			
-			while(children.size()<8) {
-	        	Map<String, String> curChildMap = new HashMap<String, String>();
-	            children.add(curChildMap);
-	            curChildMap.put(NAME, "<empty>");
-	            curChildMap.put(ID, "");
-			}
-			
-			
-	        
-	        curGroupMap.put(NAME, getGroupName(i++, widgetCount));
-	        curGroupMap.put(ID, "Id");
-			
-	        childData.add(children);
-		}	    
-	            
-	    // Set up our adapter
-		adapter = new SimpleExpandableListAdapter(
-			this,
-			groupData,
-			android.R.layout.simple_expandable_list_item_1,
-			new String[] { NAME, ID },
-			new int[] { android.R.id.text1, android.R.id.text2 },
-			childData,
-			android.R.layout.simple_expandable_list_item_2,
-			new String[] { NAME, ID },
-			new int[] { android.R.id.text1, android.R.id.text2 }
-		);
+		adapter = new WidgetListAdaptor();
+		adapter.init(this);
+		
 	    widgetList.setAdapter(adapter);
 		
 		refreshPreview();
 	}
 	
-	private String getGroupName(int group, int widgetCount) {
-        StringBuilder nameSb = new StringBuilder();
-        nameSb.append("Row ");
-        nameSb.append(group);
-        nameSb.append(" ");
-
-        if(widgetCount==0) {
-        	nameSb.append("(empty)");
-        }
-        else if(widgetCount==1) {
-        	nameSb.append("(1 widget)");
-        }
-        else {
-        	nameSb.append("(");
-        	nameSb.append(widgetCount);
-        	nameSb.append(" widgets)");
-        }
-        
-        return nameSb.toString();
-	}
-    
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
     	super.onActivityResult(requestCode, resultCode, data);
 
-		widgetMap = WidgetManager.getCachedWidgets(this, null);
-    	
-        if (resultCode == Activity.RESULT_OK) {      	  
+    	if (resultCode == Activity.RESULT_OK) {      	  
         	String id = data.getStringExtra("selectedWidget");
         	int groupPosition = data.getIntExtra("groupPosition", -1);
         	int childPosition = data.getIntExtra("childPosition", -1);
         	
         	if(groupPosition>-1 && childPosition>-1) {
-        		Map<String,String> curChildMap = childData.get(groupPosition).get(childPosition);
-        		if(id==null || id.equalsIgnoreCase("")) {
-    	            curChildMap.put(NAME, "<empty>");
-    	            curChildMap.put(ID, "");
-        		}
-        		else {
-    	            String name = id;
-    	            if(widgetMap.containsKey(id))
-    	            	name = widgetMap.get(id).description;
-    	            curChildMap.put(NAME, name);
-		            curChildMap.put(ID, id);
-        		}
+        		
+        		adapter.set(groupPosition, childPosition, id);
+        		
+        		adapter.notifyDataSetChanged();
+            	storeWidgetLayout();
+            	refreshPreview();
+            	Idle.updateIdle(this, true);
+    	        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
+    	        	Idle.sendOledIdle(this);
+    	        }
+        	
         	}
-        	
-        	int widgetCount = 0;
-        	int childCount = childData.get(groupPosition).size();
-        	for(int i=0; i<childCount;++i) {
-        		Map<String,String> curChildMap = childData.get(groupPosition).get(i);
-        		if(!curChildMap.get(ID).equalsIgnoreCase("")) {
-        			widgetCount++;
-        		}
-        	}
-        	
-        	groupData.get(groupPosition).put(NAME, getGroupName(groupPosition+1, widgetCount));
-        	
-        	adapter.notifyDataSetChanged();
-        	storeWidgetLayout();
-        	refreshPreview();
-        	Idle.updateIdle(this, true);
-	        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-	        	Idle.sendOledIdle(this);
-	        }
         }
     }
     
@@ -265,26 +329,6 @@ public class WidgetSetup extends Activity {
     }
     
     private void storeWidgetLayout() {
-    	
-        StringBuilder out = new StringBuilder();
-    	for(List<Map<String, String>> row : childData) {
-    		if(out.length()>0)
-    			out.append("|");
-    		
-    		StringBuilder line = new StringBuilder();
-    		for(Map<String, String> child : row) {
-        		String id = child.get(ID);	
-        		if(id!="") {
-	        		if(line.length()>0)
-	        			line.append(",");
-	        		
-	        		line.append(id);
-        		}
-    		}
-    		
-    		out.append(line);
-    	}
-    	
-    	MetaWatchService.saveWidgets(this, out.toString());
+    	MetaWatchService.saveWidgets(this, adapter.get());
     }
 }
