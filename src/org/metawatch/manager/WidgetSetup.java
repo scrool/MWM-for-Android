@@ -130,23 +130,27 @@ public class WidgetSetup extends Activity {
 			String id = (String) getChild(groupPosition, childPosition);
 			String name = id;
 			
+			Bitmap bmp = null;
 			if(id.isEmpty()) {
 				id = "";
 				name = "<Add Widget>";
-			}
+				icon.setVisibility(View.GONE);
+			} else {
 			
-			Bitmap bmp = null;
-			
-            if(widgetMap.containsKey(id)) {
-            	name = widgetMap.get(id).description;
-            	bmp = widgetMap.get(id).bitmap;
-            } else {
-            	bmp = Bitmap.createBitmap(1, 1, Config.ALPHA_8);
+				icon.setVisibility(View.VISIBLE);
+	            if(widgetMap.containsKey(id)) {
+	            	name = widgetMap.get(id).description;
+	            	bmp = widgetMap.get(id).bitmap;        	
+	            } else {
+	            	bmp = Bitmap.createBitmap(1, 1, Config.ALPHA_8);
+	            }
+            	
             }
 			
 			label.setText(name);
-			if (bmp!=null)
+			if (bmp!=null) {
 				icon.setImageBitmap( Bitmap.createScaledBitmap(bmp, bmp.getWidth()*2, bmp.getHeight()*2, false) );
+			}
 			
 			return convertView;
 		}
