@@ -174,7 +174,16 @@ public class WidgetSetup extends Activity {
 	        return nameSb.toString();
 		}
 		
-		private String getGroupLabel(int widgetCount) {
+		private String getGroupLabel(int group) {
+			
+			int widgetCount = 0;
+			if(group<groups.size()) {
+				for(String entry : groups.get(group)) {
+					if(!entry.isEmpty())
+						widgetCount++;
+				}
+			}
+			
 			StringBuilder nameSb = new StringBuilder();
 	        if(widgetCount==0) {
 	        	nameSb.append("empty");
@@ -200,7 +209,7 @@ public class WidgetSetup extends Activity {
 			TextView line2 = (TextView) convertView.findViewById(android.R.id.text2);
 			
 			line1.setText(getGroupName(groupPosition));
-			line2.setText(getGroupLabel(getChildrenCount(groupPosition)-1));
+			line2.setText(getGroupLabel(groupPosition));
 			
 			return convertView;
 		}
