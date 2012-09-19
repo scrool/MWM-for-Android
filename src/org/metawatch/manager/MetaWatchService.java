@@ -293,7 +293,7 @@ public class MetaWatchService extends Service {
 		Preferences.notifyNMA = sharedPreferences.getBoolean("notifyNMA",
 				Preferences.notifyNMA);
 		Preferences.watchMacAddress = sharedPreferences.getString("MAC",
-				Preferences.watchMacAddress);
+				Preferences.watchMacAddress).trim();
 		Preferences.skipSDP = sharedPreferences.getBoolean("SkipSDP",
 				Preferences.skipSDP);
 		Preferences.insecureBtSocket = sharedPreferences.getBoolean("InsecureBtSocket", 
@@ -566,6 +566,9 @@ public class MetaWatchService extends Service {
 
 		try {
 			
+			if (!Preferences.loaded)
+				loadPreferences(context);
+			
 			MetaWatchService.fakeWatch = false;
 			if (Preferences.watchMacAddress.equals("DIGITAL")) {
 				MetaWatchService.fakeWatch = true;
@@ -576,10 +579,8 @@ public class MetaWatchService extends Service {
 				MetaWatchService.watchType = MetaWatchService.WatchType.ANALOG;
 			}
 
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Remote device address: "
-					+ Preferences.watchMacAddress);
-			if (!Preferences.loaded)
-				loadPreferences(context);
+			if (Preferences.logging) Log.d(MetaWatch.TAG, "Remote device address: '"
+					+ Preferences.watchMacAddress + "'");
 			
 			if (!MetaWatchService.fakeWatch) {
 	

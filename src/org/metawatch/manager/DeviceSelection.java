@@ -113,11 +113,17 @@ public class DeviceSelection extends Activity {
 		super.onCreate(savedInstanceState);
 		context = this;
 		
+		SharedPreferences sharedPreferences = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		boolean showFakeWatches = sharedPreferences.getBoolean("ShowFakeWatches", false);
+		
 		// No point in discovering if it's switched off
-		BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
-		if((defaultAdapter == null) || (!BluetoothAdapter.getDefaultAdapter().isEnabled())) {
-			finish();
-			return;
+		if( !showFakeWatches ) {
+			BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+			if((defaultAdapter == null) || (!BluetoothAdapter.getDefaultAdapter().isEnabled())) {
+				finish();
+				return;
+			}
 		}
 	
 		setContentView(R.layout.device_selection);
@@ -157,28 +163,27 @@ public class DeviceSelection extends Activity {
 		
 		if (MetaWatchService.bluetoothAdapter == null)
 			MetaWatchService.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		if (MetaWatchService.bluetoothAdapter == null) {
+		if (MetaWatchService.bluetoothAdapter == null && !showFakeWatches) {
 			sendToast("Bluetooth not supported");
 			return;
 		}
 		
-		Set<BluetoothDevice> pairedDevices = MetaWatchService.bluetoothAdapter.getBondedDevices();
-		if (pairedDevices.size() > 0) {
-		    for (BluetoothDevice device : pairedDevices) {
-		        addToList(device.getAddress(), device.getName());
-		    }
+		if( MetaWatchService.bluetoothAdapter != null ) {
+			Set<BluetoothDevice> pairedDevices = MetaWatchService.bluetoothAdapter.getBondedDevices();
+			if (pairedDevices.size() > 0) {
+			    for (BluetoothDevice device : pairedDevices) {
+			        addToList(device.getAddress(), device.getName());
+			    }
+			}
 		}
-		
-		SharedPreferences sharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(context);
-		boolean showFakeWatches = sharedPreferences.getBoolean("ShowFakeWatches", false);
-		
+				
 		if(showFakeWatches) {		
 			addToList("DIGITAL", "Fake Digital Watch (Use for debugging digital functionality within MWM)");
 			addToList("ANALOG", "Fake Analog Watch (Use for debugging analog functionality within MWM)");
 		}
 		
-		startDiscovery();
+		if( MetaWatchService.bluetoothAdapter != null )
+			startDiscovery();
 	
 	}
 	
