@@ -986,5 +986,10 @@ public class Utils {
 		layout.draw(canvas);
 		canvas.restore();	
     }
+    
+    // String.isEmpty doesn't work on 2.1
+    public static boolean stringIsEmpty(final String string) {
+    	return string.trim().equals("");
+    }
 	
 }

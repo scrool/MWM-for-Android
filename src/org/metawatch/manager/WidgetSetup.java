@@ -72,7 +72,7 @@ public class WidgetSetup extends Activity {
 			for(List<String> row : groups) {
 				boolean isEmpty = true;
 				for(String entry : row) {
-					if( !entry.isEmpty() ) {
+					if( !Utils.stringIsEmpty(entry) ) {
 						isEmpty = false;
 					}
 				}
@@ -131,7 +131,7 @@ public class WidgetSetup extends Activity {
 			String name = id;
 			
 			Bitmap bmp = null;
-			if(id.isEmpty()) {
+			if(Utils.stringIsEmpty(id)) {
 				id = "";
 				name = "<Add Widget>";
 				icon.setVisibility(View.GONE);
@@ -183,7 +183,7 @@ public class WidgetSetup extends Activity {
 			int widgetCount = 0;
 			if(group<groups.size()) {
 				for(String entry : groups.get(group)) {
-					if(!entry.isEmpty())
+					if(!Utils.stringIsEmpty(entry))
 						widgetCount++;
 				}
 			}

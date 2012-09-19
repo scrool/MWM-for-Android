@@ -53,6 +53,8 @@ public class PictureWidget implements InternalWidget {
 			return;
 
 		File[] imageFiles = searchDir.listFiles();
+		if(imageFiles == null)
+			return;
 
 		for (File file : imageFiles) {
 			Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
