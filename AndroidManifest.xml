@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.metawatch.communityedition"
-      android:versionCode="11"
-      android:installLocation="internalOnly" android:versionName="1.21.1.0">
+      android:versionCode="12"
+      android:installLocation="internalOnly" android:versionName="1.22.0.0">
       
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="10"/>
     <supports-screens android:resizeable="true" android:normalScreens="true" android:anyDensity="true" 
@@ -113,6 +113,8 @@
             	<action android:name="com.sonyericsson.music.playbackcontrol.ACTION_TRACK_STARTED" />
             	<action android:name="org.metawatch.manager.UPDATE_CALENDAR"/>
             	<action android:name="com.usk.app.notifymyandroid.NEW_NOTIFICATION" />
+            	<action android:name="fm.last.android.metachanged" />
+
             </intent-filter>
             <intent-filter>
 	            <action android:name="android.intent.action.EVENT_REMINDER" />

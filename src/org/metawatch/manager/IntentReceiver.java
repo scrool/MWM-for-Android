@@ -60,15 +60,23 @@ public class IntentReceiver extends BroadcastReceiver {
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "IntentReceiver.onReceive(): received intent, action='"+action+"'");
 		
 		try {
+			
 			Bundle b = intent.getExtras();
-			if (b != null) {
-				for (String key : b.keySet()) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
-							"extra: " + key + " = '" + b.get(key) + "'");
+			if (Preferences.logging && b != null) {
+				try {
+					for (String key : b.keySet()) {
+							Log.d(MetaWatch.TAG, "extra: " + key + " = '" + b.get(key) + "'");
+					}
+					
+					String dataString = intent.getDataString();
+					if (Preferences.logging) Log.d(MetaWatch.TAG, "dataString: "
+							+ (dataString == null ? "null" : "'" + dataString + "'"));
+					
+				} catch ( android.os.BadParcelableException e ) {
+					Log.d(MetaWatch.TAG, "BadParcelableException listing extras");
+				} catch ( java.lang.RuntimeException e ) {
+					Log.d(MetaWatch.TAG, "RuntimeException listing extras");
 				}
-				String dataString = intent.getDataString();
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "dataString: "
-						+ (dataString == null ? "null" : "'" + dataString + "'"));
 			}
 			
 			if (action.equals("android.intent.action.PROVIDER_CHANGED")) {
@@ -316,7 +324,8 @@ public class IntentReceiver extends BroadcastReceiver {
 					|| intent.getAction().equals("com.nullsoft.winamp.metachanged")
 					|| intent.getAction().equals("com.sonyericsson.music.playbackcontrol.ACTION_TRACK_STARTED")
 					|| intent.getAction().equals("com.amazon.mp3.metachanged")
-					|| intent.getAction().equals("com.adam.aslfms.notify.playstatechanged")) {
+					|| intent.getAction().equals("com.adam.aslfms.notify.playstatechanged")
+					|| intent.getAction().equals("fm.last.android.metachanged")) {
 	
 				/* If the intent specifies a "playing" extra, use it. */
 				if (intent.hasExtra("playing")) {
@@ -388,7 +397,8 @@ public class IntentReceiver extends BroadcastReceiver {
 				NotificationBuilder.createNMA(context, app, event, desc, prio, url);
 			}	
 		} catch (android.os.BadParcelableException e){
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "BadParcelableException - "+e.getMessage());
+			e.printStackTrace();
+			//if (Preferences.logging) Log.d(MetaWatch.TAG, "BadParcelableException - "+e.getMessage());
 		}
 	}
 }
