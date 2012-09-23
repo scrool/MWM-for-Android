@@ -954,14 +954,14 @@ public class Utils {
     	return builder.toString();
     }
     
-    private static StaticLayout buildText(Context context, String text, int width, Layout.Alignment alignment, int textCol, FontSize size ) {
+    private static StaticLayout buildText(Context context, String text, int width, Layout.Alignment alignment, int textCol,  FontSize size ) {
 		TextPaint tp = new TextPaint();
 		tp.setColor(textCol);
 		FontInfo info = FontCache.instance(context).Get(size);
 		tp.setTextSize(info.size);
 		tp.setTypeface(info.face);
     	
-    	return new StaticLayout(text, tp, width, alignment, 1.2f, 0, false);
+    	return new StaticLayout(text, tp, width, alignment, 1.0f, 0, false);
     }
     
     public static void autoText(Context context, Canvas canvas, String text, int tX, int tY, int width, int height, Layout.Alignment alignment, int textCol) {
