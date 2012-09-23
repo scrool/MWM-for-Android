@@ -793,7 +793,8 @@ public class MetaWatchService extends Service {
 		}
 		
 		public void quit() {
-			looper.quit();
+			if (looper != null)
+				looper.quit();
 		}		
 	}	
 	
