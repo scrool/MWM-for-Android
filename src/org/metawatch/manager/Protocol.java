@@ -153,8 +153,10 @@ public class Protocol {
 	}
 
 	public static boolean sendLcdBitmap(Bitmap bitmap, int bufferType) {
-		if (bitmap==null) 
+		if (bitmap==null || bitmap.getWidth() != 96 || bitmap.getHeight() != 96 ) { 
+			if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.sendLcdBitmap - null or non 96px bitmap!");
 			return false;
+		}
 		
 		if (Preferences.dumpWatchScreenshots)
 			Utils.dumpBitmapToSdCard(bitmap, Environment.getExternalStorageDirectory().getPath()+ "MWM_"+System.currentTimeMillis()+".png");

@@ -359,29 +359,33 @@ public class Monitors {
 		
 		public void onLocationChanged(Location location) {
 					
-			LocationData.latitude = location.getLatitude();
-			LocationData.longitude = location.getLongitude();
-			
-			LocationData.timeStamp = location.getTime();
-			
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "location changed "+location.toString() );
-			
-			LocationData.received = true;
-			MetaWatchService.notifyClients();
-			
-			if (fastUpdates) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "Switching to 30min location updates");
-				// Restart location updates at a much lower frequency
-
-				locationManager.removeUpdates(networkLocationListener);
-				locationManager.requestLocationUpdates(locationProvider, 30 * 60 * 1000, 500, networkLocationListener);
-				fastUpdates = false;
-			}
-			
-			if (!weatherData.received /*&& !WeatherData.updating*/) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "First location - getting weather");
+			try {
+				LocationData.latitude = location.getLatitude();
+				LocationData.longitude = location.getLongitude();
 				
-				Monitors.updateWeatherData(context);
+				LocationData.timeStamp = location.getTime();
+				
+				if (Preferences.logging) Log.d(MetaWatch.TAG, "location changed "+location.toString() );
+				
+				LocationData.received = true;
+				MetaWatchService.notifyClients();
+				
+				if (fastUpdates) {
+					if (Preferences.logging) Log.d(MetaWatch.TAG, "Switching to 30min location updates");
+					// Restart location updates at a much lower frequency
+	
+					locationManager.removeUpdates(networkLocationListener);
+					locationManager.requestLocationUpdates(locationProvider, 30 * 60 * 1000, 500, networkLocationListener);
+					fastUpdates = false;
+				}
+				
+				if (!weatherData.received /*&& !WeatherData.updating*/) {
+					if (Preferences.logging) Log.d(MetaWatch.TAG, "First location - getting weather");
+					
+					Monitors.updateWeatherData(context);
+				}
+			} catch (java.lang.NullPointerException e) {
+				if (Preferences.logging) Log.d(MetaWatch.TAG, "onLocationChanged: NullPointerException");
 			}
 		}
 

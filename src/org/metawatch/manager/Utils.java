@@ -195,7 +195,7 @@ public class Utils {
 				photoUri = ContactsContract.Data.CONTENT_URI;
 				c = ch.add( context.getContentResolver().query(photoUri, new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO, ContactsContract.Data.PHOTO_ID}, Data.PHOTO_ID + " = " + photoID, null, null) );
 				
-				if (c.moveToFirst()) {
+				if (c!=null && c.moveToFirst()) {
 		            try {
 		            	ByteArrayInputStream rawPhotoStream = new ByteArrayInputStream(c.getBlob(c.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO)));
 		            	Bitmap contactPhoto = BitmapFactory.decodeStream(rawPhotoStream);

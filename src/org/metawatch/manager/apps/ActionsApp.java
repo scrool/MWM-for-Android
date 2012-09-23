@@ -280,7 +280,7 @@ public class ActionsApp extends ApplicationBase {
 			// Paint white over any scrolled items.
 			canvas.drawRect(0, 0, 95, textHeight+4, paintWhite);
 		}
-		String title = (containerStack==null || containerStack.isEmpty() || containerStack.peek()==null) ? "Actions" : containerStack.peek().getTitle();
+		String title = getUiTitle();
 		canvas.drawText((String) TextUtils.ellipsize(title, paint, 84, TruncateAt.END), 2, textHeight+1, paint);
 		canvas.drawLine(1, textHeight+2, (isToggleable() ? 79 : 87), textHeight+2, paint);
 		
@@ -304,6 +304,10 @@ public class ActionsApp extends ApplicationBase {
 		}
 		return bitmap;
 	}
+
+	private String getUiTitle() {
+		return (containerStack==null || containerStack.isEmpty() || containerStack.peek()==null) ? "Actions" : containerStack.peek().getTitle();
+	}
 	
 	private Bitmap drawAnalog(final Context context, boolean preview) {
 		TextPaint paint = new TextPaint();
@@ -324,7 +328,7 @@ public class ActionsApp extends ApplicationBase {
 		// Top screen
 		canvas.clipRect(0, 0, 80, 16, Region.Op.REPLACE);
 		
-		String title = "Actions";
+		String title = getUiTitle();
 		StringBuilder position = new StringBuilder();
 		if (currentActions.size()>0) {
 			position.append("(");
@@ -333,11 +337,7 @@ public class ActionsApp extends ApplicationBase {
 			position.append(currentActions.size());
 			position.append(")");
 		}
-					
-		if (!containerStack.isEmpty()) {
-			title = containerStack.peek().getTitle();
-		}
-		
+			
 		canvas.drawText((String) TextUtils.ellipsize(title, paint, 74, TruncateAt.END), 0, 6, paint);
 		canvas.drawText((String) TextUtils.ellipsize(position.toString(), paint, 74, TruncateAt.END), 0, 13, paint);
 		
