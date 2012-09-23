@@ -21,7 +21,7 @@ public class NowPlayingWidget implements InternalWidget {
 	final static String desc_0 = "Now Playing (96x32)";
 	
 	public final static String id_1 = "nowplaying_80_16";
-	final static String desc_1 = "Now Playing (16x16)";
+	final static String desc_1 = "Now Playing (80x16)";
 	
 	private Context context;
 	private TextPaint paintSmall;
