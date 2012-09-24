@@ -172,14 +172,12 @@
 	
 	<string-array name="settings_weather_provider_names">
 	<item>Désactivé</item>
- <!--    <item>Google météo</item> -->
     <item>Weather Underground</item>
-    <item>Yahoo Weather</item>
+    <item>Yahoo! Weather</item>
     </string-array>
     
     <string-array name="settings_weather_provider_values"> 
 	<item>0</item>
-<!--<item>1</item> -->
 	<item>2</item>
 	<item>3</item>
 	</string-array>
@@ -334,6 +332,9 @@
   	<string name="ui_tab_preferences">Préférences</string>
   	<string name="ui_tab_widgets">Widgets</string>
   	<string name="ui_tab_tests">Tests</string>
+  	
+  	<string name="ui_tab_downloaded_themes">Downloaded</string>
+  	<string name="ui_tab_theme_gallery">Gallery</string>
   	  
     
     <string name="device_selection_search_button">Recherche de l\'appareil</string>

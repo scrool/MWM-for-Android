@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MetaWatch</string>
+    <string name="app_name_long">MetaWatch Manager - Community Edition</string>
+    
+    <string name="settings_Notifications">通知設定</string>
+	<string name="settings_Call">通話</string>
+	<string name="settings_Call_desc">着信の通知</string>
+    <string name="settings_SMS">SMS/MMS</string>
+    <string name="settings_SMS_desc">新着SMS/MMSの通知</string>
+    <string name="settings_SMS_Vibrate_Pattern">SMS振動パターン</string>
+    <string name="settings_Gmail">Gmail</string>
+    <string name="settings_Gmail_desc">新着メールの通知(Gmail)</string>
+    <string name="settings_Gmail_Vibrate_Pattern">Gmail振動パターン</string>
+	<string name="settings_K9">K-9メール</string>
+	<string name="settings_K9_desc">新着メールの通知(K-9 mail)</string>
+	<string name="settings_K9_Vibrate_Pattern">K-9メール振動パターン</string>
+	<string name="settings_TD">TouchDownメール</string>
+	<string name="settings_TD_desc">新着メールの通知(TouchDown)</string>
+	<string name="settings_TD_Vibrate_Pattern">TouchDownメール振動パターン</string>
+	<string name="settings_Alarm">アラーム</string>
+	<string name="settings_Alarm_desc">アラーム時刻の通知</string>
+	<string name="settings_Alarm_Vibrate_Pattern">アラーム振動パターン</string>
+	<string name="settings_Music">ミュージック</string>
+	<string name="settings_Music_desc">音楽トラック/アーティストの情報</string>
+    <string name="settings_Music_Vibrate_Pattern">ミュージック振動パターン</string>
+    <string name="settings_Timezonechange">タイムゾーン変更</string>
+    <string name="settings_Timezonechange_desc">タイムゾーン変更の通知</string>
+    <string name="settings_Timezonechange_Vibrate_Pattern">タイムゾーン変更振動パターン</string>
+    <string name="settings_Batterylow">バッテリー残量</string>
+    <string name="settings_Batterylow_desc">バッテリー残量が少ない時に警告</string>
+    <string name="settings_Battery_Vibrate_Pattern">バッテリー残量振動パターン</string>
+    <string name="settings_NewVoicemail">新着ボイスメール</string>
+    <string name="settings_NewVoicemail_desc">新着ボイスメールの通知</string>
+    <string name="settings_NewVoicemail_Vibrate_Pattern">新着ボイスメール振動パターン</string>
+	<string name="settings_Calendar">カレンダー</string>
+	<string name="settings_Calendar_desc">カレンダーの通知(「Android設定」->「ユーザー補助」の「有効化」が必要)</string>
+    <string name="settings_Calendar_Vibrate_Pattern">カレンダー通知振動パターン</string>
+	<string name="settings_NMA">Notify My Android連携</string>
+	<string name="settings_NMA_desc">Notify My Androidの通知を転送</string>
+    <string name="settings_NMA_Vibrate_Pattern">Notify My Android振動パターン</string>
+	<string name="settings_OtherNotification">その他Androidアプリ</string>
+	<string name="settings_OtherNotification_desc">その他アプリからの通知(「Android設定」->「ユーザー補助」の「有効化」が必要)</string>
+    <string name="settings_OtherNotification_Vibrate_Pattern">その他Androidアプリ振動パターン</string>
+	<string name="settings_OtherNotification_Vibrate_Pattern_desc">その他Androidアプリ振動パターンのデフォルト値</string>
+
+	<string name="settings_OtherApps">その他Androidアプリ設定</string>
+	<string name="settings_OtherApps_desc">通知を受けるAndroidアプリの選択と振動パターンの設定</string>
+
+	<string name="settings_CancelButton">キャンセル</string>
+
+	<string name="settings_Font_Size">フォントサイズ</string>
+	
+	<string name="settings_center_notification">通知テキストを中央寄せ</string>
+	<string name="settings_center_notification_desc">通知テキストを中央に寄せて表示</string>
+
+	<string name="settings_auto_light">通知時に点灯</string>
+	<string name="settings_auto_light_desc">通知や着信を表示する時にライトを点灯</string>
+
+	<string name="settings_notification_timeout">通知タイムアウト</string>
+	<string name="settings_notification_timeout_desc">非継続(non-sticky)通知からアイドル画面に戻るまでのデフォルト時間(秒)</string>
+
+    <string name="settings_Device">デバイス設定</string>
+    <string name="settings_Mac">MACアドレス設定</string>
+    <string name="settings_Mac_desc">MetaWatchのMACアドレスを手入力</string>
+
+    <string name="settings_Read_calendar_during_meeting">予定進行中のカレンダ読み込み</string>
+    <string name="settings_Read_calendar_during_meeting_desc">予定の進行中にカレンダ情報を更新(予定の開始時刻を過ぎたらカレンダウィジェットの情報を書き換える)</string>
+    <string name="settings_Read_calendar_min_duration_to_meeting_end">予定の最短時間</string>
+    <string name="settings_Read_calendar_min_duration_to_meeting_end_desc">予定進行中にカレンダを読み込む時間間隔(分)</string>
+    <string name="settings_Display_location_in_small_calendar_widget">小さいカレンダーウィジェットに場所を表示</string>
+    <string name="settings_Display_location_in_small_calendar_widget_desc">スペースが十分あれば 24x32カレンダウィジェットの日付の代わりに場所を表示</string>
+    <string name="settings_Event_date_in_calendar_widget">カレンダウィジェットにイベント日付</string>
+    <string name="settings_Event_date_in_calendar_widget_desc">*x32カレンダウィジェットの今日日付の代わりにイベント日付を表示(イベント表示中)</string>
+
+    <string name="settings_Display_widget_row_separator">区切り線を表示</string>
+    <string name="settings_Display_widget_row_separator_desc">ウィジェットの行間に区切り線を描画</string>
+
+    <string name="settings_Overlay_weather_text">お天気ウィジェットに文字を上書き</string>
+    <string name="settings_Overlay_weather_text_desc">お天気アイコンの上にテキスト(天気、場所)を書く</string>
+
+    <string name="settings_phoneCalls">通話設定</string>
+        
+    <string name="settings_call_actions">呼び出し画面を表示</string>
+    <string name="settings_call_actions_desc">電話呼び出し時に通話アクションメニューを自動的に表示</string>
+   	<string name="settings_auto_speakerphone">自動スピーカーオン</string>
+   	<string name="settings_auto_speakerphone_desc">電話呼び出しをMetaWatchで受けた時、スピーカーを自動的にオンにする。</string>     
+       
+    <string name="settings_analog_pause_scroll">スクロール前に一時停止</string>
+    <string name="settings_analog_pause_scroll_desc">アナログ時計でメッセージをスクロール表示する時に数秒停止</string>
+        
+    <string name="settings_quick_button_action">クイックボタン動作</string>
+    <string name="settings_quick_button_action_desc">MetaWatchアプリでないアイドル画面状態での右中央ボタンの動作</string>    
+        
+    <string name="settings_sticky_notifications">スティッキー通知</string>  
+    <string name="settings_sticky_notifications_desc">継続（sticky)通知を使う(sticky通知=確認するまで画面表示を続ける)</string>   
+        
+    <string name="settings_sticky_notification_timeout">スティッキー通知タイムアウト</string>
+    <string name="settings_sticky_notification_timeout_desc">継続(sticky)通知からアイドル画面に戻るまでのデフォルト時間(秒)</string>    
+        
+    <string name="settings_invert_lcd">液晶反転表示</string>    
+    <string name="settings_invert_lcd_desc">必要に応じて表示を反転</string>
+        
+    <string name="settings_clock_every_page">全ページに時刻表示</string>
+    <string name="settings_clock_every_page_desc">すべてのウィジェット画面で時刻表示</string>    
+        
+    <string name="settings_idle_app_buffer">時刻非表示ウィジェット画面でMetaWatchアプリバッファを使う</string>
+    <string name="settings_idle_app_buffer_desc">Bluetooth接続が切れて内蔵ボタン動作が使えなくなる画面の時、時刻と状態アイコンを表示</string>    
+        
+    <string-array name="settings_font_size_name"> 
+   	<item>フォント小</item>
+   	<item>フォント中</item>
+   	<item>フォント大</item>     
+	</string-array> 
+
+	<string-array name="settings_font_size_value"> 
+	<item>1</item>
+   	<item>2</item>
+   	<item>3</item>  
+	</string-array>
+	
+	<string name="settings_Number_of_buzzes_dialogtitle">振動回数</string>
+    
+	<string-array name="settings_number_buzzes_names">
+	<item>振動なし</item> 
+	<item>1回振動</item>
+   	<item>2回振動</item>
+   	<item>3回振動</item>  
+   	<item>4回振動</item>  
+   	<item>5回振動</item>  
+	</string-array>
+
+	<string-array name="settings_number_buzzes_values"> 
+	<item>0</item>
+	<item>1</item>
+   	<item>2</item>
+   	<item>3</item>  
+   	<item>4</item>  
+   	<item>5</item>  
+	</string-array>
+    
+	<string-array name="settings_collect_voltage_names">
+	<item>収集しない</item> 
+	<item>1分毎</item>
+	<item>5分毎</item>
+   	<item>10分毎</item>
+   	<item>15分毎</item>  
+   	<item>30分毎</item>  
+   	<item>60分毎</item>  
+	</string-array>
+
+	<string-array name="settings_collect_voltage_values"> 
+	<item>0</item>
+	<item>1</item>
+	<item>5</item>
+   	<item>10</item>
+   	<item>15</item>  
+   	<item>30</item>  
+   	<item>60</item>  
+	</string-array>
+        
+    <string-array name="settings_media_control_method_names">
+    <item>MusicServiceCommandメッセージ(android内蔵プレーヤー)</item>
+    <item>ヘッドセットボタンのエミュレート(Winampやその他のプレイヤー)</item>
+    </string-array>
+    
+    <string-array name="settings_media_control_method_values"> 
+	<item>0</item>
+	<item>1</item>
+	<item>2</item>
+	</string-array>
+	
+	<string-array name="settings_weather_provider_names">
+	<item>指定しない</item>
+    <item>Weather Underground</item>
+    <item>Yahoo!天気(英語)</item>
+    </string-array>
+    
+    <string-array name="settings_weather_provider_values"> 
+	<item>0</item>
+	<item>2</item>
+	<item>3</item>
+	</string-array>
+	
+    <string-array name="settings_geolocation_names">
+	<item>手入力した場所を使う</item>
+    <item>お天気情報サイト</item>
+    <item>常にGoogleを使う</item>
+    </string-array>
+    
+    <string-array name="settings_geolocation_values"> 
+	<item>0</item>
+	<item>1</item>
+	<item>2</item>
+	</string-array>
+    
+    <string-array name="settings_app_launch_mode_name"> 
+   	<item>ポップアップ</item>
+   	<item>MetaWatchアプリ画面</item>    
+	</string-array> 
+
+	<string-array name="settings_app_launch_mode_value"> 
+	<item>0</item>
+   	<item>1</item> 
+	</string-array>
+    
+    <string-array name="settings_quick_button_name"> 
+   	<item>無効(秒表示切り替え)</item>
+   	<item>前回の通知を再表示</item>
+   	<item>MetaWatchアプリの開始/実行</item>   
+	</string-array> 
+
+	<string-array name="settings_quick_button_value"> 
+	<item>0</item>
+   	<item>1</item>
+   	<item>2</item>
+	</string-array>
+    
+    <string name="settings_Digital">デジタル時計設定</string>
+    <string name="settings_Analog">アナログ時計設定</string>
+    <string name="settings_Other">その他設定</string>
+    
+    <string name="settings_Select_Watch">MetaWatchの選択</string>
+    <string name="settings_Select_Watch_desc">MetaWatchの検出と選択</string>
+    <string name="settings_Show_fake_watches">フェイクウォッチの表示</string>
+    <string name="settings_Show_fake_watches_desc">検出画面にフェイクウォッチを表示。デバッグ用にアナログ、デジタル時計の接続をエミューレート</string>
+
+    <string name="settings_watch_widgets">MetaWatchウィジェット設定</string>
+    <string name="settings_weather_widgets">お天気ウィジェット</string>
+    <string name="settings_calendar_widgets">カレンダーウィジェット</string>
+    <string name="settings_watch_apps">MetaWatchアプリ設定</string>
+    
+    <string name="settings_reset_widgets">ウィジェット初期化</string>
+    <string name="settings_reset_widgets_desc">ウィジェットをデフォルトレイアウトに初期化</string>
+    
+    <string name="settings_hide_empty_widgets">空白のウィジェットを隠す</string>
+    <string name="settings_hide_empty_widgets_desc">件数0やデータのないウィジェットを隠す</string>
+    
+    <string name="settings_weather_provider">お天気情報サイト</string>
+    <string name="settings_weather_provider_desc">お天気情報の取得先の選択、もしくは無効化</string>
+    
+    <string name="settings_weather_geolocation">お天気位置情報モード</string>
+    <string name="settings_weather_geolocation_desc">位置情報の取得方法</string>
+    
+    <string name="settings_weather_location">お天気の場所</string>
+    <string name="settings_weather_location_desc">お天気位置情報手動設定時のデフォルト都市</string>
+    
+    <string name="settings_weather_celsius">摂氏(℃)表示</string>
+    <string name="settings_weather_celsius_desc">華氏(°F)の替わりに摂氏(℃)で表示</string>
+    
+    <string name="settings_wunderground_key">APIキー</string>
+    <string name="settings_wunderground_key_desc">Weather UndergroundのAPIキー - Weather Undergroundをお天気情報サイトとした時に必要</string>
+    
+    <string name="settings_app_launch_mode">MetaWatchアプリ起動モード</string>
+    
+    <string name="settings_music_app">ミュージックコントロール</string>
+    <string name="settings_music_app_desc">MetaWatchアプリ画面で音楽プレーヤ操作</string>
+    
+    <string name="settings_media_control_method">メディア制御方法</string>
+    
+    <string name="settings_actions_app">アクション</string>
+    <string name="settings_actions_app_desc">MetaWatchアプリ画面にMetaWatchアクション画面(MetaWatchアクション画面=最新通知の表示、MetaWatchアプリの起動などができるメニュー画面)</string>
+    
+    <string name="settings_choose_theme">テーマ選択</string>
+    <string name="settings_choose_theme_desc">MetaWatchアイコンテーマの選択</string>
+    
+    <string name="settings_active_apps">MetaWatchアプリ画面の有効化</string>
+    
+    <string name="settings_packet_wait">パケット待ち時間</string>
+    <string name="settings_packet_wait_desc">パケット送信の時間間隔(ms)</string>
+    
+    <string name="settings_hide_notification_icon">通知アイコン非表示</string>
+    <string name="settings_hide_notification_icon_desc">ステータスバーにアイコンを表示しない(再起動が必要)</string>
+    
+    <string name="settings_skip_sdp">SDP検出スキップ</string>
+    <string name="settings_skip_sdp_desc">1番ポートに直接接続</string>
+    
+    <string name="settings_insecure_bluetooth">非セキュアBTソケットの利用</string>
+    <string name="settings_insecure_bluetooth_desc">Bluetooth接続時に毎回PINコード入力が求められてしまうような場合、有効にする</string>
+    
+    <string name="settings_debug_logging">デバグロギング</string>
+    <string name="settings_debug_logging_desc">デバグログの出力 - 無効にするとパフォーマンスが向上する - 問題があるときデバグ出力を有効にし、logcatの出力を報告してください。</string>
+    
+    <string name="settings_log_packets">パケット詳細ログ</string>
+    <string name="settings_log_packets_desc">Bluetoothパケットの詳細をロギング</string>
+    
+    <string name="settings_sms_freq">SMSの繰り返しテスト間隔</string>
+    <string name="settings_sms_freq_desc">テストSMS通知の時間間隔(秒)</string>
+    
+    <string name="settings_watch_voltage">MetaWatch電圧取得</string>
+    <string name="settings_watch_voltage_desc">MetaWatchから電圧を取得し、SDカードに書き出す(要再起動)</string>
+    <string name="settings_watch_voltage_freq">取得間隔</string>
+    
+    <string name="settings_auto_connect">開始時に自動接続</string>
+    <string name="settings_auto_connect_desc">MWMアプリ起動時にBluetooth接続を自動で試みます。</string>
+    
+    <string name="settings_notify_on_connect">接続完了をMetaWatchに通知</string>
+    <string name="settings_notify_on_connect_desc">Bluetooth接続完了時にMetaWatchに接続完了通知を送る</string>
+    
+    <string name="settings_display_splash">起動画面を表示</string>
+    <string name="settings_display_splash_desc">MetaWatchにMWMの起動画面を表示</string>
+    
+    <string name="settings_restart_if_stalled">もし落ちたら再起動</string>
+    <string name="settings_restart_if_stalled_desc">アプリが予期せぬ停止をした時、自動的に再起動</string>
+    
+    <string name="settings_haptic_feedback">ボタン押下バイブ</string>
+    <string name="settings_haptic_feedback_desc">MetaWatchボタン押下時に振動</string>
+    
+    <string name="settings_notification_queue">通知キューを表示</string>
+    <string name="settings_notification_queue_desc">状態画面に通知待ちのメッセージの有無を表示</string>
+    
+    <string name="settings_screenshots">MetaWatchスクリーンショット取得</string>
+    <string name="settings_screenshots_desc">MetaWatch画面のスクリーンショット取得しSDカードに保存する。警告-この機能はスローダウンをもたらし、SDカードをいっぱいにする-本当に必要なテーマのスクリーンショット取得にだけ使うこと。</string>
+    
+    <string name="settings_backup">設定の保存</string>
+    <string name="settings_backup_backup">バックアップ</string>
+    <string name="settings_backup_backup_desc">外部ストレージ(SD Cardなど)に設定を保存</string>
+    <string name="settings_backup_restore">復元</string>
+    <string name="settings_backup_restore_desc">外部ストレージ(SD Cardなど)から設定を復元</string>
+   
+    <string name="settings_auto_clock_format">時刻フォーマットの自動設定</string>
+    <string name="settings_auto_clock_format_desc">Bluetooth接続時に時刻フォーマットを自動的にセットする。警告 - ファームウェアが０．９版以前のMetaWatchはクラッシュする。</string>
+    
+    <string name="settings_silent_mode">サイレントモード</string>
+    <string name="settings_silent_mode_desc">通知振動や画面更新をしない。アイドル画面切り替えボタン(右上ボタン)長押しで切り替わる。</string>
+    
+    <string name="main_service_toggle_on">実行中。クリックで停止。</string>
+    <string name="main_service_toggle_off">停止中。クリックで開始。</string>
+
+  
+  	<string name="ui_tab_status">状態</string>
+  	<string name="ui_tab_preferences">設定</string>
+  	<string name="ui_tab_widgets">ウィジェット</string>
+  	<string name="ui_tab_tests">テスト</string>
+  	
+  	<string name="ui_tab_downloaded_themes">Downloaded</string>
+  	<string name="ui_tab_theme_gallery">Gallery</string>
+  	  
+    
+    <string name="device_selection_search_button">デバイスの検出</string>
+    
+    
+    <string name="other_apps_app_enable">対象</string>
+    <string name="other_apps_vibrate_label">振動</string>
+    
+    <string name="other_apps_vibration_default_abbr">Def.</string>
+    <string name="other_apps_vibration_none_abbr">No</string>
+    
+    <string name="other_apps_use_default">デフォルトに戻す</string>
+    
+
+	<string name="connection_disconnected">未接続</string>  
+	<string name="connection_connecting">接続中</string> 
+	<string name="connection_connected">接続完了</string> 
+	<string name="connection_disconnecting">切断中</string>
+	
+	
+	<string name="error_bluetooth_not_supported">Bluetooth通信の機能がないため、MetaWatchと接続できない。</string>
+	<string name="error_bluetooth_not_enabled">Bluetooth通信が無効のため、MetaWatchと接続できない。Bluetooth通信を有効にしてから再接続。</string>
+    
+	<string name="status_loading">...読み込み中...</string>
+	
+	<string name="status_weather_last_updated">お天気更新時刻：</string>
+	<string name="status_weather_forecast">天気予報</string>
+	<string name="status_weather_observation">現在の天気：</string>
+	<string name="status_weather_waiting">お天気情報待ち</string>
+	<string name="status_location_updated">位置情報更新時刻：</string>
+	<string name="status_location_waiting">位置情報待ち</string>
+	
+	<string name="status_accessibility_working">ユーザー補助有効、稼働中</string>
+	<string name="status_accessibility_waiting">ユーザー補助有効 - 通知待ち</string>
+	<string name="status_accessibility_failed">ユーザー補助未動作 - 「Android設定」->「ユーザー補助」を一旦無効にして再度有効化する</string>
+	<string name="status_accessibility_disabled">ユーザー補助無効</string>
+	
+	<string name="status_message_queue">メッセージ待ちの数：</string>
+	<string name="status_notification_queue">通知待ちの数：</string>
+	
+</resources>

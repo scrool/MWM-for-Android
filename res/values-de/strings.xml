@@ -172,14 +172,12 @@
 	
 	<string-array name="settings_weather_provider_names">
 	<item>Kein</item>
-<!--     <item>Google Wetter</item>  -->
     <item>Weather Underground</item>
-    <item>Yahoo Wetter</item>
+    <item>Yahoo! Wetter</item>
     </string-array>
     
     <string-array name="settings_weather_provider_values"> 
 	<item>0</item>
-<!--<item>1</item> -->
 	<item>2</item>
 	<item>3</item>
 	</string-array>
@@ -235,8 +233,8 @@
     <string name="settings_reset_widgets">Widgets zurücksetzen</string>
     <string name="settings_reset_widgets_desc">Layout der Widgets zurücksetzen</string>
     
-    <string name="settings_hide_empty_widgets">Hide empty widgets</string>
-    <string name="settings_hide_empty_widgets_desc">Hide widgets that are displaying "0" or have no data</string>
+    <string name="settings_hide_empty_widgets">Leere Widgets verstecken</string>
+    <string name="settings_hide_empty_widgets_desc">Widgets verstecken, die keine Daten oder "0" darstellen</string>
     
     <string name="settings_weather_provider">Weather Provider</string>
     <string name="settings_weather_provider_desc">Wähle eine Quelle für Wetterdaten aus.</string>
@@ -320,10 +318,10 @@
     <string name="settings_backup_restore">Wiederherstellen</string>
     <string name="settings_backup_restore_desc">Wiederherstellung der Einstellungen von Sicherung auf der SD Karte.</string>
    
-    <string name="settings_auto_clock_format">Auto set clock format</string>
-    <string name="settings_auto_clock_format_desc">Automatically set the watch date and time formats when connecting.  WARNING - this may cause the watch to crash on pre 0.9 versions of the firmware.</string>
+    <string name="settings_auto_clock_format">Uhrzeitformat Auto</string>
+    <string name="settings_auto_clock_format_desc">Setze das Format der Uhrzeit und des Datums automatisch. Vorsicht: Dies kann zu einem Absturz der Uhr führen, falls Firmware kleiner 0.9 installiert ist.</string>
     
-    <string name="settings_silent_mode">Silent Mode</string>
+    <string name="settings_silent_mode">Lautlos-Modus</string>
     <string name="settings_silent_mode_desc">Mute notifications, and stop updating the idle screen.  Toggle with a long press on the idle page switch button.</string>
     
     <string name="main_service_toggle_on">Service läuft. Click zum Stoppen.</string>
@@ -334,6 +332,9 @@
   	<string name="ui_tab_preferences">Einstellungen</string>
   	<string name="ui_tab_widgets">Widgets</string>
   	<string name="ui_tab_tests">Tests</string>
+  	
+  	<string name="ui_tab_downloaded_themes">Downloaded</string>
+  	<string name="ui_tab_theme_gallery">Gallery</string>
   	  
     
     <string name="device_selection_search_button">Suche Geräte</string>
