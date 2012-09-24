@@ -255,7 +255,8 @@ public class MetaWatch extends TabActivity {
 						"Richard Munn<br>Craig Oliver<br>Didi Pfeifle<br>Thierry Schork<br>Kyle Schroeder<br>"+
 						"Chris Sewell<br>Dobie Wollert<p>"+
 						"<b>Translation Team</b><br>"+
-						"Miguel Branco<br>Didi Pfeifle<br>Geurt Pieter Maassen van den Brink<br>Thierry Schork<p>"+
+						"Miguel Branco<br>Didi Pfeifle<br>Geurt Pieter Maassen van den Brink<br>Thierry Schork<br>"+
+						"Kamosan Software<p>"+
 						"<p>&copy; Copyright 2011-2012 Meta Watch Ltd.</p>" +
 						"</center></body></html>";
         webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null);
