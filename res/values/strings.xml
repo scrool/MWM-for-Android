@@ -292,7 +292,7 @@
     <string name="settings_watch_voltage_freq">Collection Frequency</string>
     
     <string name="settings_auto_connect">Auto Connect on Startup</string>
-    <string name="settings_auto_connect_desc">Automatically attempt to connect on app startup.</string>
+    <string name="settings_auto_connect_desc">Restore previous connection state on startup.</string>
     
     <string name="settings_notify_on_connect">Notify Watch on Connect</string>
     <string name="settings_notify_on_connect_desc">Send a notification to the watch after connecting to it</string>
