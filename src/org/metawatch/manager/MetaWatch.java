@@ -37,14 +37,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.metawatch.communityedition.R;
-import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
-import org.metawatch.manager.MetaWatchService.WeatherProvider;
-import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.apps.AppManager;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
 import android.app.TabActivity;
 import android.content.ComponentName;
@@ -53,7 +48,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -64,12 +58,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.webkit.WebView;
 import android.widget.TabHost;
-import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.bugsense.trace.BugSenseHandler;
 
@@ -77,12 +68,12 @@ public class MetaWatch extends TabActivity {
    
 	public static final String TAG = "MetaWatch";
 	
-	public static TextView textView = null;	
-	public static ToggleButton toggleButton = null;
+	//public static TextView textView = null;	
+	//public static ToggleButton toggleButton = null;
 	
-    private static Messenger mService = null;
+    public static Messenger mService = null;
 	    
-    private static long startupTime = 0;
+    public static long startupTime = 0;
     
     private static Context context = null;
         
@@ -117,8 +108,10 @@ public class MetaWatch extends TabActivity {
         final TabHost tabHost = getTabHost();
 
         tabHost.addTab(tabHost.newTabSpec("tab1")
+        		.setIndicator("destroy")
                 .setIndicator(res.getString(R.string.ui_tab_status),res.getDrawable(R.drawable.ic_tab_status))
-                .setContent(new Intent(this, MetaWatchStatus.class)));
+                .setContent(new Intent(this, MetaWatchStatus.class)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)));
 
         tabHost.addTab(tabHost.newTabSpec("tab2")
                 .setIndicator(res.getString(R.string.ui_tab_preferences),res.getDrawable(R.drawable.ic_tab_settings))
@@ -134,45 +127,40 @@ public class MetaWatch extends TabActivity {
                 .setIndicator(res.getString(R.string.ui_tab_tests),res.getDrawable(R.drawable.ic_tab_test))
                 .setContent(new Intent(this, Test.class)));
         
-        synchronized (MetaWatchStatus.textView) {
-        	if (MetaWatchStatus.textView==null) {
-		        try {
-					MetaWatchStatus.textView.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					finish();
-				}
-        	}
-	        textView = MetaWatchStatus.textView;
-	        toggleButton = MetaWatchStatus.toggleButton;
-	        toggleButton.setChecked(isServiceRunning());
-	        
-        }
+//        if (!getViews())
+//        	finish();
 		
 		if (Preferences.watchMacAddress == "") {
 			// Show the watch discovery screen on first start
 			startActivity(new Intent(getApplicationContext(), DeviceSelection.class));
 		}
-		
-	
-		toggleButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-            	if(toggleButton.isChecked())
-            		startService();
-            	else
-            		stopService();
-            }
-        });
-		
-		displayStatus();
+				
+		MetaWatchStatus.displayStatus();
 		
 		Protocol.configureMode();
 		
-		if (!isServiceRunning() && Preferences.autoConnect 
-				&& MetaWatchService.getPreviousConnectionState(context) == true) {
-			startService();
-		}
+		MetaWatchService.autoStartService(context);
     }
+
+//	private static boolean getViews() {
+//		if (textView!=null || textView==MetaWatchStatus.textView)
+//			return true;
+//		
+//		synchronized (MetaWatchStatus.textView) {
+//        	if (MetaWatchStatus.textView==null) {
+//		        try {
+//					MetaWatchStatus.textView.wait();
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//					return false;
+//				}
+//        	}
+//	        textView = MetaWatchStatus.textView;
+//	        toggleButton = MetaWatchStatus.toggleButton;
+//	        toggleButton.setChecked(Utils.isServiceRunning(context));
+//	        return true;
+//        }
+//	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -200,47 +188,7 @@ public class MetaWatch extends TabActivity {
 	        return super.onOptionsItemSelected(item);
 	    }
 	}
-    
-	void startService() {
-
-		if(!isServiceRunning()) {
-			Context context = getApplicationContext();
-			context.bindService(new Intent(MetaWatch.this, 
-					MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
-		}
-		
-        if(isServiceRunning()) {
-        	toggleButton.setChecked(true);
-        }
-	}
-	
-    void stopService() {
-
-		Context context = getApplicationContext();
-        try {
-        	context.stopService(new Intent(this, MetaWatchService.class));
-            context.unbindService(mConnection);            	
-        }
-        catch(Throwable e) {
-        	// The service wasn't running
-        	if (Preferences.logging) Log.d(MetaWatch.TAG, e.getMessage());          	
-        }
-
-    	if(!isServiceRunning()) {
-    		toggleButton.setChecked(false);
-    	}
-    }
-    
-    private boolean isServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("org.metawatch.manager.MetaWatchService".equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
+        
     void exit() {
     	MetaWatchService.setPreviousConnectionState(context, false);
     	System.exit(0);
@@ -279,108 +227,14 @@ public class MetaWatch extends TabActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MetaWatchService.Msg.UPDATE_STATUS:
-                    displayStatus();
+                    MetaWatchStatus.displayStatus();
                     break;
                 default:
                     super.handleMessage(msg);
             }
         }
     }
-    
-    private static void displayStatus() {
-    	Resources res = context.getResources();
-    	textView.setText(res.getString(R.string.app_name_long));
-    	textView.append("\n\n");
-    	
-    	switch (MetaWatchService.connectionState) {
-	    	case MetaWatchService.ConnectionState.DISCONNECTED:
-	    		Utils.appendColoredText(textView, res.getString(R.string.connection_disconnected).toUpperCase(), Color.RED);
-	    		break;
-	    	case MetaWatchService.ConnectionState.CONNECTING:
-	    		Utils.appendColoredText(textView, res.getString(R.string.connection_connecting).toUpperCase(), Color.YELLOW);
-	    		break;
-	    	case MetaWatchService.ConnectionState.CONNECTED:
-	    		Utils.appendColoredText(textView, res.getString(R.string.connection_connected).toUpperCase(), Color.GREEN);
-	    		break;
-	    	case MetaWatchService.ConnectionState.DISCONNECTING:
-	    		Utils.appendColoredText(textView, res.getString(R.string.connection_disconnecting).toUpperCase(), Color.YELLOW);
-	    		break;
-    	}
-    	textView.append("\n");
-    	
-    	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
-    		textView.append("\n");
-    		if (Monitors.weatherData.error) {
-    			Utils.appendColoredText(textView, "ERROR: " , Color.RED);
-    			Utils.appendColoredText(textView, Monitors.weatherData.errorString, Color.RED);
-    			textView.append("\n");
-    		}
-    		if (Monitors.weatherData.received) {
-    			textView.append(res.getString(R.string.status_weather_last_updated));
-    			textView.append("\n  ");
-    			textView.append(res.getString(R.string.status_weather_forecast));
-    			textView.append("\n    ");
-    			printDate(Monitors.weatherData.forecastTimeStamp);
-    			textView.append("  ");
-    			textView.append(res.getString(R.string.status_weather_observation));
-    			textView.append("\n    ");
-    			printDate(Monitors.weatherData.timeStamp);
-    		}
-    		else {
-    			textView.append(res.getString(R.string.status_weather_waiting));
-    		}
-    	}
-    	
-    	if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
-    		textView.append("\n");
-    		if (LocationData.received) {
-    			textView.append(res.getString(R.string.status_location_updated));
-    			textView.append("\n  ");
-    			printDate(LocationData.timeStamp);
-    		}
-    		else {
-    			textView.append(res.getString(R.string.status_location_waiting));
-    			textView.append("\n");
-    		}
-    	}
-    	
-    	textView.append("\n");
-    	if (Utils.isAccessibilityEnabled(context)) {    		
-	    	if (MetaWatchAccessibilityService.accessibilityReceived) {
-	    		Utils.appendColoredText(textView, res.getString(R.string.status_accessibility_working), Color.GREEN);
-	    	}
-	    	else {
-	    		if(startupTime==0 || System.currentTimeMillis()-startupTime<60*1000) {
-	    			textView.append(res.getString(R.string.status_accessibility_waiting));
-	    		}
-	    		else {
-	    			Utils.appendColoredText(textView, res.getString(R.string.status_accessibility_failed), Color.RED);
-	    		}
-	    	}
-	    }
-    	else {
-    		textView.append(res.getString(R.string.status_accessibility_disabled));
-    	}
-    	textView.append("\n");
-    
-    	textView.append("\n"+res.getString(R.string.status_message_queue)+" " + Protocol.getQueueLength());
-    	textView.append("\n"+res.getString(R.string.status_notification_queue)+" " + Notification.getQueueLength() + "\n");
-    	
-    	if(Preferences.showNotificationQueue) {
-    		textView.append(Notification.dumpQueue());
-    	}
-    }
-    
-    private static void printDate(long ticks) {
-    	if(ticks==0) {
-    		textView.append(context.getResources().getString(R.string.status_loading));
-    	}
-    	else {
-	    	textView.append(Utils.ticksToText(context, ticks));
-    	}
-    	textView.append("\n");
-    }
-    
+     
     /**
      * Target we publish for clients to send messages to IncomingHandler.
      */
@@ -392,7 +246,7 @@ public class MetaWatch extends TabActivity {
     /**
      * Class for interacting with the main interface of the service.
      */
-    private static ServiceConnection mConnection = new ServiceConnection() {
+    public static ServiceConnection mConnection = new ServiceConnection() {
     	   	
         public void onServiceConnected(ComponentName className,
                 IBinder service) {
@@ -402,7 +256,6 @@ public class MetaWatch extends TabActivity {
             // service through an IDL interface, so get a client-side
             // representation of that from the raw service object.
             mService = new Messenger(service);
-            textView.append("Attached to service\n");
 
             // We want to monitor the service for as long as we are
             // connected to it.
@@ -420,43 +273,7 @@ public class MetaWatch extends TabActivity {
             // This is called when the connection with the service has been
             // unexpectedly disconnected -- that is, its process crashed.
             mService = null;
-            textView.append("Disconnected from service\n");
         }
     };
-
-    /*
-    void doBindService() {
-        // Establish a connection with the service.  We use an explicit
-        // class name because there is no reason to be able to let other
-        // applications replace our component.
-    	mIsBound = bindService(new Intent(MetaWatch.this, 
-                MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
-        textView.append("Binding.\n");
-    }*/
-
-    /*
-    void doUnbindService() {
-        if (mIsBound) {
-            // If we have received the service, and hence registered with
-            // it, then now is the time to unregister.
-            if (mService != null) {
-                try {
-                    Message msg = Message.obtain(null,
-                            MetaWatchService.Msg.UNREGISTER_CLIENT);
-                    msg.replyTo = mMessenger;
-                    mService.send(msg);
-                } catch (RemoteException e) {
-                    // There is nothing special we need to do if the service
-                    // has crashed.
-                }
-            }
-
-            // Detach our existing connection.
-            unbindService(mConnection);
-            mIsBound = false;
-            textView.append("Binding.\n");
-        }
-        
-    }*/
-    
+  
 }
