@@ -385,6 +385,21 @@ public class MetaWatchService extends Service {
 		}
 
 	}
+	
+	public static boolean getPreviousConnectionState(Context context) {
+		SharedPreferences sharedPreferences = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		return sharedPreferences.getBoolean("PreviousConnectionState", false);
+	}
+	
+	public static void setPreviousConnectionState(Context context, boolean connected) {
+		SharedPreferences sharedPreferences = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		Editor editor = sharedPreferences.edit();
+
+		editor.putBoolean("PreviousConnectionState", connected);
+		editor.commit();
+	}
 
 	public static void saveMac(Context context, String mac) {
 		SharedPreferences sharedPreferences = PreferenceManager
@@ -430,6 +445,19 @@ public class MetaWatchService extends Service {
 			editor.putString("widgets", widgets);
 		}
 		editor.commit();
+	}
+	
+	public static void autoStartService(Context context) {
+		if(connectionState != ConnectionState.DISCONNECTED)
+			return;
+		
+		if (!Preferences.loaded)
+			MetaWatchService.loadPreferences(context);
+		
+		if(Preferences.autoConnect && getPreviousConnectionState(context)==true) {
+			context.startService(new Intent(context, MetaWatchService.class));
+			if (Preferences.logging) Log.v(MetaWatch.TAG, "Service auto started");
+		} 
 	}
 	
 	public void createNotification() {
@@ -629,6 +657,7 @@ public class MetaWatchService extends Service {
 			}
 			
 			connectionState = ConnectionState.CONNECTED;
+			setPreviousConnectionState(context, true);
 			updateNotification();
 
 			Protocol.startProtocolSender();
@@ -745,6 +774,7 @@ public class MetaWatchService extends Service {
 
 	void disconnectExit() {
 		connectionState = ConnectionState.DISCONNECTING;
+		setPreviousConnectionState(context, false);
 		updateNotification();
 		disconnect();
 	}

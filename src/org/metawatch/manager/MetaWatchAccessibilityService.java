@@ -44,6 +44,8 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 	@Override
 	public void onAccessibilityEvent(AccessibilityEvent event) {
 
+		MetaWatchService.autoStartService(this);
+		
 		if(!accessibilityReceived) {
 			accessibilityReceived = true;
 			MetaWatchService.notifyClients();

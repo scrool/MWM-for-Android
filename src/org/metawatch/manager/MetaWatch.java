@@ -168,7 +168,8 @@ public class MetaWatch extends TabActivity {
 		
 		Protocol.configureMode();
 		
-		if (!isServiceRunning() && Preferences.autoConnect) {
+		if (!isServiceRunning() && Preferences.autoConnect 
+				&& MetaWatchService.getPreviousConnectionState(context) == true) {
 			startService();
 		}
     }
@@ -241,6 +242,7 @@ public class MetaWatch extends TabActivity {
     }
     
     void exit() {
+    	MetaWatchService.setPreviousConnectionState(context, false);
     	System.exit(0);
     }
     
