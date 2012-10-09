@@ -61,8 +61,13 @@ public class MetaWatchStatus extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        context = this;
-                   
+        context = this;                         
+    }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	
         textView = (TextView) findViewById(R.id.textview);
 		toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
 		
@@ -75,14 +80,10 @@ public class MetaWatchStatus extends Activity {
             }
         });
 		
-		displayStatus();
-        
+		displayStatus(this);
     }
     
-    static void displayStatus() {
-    	if (context==null)
-    		return;
-    	
+    static void displayStatus(Context context) {
     	toggleButton.setChecked(Utils.isServiceRunning(context));
     	
     	Resources res = context.getResources();
@@ -166,6 +167,9 @@ public class MetaWatchStatus extends Activity {
     	if(Preferences.showNotificationQueue) {
     		textView.append(Notification.dumpQueue());
     	}
+    	
+    	textView.append("\n\n\nStatus updated at ");
+		printDate(System.currentTimeMillis());
     }
     
     private static void printDate(long ticks) {

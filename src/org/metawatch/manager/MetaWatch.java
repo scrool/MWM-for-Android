@@ -68,9 +68,6 @@ public class MetaWatch extends TabActivity {
    
 	public static final String TAG = "MetaWatch";
 	
-	//public static TextView textView = null;	
-	//public static ToggleButton toggleButton = null;
-	
     public static Messenger mService = null;
 	    
     public static long startupTime = 0;
@@ -126,41 +123,27 @@ public class MetaWatch extends TabActivity {
         tabHost.addTab(tabHost.newTabSpec("tab4")
                 .setIndicator(res.getString(R.string.ui_tab_tests),res.getDrawable(R.drawable.ic_tab_test))
                 .setContent(new Intent(this, Test.class)));
-        
-//        if (!getViews())
-//        	finish();
 		
 		if (Preferences.watchMacAddress == "") {
 			// Show the watch discovery screen on first start
 			startActivity(new Intent(getApplicationContext(), DeviceSelection.class));
 		}
-				
-		MetaWatchStatus.displayStatus();
 		
 		Protocol.configureMode();
 		
 		MetaWatchService.autoStartService(context);
     }
-
-//	private static boolean getViews() {
-//		if (textView!=null || textView==MetaWatchStatus.textView)
-//			return true;
-//		
-//		synchronized (MetaWatchStatus.textView) {
-//        	if (MetaWatchStatus.textView==null) {
-//		        try {
-//					MetaWatchStatus.textView.wait();
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//					return false;
-//				}
-//        	}
-//	        textView = MetaWatchStatus.textView;
-//	        toggleButton = MetaWatchStatus.toggleButton;
-//	        toggleButton.setChecked(Utils.isServiceRunning(context));
-//	        return true;
-//        }
-//	}
+    
+    @Override
+    public void onResume() {
+    	super.onResume();
+    	
+    	context = getApplicationContext();
+		context.bindService(new Intent(MetaWatch.this, 
+				MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
+    	
+    	MetaWatchStatus.displayStatus(this);
+    }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -227,7 +210,7 @@ public class MetaWatch extends TabActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MetaWatchService.Msg.UPDATE_STATUS:
-                    MetaWatchStatus.displayStatus();
+                    MetaWatchStatus.displayStatus(context);
                     break;
                 default:
                     super.handleMessage(msg);
