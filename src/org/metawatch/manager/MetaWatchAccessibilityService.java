@@ -53,8 +53,17 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 		
 		/* Acquire details of event. */
 		int eventType = event.getEventType();
-		String packageName = event.getPackageName().toString();
-		String className = event.getClassName().toString();
+		
+		String packageName = "";
+		String className = "";
+		try {
+			packageName = event.getPackageName().toString();
+			className = event.getClassName().toString();
+		} catch (java.lang.NullPointerException e) {
+			if (Preferences.logging) Log.d(MetaWatch.TAG,
+					"MetaWatchAccessibilityService.onAccessibilityEvent(): null package or class name");
+			return;
+		}
 				
 		if (eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
 			if (Preferences.logging) Log.d(MetaWatch.TAG,
