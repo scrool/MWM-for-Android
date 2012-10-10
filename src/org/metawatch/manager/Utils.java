@@ -967,7 +967,7 @@ public class Utils {
     	return builder.toString();
     }
     
-    private static StaticLayout buildText(Context context, String text, int width, Layout.Alignment alignment, int textCol,  FontSize size ) {
+    public static StaticLayout buildText(Context context, String text, int width, Layout.Alignment alignment, int textCol,  FontSize size ) {
 		TextPaint tp = new TextPaint();
 		tp.setColor(textCol);
 		FontInfo info = FontCache.instance(context).Get(size);
