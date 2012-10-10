@@ -733,6 +733,10 @@ public class Utils {
 			canvas.drawBitmap(icon, 0, 3, null);
 			canvas.drawText(text, 12, 30, textPaint);
 		}
+		else if(height==46) {
+			canvas.drawBitmap(icon, 11, 6, null);
+			canvas.drawText(text, 24, 40, textPaint);
+		}
 		
 		return bitmap;
 	}
