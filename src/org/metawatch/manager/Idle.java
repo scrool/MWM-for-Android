@@ -148,8 +148,8 @@ public class Idle {
 					totalHeight += row.getHeight();
 				}
 							
-				int space = (watchType == WatchType.DIGITAL) ? (((showClock ? 64:96) - totalHeight) / (rows.size()+1)) : 0;
-				int yPos = (watchType == WatchType.DIGITAL) ? (showClock ? 32:0) + space : 0;
+				int space = (watchType == WatchType.DIGITAL) ? (((showClock ? 32:96) - totalHeight) / (rows.size()+1)) : 0;
+				int yPos = (watchType == WatchType.DIGITAL) ? (showClock ? 64:0) + space : 0;
 				
 				for(WidgetRow row : rows) {
 					row.draw(widgetData, canvas, yPos);
@@ -159,7 +159,7 @@ public class Idle {
 				if (watchType == WatchType.DIGITAL && Preferences.displayWidgetRowSeparator) {
 					yPos = space/2; // Center the separators between rows.
 					if (showClock) {
-						yPos += 32;
+						yPos += 64;
 						drawLine(canvas, yPos);
 					}
 					int i = 0;
@@ -356,7 +356,7 @@ public class Idle {
 		
 			int screenSize = 0;
 			if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
-				screenSize = 32; // Initial screen has top part used by the fw clock
+				screenSize = 64; // Initial screen has top part used by the fw clock
 			}
 			
 			ArrayList<WidgetRow> screenRow = new ArrayList<WidgetRow>();
@@ -366,7 +366,7 @@ public class Idle {
 					screenRow = new ArrayList<WidgetRow>();
 					if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL &&
 							Preferences.clockOnEveryPage) {
-						screenSize = 32;
+						screenSize = 64;
 					} else { 
 						screenSize = 0;
 					}
@@ -433,9 +433,9 @@ public class Idle {
 	  Paint paint = new Paint();
 	  paint.setColor(Color.BLACK);
 
-	  int left = 3;
+	  int left = 2;
 
-	  for (int i = 0+left; i < 96-left; i += 3)
+	  for (int i = 0+left; i < 96-left; i += 4)
 	    canvas.drawLine(i, y, i+2, y, paint);
 	
 	  return canvas;
