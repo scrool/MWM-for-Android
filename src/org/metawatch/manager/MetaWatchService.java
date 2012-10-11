@@ -83,6 +83,7 @@ public class MetaWatchService extends Service {
 	static InputStream inputStream;
 	static OutputStream outputStream;
 	static ServiceThread serviceThread;
+	static Service instance = null;
 
 	//TelephonyManager telephonyManager;
 	NotificationManager notificationManager;
@@ -463,6 +464,10 @@ public class MetaWatchService extends Service {
 		} 
 	}
 	
+	public static boolean isRunning() {
+		return instance != null;
+	}
+	
 	public void createNotification() {
 		SharedPreferences sharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(this);
@@ -531,6 +536,7 @@ public class MetaWatchService extends Service {
 		if (Preferences.logging) Log.d(MetaWatch.TAG,
 				"MetaWatchService.onCreate()");
 		
+		instance = this;
 		context = this;
 		
 		initialize();
@@ -584,6 +590,7 @@ public class MetaWatchService extends Service {
 		disconnectExit();			
 		super.onDestroy();
 		serviceThread.quit();
+		instance=null;
 		
 		if (Preferences.logging) Log.d(MetaWatch.TAG,
 				"MetaWatchService.onDestroy()");
@@ -824,7 +831,10 @@ public class MetaWatchService extends Service {
 			finally
 			{				
 				connectionState = ConnectionState.DISCONNECTED;
-				updateNotification();				
+				updateNotification();		
+				if (instance != null) {
+					instance.stopSelf();
+				}
 			}
 		}
 		
