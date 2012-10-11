@@ -41,7 +41,11 @@ public class CalendarWidget implements InternalWidget {
 	public final static String id_5 = "Calendar_40_16";
 	final static String desc_5 = "Next Calendar Appointment (40x16)";
 	
+	public final static String id_6 = "Calendar_46_46";
+	final static String desc_6 = "Next Calendar Appointment (46x46)";
+	
 	private Context context;
+	private TextPaint paintLarge;
 	private TextPaint paintSmall;
 	private TextPaint paintSmallNumerals;
 	private TextPaint paintNumerals;
@@ -55,6 +59,12 @@ public class CalendarWidget implements InternalWidget {
 	public void init(Context context, ArrayList<CharSequence> widgetIds) {
 		this.context = context;
 
+		paintLarge = new TextPaint();
+		paintLarge.setColor(Color.BLACK);
+		paintLarge.setTextSize(FontCache.instance(context).Large.size);
+		paintLarge.setTypeface(FontCache.instance(context).Large.face);
+		paintLarge.setTextAlign(Align.CENTER);
+		
 		paintSmall = new TextPaint();
 		paintSmall.setColor(Color.BLACK);
 		paintSmall.setTextSize(FontCache.instance(context).Small.size);
@@ -140,6 +150,11 @@ public class CalendarWidget implements InternalWidget {
 		if(widgetIds == null || widgetIds.contains(id_5)) {		
 			result.put(id_5, GenWidget(id_5));
 		}
+
+		if(widgetIds == null || widgetIds.contains(id_6)) {		
+			result.put(id_6, GenWidget(id_6));
+		}
+	
 	}
 
 	private InternalWidget.WidgetData GenWidget(String widget_id) {
@@ -188,6 +203,12 @@ public class CalendarWidget implements InternalWidget {
 			widget.height = 16;
 			iconFile = null;
 		}
+		else if (widget_id.equals(id_6)) {
+			widget.id = id_6;
+			widget.description = desc_6;
+			widget.width = 46;
+			widget.height = 46;
+		}
 
 		Bitmap icon = iconFile == null ? null : Utils.getBitmap(context, iconFile);
 
@@ -200,6 +221,7 @@ public class CalendarWidget implements InternalWidget {
 		
 		if (widget.height == 16 && icon != null) {
 			canvas.drawBitmap(icon, widget.width == 16 ? 2 : 0, iconOffset.y, null);
+
 			if(meetingTime.equals("None"))
 				canvas.drawText("-", widget.width == 16 ? 8 : 6, textOffset.y, paintSmallNumerals);
 			else {
@@ -215,6 +237,34 @@ public class CalendarWidget implements InternalWidget {
 					paintSmallNumerals.setTextAlign(Align.CENTER);
 				}
 			}
+		}
+		else if (widget.height == 46 && icon != null){
+			canvas.drawBitmap(icon, 11, iconOffset.y, null);
+		
+			if ((Preferences.displayLocationInSmallCalendarWidget)&&
+					(!meetingTime.equals("None"))&&(meetingLocation!=null)&&
+					(!meetingLocation.equals("---"))&&(widget_id.equals(id_0))&&
+					(meetingLocation.length()>0)&&(meetingLocation.length()<=3)) {
+				canvas.drawText(meetingLocation, 23, (iconOffset.y+13), paintSmall);        
+			}
+			else 
+			{
+				Calendar c = Calendar.getInstance(); 
+				if ((Preferences.eventDateInCalendarWidget)&&
+						(!meetingTime.equals("None"))) {
+					c.setTimeInMillis(meetingStartTimestamp);
+				}
+				int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+				if(dayOfMonth<10) {
+					canvas.drawText(""+dayOfMonth, 23, (iconOffset.y+13), paintNumerals);
+				}
+				else
+				{
+					canvas.drawText(""+dayOfMonth/10, 20, (iconOffset.y+13), paintNumerals);
+					canvas.drawText(""+dayOfMonth%10, 26, (iconOffset.y+13), paintNumerals);
+				}
+			}
+			canvas.drawText(meetingTime, 24, textOffset.y, paintLarge);
 		}
 		else if (icon!=null){
 			canvas.drawBitmap(icon, 0, iconOffset.y, null);
@@ -256,10 +306,10 @@ public class CalendarWidget implements InternalWidget {
 		if ((meetingLocation !=null) && (meetingLocation.length()>0))
 			text += " - " + meetingLocation;
 		
-		if (widget_id.equals(id_1) || widget_id.equals(id_4)) {
+		if (widget_id.equals(id_1) || widget_id.equals(id_4) ) {
 			
 			paintSmall.setTextAlign(Align.LEFT);
-
+			
 			int iconSpace = iconFile == null ? 0 : 25;
 			
 			canvas.save();			
@@ -275,7 +325,8 @@ public class CalendarWidget implements InternalWidget {
 
 			paintSmall.setTextAlign(Align.CENTER);
 		}
-		else if (widget_id.equals(id_3) || widget_id.equals(id_5)) {
+		else if (widget_id.equals(id_3) || widget_id.equals(id_5) ) {
+			
 			paintSmall.setTextAlign(Align.LEFT);
 
 			int iconSpace = iconFile == null ? 0 : 11;
