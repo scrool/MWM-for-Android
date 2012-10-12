@@ -632,6 +632,13 @@
 			android:summary="@string/settings_screenshots_desc"
 			android:defaultValue="false"
 		    />			
+		    
+		<CheckBoxPreference
+		    android:title="@string/settings_test_widgets"
+		    android:key="TestWidgets"
+		    android:summary="@string/settings_test_widgets_desc"
+		    android:defaultValue="false"
+		    />
 	</PreferenceScreen>	
 	
 	<PreferenceScreen

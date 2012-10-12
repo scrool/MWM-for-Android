@@ -316,6 +316,9 @@
     <string name="settings_screenshots">Dump watch screenshots</string>
     <string name="settings_screenshots_desc">Save screenshots of the watch display to your SD Card.  WARNING - this will slow down everything, and could fill up your SD Card - only really of use for obtaining screenshots for themes.</string>
     
+    <string name="settings_test_widgets">Show test widgets</string>
+    <string name="settings_test_widgets_desc">Show layout test widgets. (Requires restart)</string>
+    
     <string name="settings_backup">Backup Settings</string>
     <string name="settings_backup_backup">Backup</string>
     <string name="settings_backup_backup_desc">Backup settings to external storage.</string>
