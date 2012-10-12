@@ -16,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Paint.Align;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -462,10 +463,12 @@ public class WeatherWidget implements InternalWidget {
 			int moonPhase = Monitors.weatherData.ageOfMoon;
 			int moonImage = phaseImage[moonPhase];
 			int x = 0-(moonImage*24);
+			int y = (Preferences.displayWidgetIconOnTop) ? 0 : 8;
 			Bitmap image = shouldInvert ? Utils.getBitmap(context, "moon-inv.bmp") : Utils.getBitmap(context, "moon.bmp");
-			canvas.drawBitmap(image, x, 0, null);
+			canvas.drawBitmap(image, x, y, null);
 			
-			canvas.drawText(Integer.toString(Monitors.weatherData.moonPercentIlluminated)+"%", 12, 30, paintSmall);
+			Point textOffset = Utils.getTextOffset(32);
+			canvas.drawText(Integer.toString(Monitors.weatherData.moonPercentIlluminated)+"%", 12, (Preferences.displayWidgetIconOnTop) ? 30 : 6, paintSmall);
 		} else {
 			canvas.drawText("Wait", 12, 16, paintSmall);
 		}
