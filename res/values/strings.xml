@@ -107,6 +107,10 @@
     <string name="settings_idle_app_buffer">Use App Buffer for Clock-less Widget Pages</string>
     <string name="settings_idle_app_buffer_desc">Makes the clock and status icon visible when the watch connection is lost, but loses built-in button actions on affected pages.</string>    
         
+    <string name="settings_apps_show_clock">Clock on App screens</string>
+    <string name="settings_apps_show_clock_desc">Show a small clock on App screens, instead of the page switch widgets.</string>    
+    
+    
     <string-array name="settings_font_size_name"> 
    	<item>Small</item>
    	<item>Medium</item>

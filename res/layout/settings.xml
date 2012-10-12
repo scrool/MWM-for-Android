@@ -367,6 +367,13 @@
 			android:defaultValue="true"
 			android:dependency="ClockOnEveryPage"
 			/>
+		
+		<CheckBoxPreference
+		    android:title="@string/settings_apps_show_clock"
+		    android:key="ClockOnAppBuffers"
+		    android:summary="@string/settings_apps_show_clock_desc"
+		    android:defaultValue="false"
+		    />
 
 	</PreferenceScreen>	
 	
