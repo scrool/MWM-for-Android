@@ -227,6 +227,7 @@ public class MetaWatchService extends Service {
 		public static String themeName = "";
 		public static boolean hideEmptyWidgets = false;
 		public static boolean clockOnAppScreens = false;
+		public static boolean hiddenWidgetsReserveSpace = false;
 		public static boolean showTestWidgets = false;
 	}
 
@@ -371,6 +372,8 @@ public class MetaWatchService extends Service {
 				Preferences.clockOnAppScreens);
 		Preferences.showTestWidgets = sharedPreferences.getBoolean("TestWidgets", 
 				Preferences.showTestWidgets);
+		Preferences.hiddenWidgetsReserveSpace = sharedPreferences.getBoolean("HiddenWidgetsReserveSpace",
+				Preferences.hiddenWidgetsReserveSpace);
 		
 		boolean silent = sharedPreferences.getBoolean("SilentMode", silentMode );
 		if (silent!=silentMode)
