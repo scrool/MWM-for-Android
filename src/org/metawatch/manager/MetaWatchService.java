@@ -230,6 +230,7 @@ public class MetaWatchService extends Service {
 		public static boolean hiddenWidgetsReserveSpace = false;
 		public static boolean showTestWidgets = false;
 		public static boolean alignWidgetRowToBottom = false;
+		public static boolean displayWidgetIconOnTop = true;
 	}
 
 	public final class WatchType {
@@ -377,6 +378,9 @@ public class MetaWatchService extends Service {
 				Preferences.hiddenWidgetsReserveSpace);
 		Preferences.alignWidgetRowToBottom = sharedPreferences.getBoolean("AlignWidgetRowToBottom",
 				Preferences.alignWidgetRowToBottom);
+		Preferences.displayWidgetIconOnTop = sharedPreferences.getBoolean("DisplayWidgetIconOnTop", 
+				Preferences.displayWidgetIconOnTop);
+
 		
 		boolean silent = sharedPreferences.getBoolean("SilentMode", silentMode );
 		if (silent!=silentMode)
