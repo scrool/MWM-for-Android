@@ -388,4 +388,6 @@
 	<string name="status_message_queue">Message Queue Length:</string>
 	<string name="status_notification_queue">Notification Queue Length:</string>
 	
+	<string name="widget_picker_title">Select a widget</string>
+	
 </resources>
