@@ -1031,4 +1031,22 @@ public class Utils {
     	return string.trim().equals("");
     }
 	
+    public static void setAppClockRefreshAlarm(Context context) {
+
+    	Date date = new Date();
+    	final int seconds = date.getSeconds();
+    	final long ms = 1000*(60-seconds);
+    	
+		Intent intent = new Intent("org.metawatch.manager.UPDATE_APPSCREEN_CLOCK");
+		PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+		// Get the AlarmManager service
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + ms, sender);
+		
+		if (Preferences.logging) Log.d(MetaWatch.TAG, "Refreshing App screen in "+ms+"ms");
+		
+	
+    }
+    
 }

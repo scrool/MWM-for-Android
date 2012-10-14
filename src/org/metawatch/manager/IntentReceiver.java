@@ -311,7 +311,8 @@ public class IntentReceiver extends BroadcastReceiver {
 				return;
 			}
 			
-			else if (intent.getAction().equals("org.metawatch.manager.UPDATE_CALENDAR")){
+			else if (intent.getAction().equals("org.metawatch.manager.UPDATE_CALENDAR") || 
+					 intent.getAction().equals("org.metawatch.manager.UPDATE_APPSCREEN_CLOCK")){
 				
 				if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
 					Idle.updateIdle(context, true);

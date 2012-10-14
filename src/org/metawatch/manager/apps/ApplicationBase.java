@@ -105,6 +105,8 @@ public abstract class ApplicationBase {
 			canvas.drawRect(new Rect(94-w,0,96,8), paint1);
 			canvas.drawRect(new Rect(95-w,0,96,7), paint2);
 			canvas.drawText(time, 96, 6, paintSmall);
+			
+			Utils.setAppClockRefreshAlarm(context);
 		}
 		else {
 			if (appState == ACTIVE_IDLE || preview) { // if preview is true, it's for idle mode
