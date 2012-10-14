@@ -318,15 +318,15 @@ public class Utils {
 			//location="nowhere";
 
 			ContentResolver cr = context.getContentResolver();
-			Cursor cursor = ch.add( cr.query(Uri.parse("content://com.android.calendar/calendars"), new String[]{ "_id","name"}, null, null, null) );
-			cursor.moveToFirst();
-			String[] CalNames = new String[cursor.getCount()];
-			int[] CalIds = new int[cursor.getCount()];
-			for (int i = 0; i < CalNames.length; i++) {
-				CalIds[i] = cursor.getInt(0);
-				CalNames[i] = cursor.getString(1);
-				cursor.moveToNext();
-			}
+//			Cursor cursor = ch.add( cr.query(Uri.parse("content://com.android.calendar/calendars"), new String[]{ "_id","name"}, null, null, null) );
+//			cursor.moveToFirst();
+//			String[] CalNames = new String[cursor.getCount()];
+//			int[] CalIds = new int[cursor.getCount()];
+//			for (int i = 0; i < CalNames.length; i++) {
+//				CalIds[i] = cursor.getInt(0);
+//				CalNames[i] = cursor.getString(1);
+//				cursor.moveToNext();
+//			}
 			Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
 
 			ContentUris.appendId(builder, now );
