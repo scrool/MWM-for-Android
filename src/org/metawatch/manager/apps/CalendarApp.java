@@ -102,12 +102,12 @@ public class CalendarApp extends ApplicationBase {
 			final int xPos = getColumn(dow);
 		
 			if (day==today) {
-				canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_today.bmp"), xPos-4, yPos-4, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_today.png"), xPos-4, yPos-4, null);
 			}
 			
 			canvas.drawText(""+day, xPos, yPos+5, paintSmallNumerals);
 			
-			if (dow==Calendar.SUNDAY) 
+			if (dow==Calendar.SUNDAY)
 				yPos += 13;
 		}
 		
