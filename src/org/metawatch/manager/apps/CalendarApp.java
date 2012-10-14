@@ -33,7 +33,7 @@ public class CalendarApp extends ApplicationBase {
 		name = "Calendar";
 	
 		supportsDigital = true;
-		supportsAnalog = true;
+		supportsAnalog = false;
 	}};
 	
 	@Override
