@@ -2,7 +2,6 @@ package org.metawatch.manager.apps;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import org.metawatch.manager.FontCache;
 import org.metawatch.manager.Utils;
@@ -13,7 +12,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint.Align;
 import android.text.TextPaint;
-import android.text.format.DateFormat;
 
 public class CalendarApp extends ApplicationBase {
 
@@ -80,7 +78,7 @@ public class CalendarApp extends ApplicationBase {
 		paintSmall.setColor(Color.WHITE);
 		paintSmall.setTextSize(FontCache.instance(context).Small.size);
 		paintSmall.setTypeface(FontCache.instance(context).Small.face);
-		paintSmall.setTextAlign(Align.CENTER);
+		paintSmall.setTextAlign(Align.LEFT);
 		
 		TextPaint paintSmallNumerals = new TextPaint();
 		paintSmallNumerals.setColor(Color.BLACK);
@@ -90,10 +88,8 @@ public class CalendarApp extends ApplicationBase {
 		
 		Calendar cal = Calendar.getInstance();
 		
-		//canvas.drawText(DateFormat.getDateFormat(context).format(cal.getTime()), 48, 8, paintSmall);
 		SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
-		canvas.drawText(df.format(cal.getTime()), 48, 8, paintSmall);
-		
+		canvas.drawText(df.format(cal.getTime()), 4, 8, paintSmall);
 		
 		final int today = cal.get(Calendar.DAY_OF_MONTH);
 		
@@ -106,7 +102,7 @@ public class CalendarApp extends ApplicationBase {
 			final int xPos = getColumn(dow);
 		
 			if (day==today) {
-				canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_today.bmp"), xPos-3, yPos-3, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_today.bmp"), xPos-4, yPos-4, null);
 			}
 			
 			canvas.drawText(""+day, xPos, yPos+5, paintSmallNumerals);
@@ -114,6 +110,8 @@ public class CalendarApp extends ApplicationBase {
 			if (dow==Calendar.SUNDAY) 
 				yPos += 13;
 		}
+		
+		drawDigitalAppSwitchIcon(context, canvas, preview);
 		
 		return bitmap;
 	}
