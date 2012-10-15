@@ -7,9 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.metawatch.manager.FontCache;
+import org.metawatch.manager.FontCache.FontSize;
+import org.metawatch.manager.Idle;
 import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchService.WatchType;
+import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.Monitors;
+import org.metawatch.manager.Protocol;
 import org.metawatch.manager.Utils;
 
 import android.content.Context;
@@ -20,7 +25,10 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.text.Layout;
+import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -36,6 +44,11 @@ public class CalendarApp extends ApplicationBase {
 		supportsAnalog = false;
 	}};
 	
+	public final static byte CALENDAR_FLIPVIEW = 40;
+	public final static byte CALENDAR_TODAY = 41;
+	public final static byte CALENDAR_PREV = 43;
+	public final static byte CALENDAR_NEXT = 44;
+	
 	@Override
 	public AppData getInfo() {
 		return appData;
@@ -43,10 +56,25 @@ public class CalendarApp extends ApplicationBase {
 
 	@Override
 	public void activate(Context context, int watchType) {
+		refresh(context);
+		
+		if (watchType == WatchType.DIGITAL) {
+			Protocol.enableButton(1, 1, CALENDAR_FLIPVIEW, MetaWatchService.WatchBuffers.APPLICATION); // right middle - press
+			Protocol.enableButton(2, 1, CALENDAR_TODAY, MetaWatchService.WatchBuffers.APPLICATION); // right bottom - press
+			
+			Protocol.enableButton(5, 1, CALENDAR_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left middle - press
+			Protocol.enableButton(6, 1, CALENDAR_PREV, MetaWatchService.WatchBuffers.APPLICATION); // left top - press
+		}
 	}
 
 	@Override
 	public void deactivate(Context context, int watchType) {
+		if (watchType == WatchType.DIGITAL) {
+			Protocol.disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION);
+			Protocol.disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
+			Protocol.disableButton(5, 1, MetaWatchService.WatchBuffers.APPLICATION);
+			Protocol.disableButton(6, 1, MetaWatchService.WatchBuffers.APPLICATION);
+		}
 	}
 	
 	public int getColumn(int dow)
@@ -78,7 +106,17 @@ public class CalendarApp extends ApplicationBase {
 	}
 	
 	long lastRefresh = 0;
+	private Calendar displayDate = Calendar.getInstance();
 	private List<Utils.CalendarEntry> calendarEntries = null;
+	
+	final static class ViewMode {
+		static final int MonthOverview = 0;
+		static final int Agenda = 1;
+		
+		static final int max = 2;
+	}
+	
+	private int currentView = ViewMode.MonthOverview;
 	
 	private void refresh(final Context context) {
 		Thread thread = new Thread("CalendarApp.refresh") {
@@ -95,13 +133,15 @@ public class CalendarApp extends ApplicationBase {
 				if (readCalendar) {
 					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarApp.refresh() start");
 					
-					Calendar cal = Calendar.getInstance();
+					Calendar cal = (Calendar)displayDate.clone();
 					cal.set(Calendar.DAY_OF_MONTH, 1);
 					
 					long startTime = cal.getTimeInMillis();
-					long endTime = startTime + DateUtils.DAY_IN_MILLIS * 32;
+					long endTime = startTime + DateUtils.DAY_IN_MILLIS * (31 + 10);
 					
 					calendarEntries = Utils.readCalendar(context, startTime, endTime, false);
+					
+					Idle.updateIdle(context, false);
 										
 					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarApp.refresh() stop - "+ (calendarEntries == null ? "0" : calendarEntries.size()) + " entries found");   
 				}
@@ -113,14 +153,10 @@ public class CalendarApp extends ApplicationBase {
 
 	@Override
 	public Bitmap update(Context context, boolean preview, int watchType) {
-		
-		refresh(context);
-		
+
 		Bitmap bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.RGB_565);
 		Canvas canvas = new Canvas(bitmap);
 		canvas.drawColor(Color.WHITE);	
-		
-		canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_month.png"), 0, 0, null);	
 		
 		TextPaint paintSmall = new TextPaint();
 		paintSmall.setColor(Color.WHITE);
@@ -137,69 +173,186 @@ public class CalendarApp extends ApplicationBase {
 		Paint paintBlack = new Paint();
 		paintBlack.setColor(Color.BLACK);
 		
-		Calendar cal = Calendar.getInstance();
+		Calendar calToday = Calendar.getInstance();
+		Calendar calTomorrow = Calendar.getInstance();
+		calTomorrow.add(Calendar.DAY_OF_MONTH, 1);
 		
-		SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
-		canvas.drawText(df.format(cal.getTime()), 4, 8, paintSmall);
+		Calendar cal = (Calendar)displayDate.clone();
 		
-		final int month = cal.get(Calendar.MONTH);
-		final int today = cal.get(Calendar.DAY_OF_MONTH);
-		
-		int yPos = 18;
-		
-		Map<Integer,Point> dateCells = new HashMap<Integer,Point>(); 
-		
-		final int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-		for(int day=1; day<=days; ++day) {
-			cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), day);
-					
-			final int dow = cal.get(Calendar.DAY_OF_WEEK);
-			final int xPos = getColumn(dow);
+		if (currentView == ViewMode.MonthOverview) {
+			canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_month.png"), 0, 0, null);	
 			
-			dateCells.put(cal.get(Calendar.DAY_OF_MONTH), new Point(xPos,yPos));
-		
-			if (day==today) {
-				canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_today.png"), xPos-4, yPos-4, null);
+			SimpleDateFormat df = new SimpleDateFormat("MMMM yyyy");
+			canvas.drawText(df.format(cal.getTime()), 4, 8, paintSmall);
+			
+			final int month = cal.get(Calendar.MONTH);
+			final int today = cal.get(Calendar.DAY_OF_MONTH);
+			
+			int yPos = 18;
+			
+			Map<Integer,Point> dateCells = new HashMap<Integer,Point>(); 
+			
+			final int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+			for(int day=1; day<=days; ++day) {
+				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), day);
+						
+				final int dow = cal.get(Calendar.DAY_OF_WEEK);
+				final int xPos = getColumn(dow);
+				
+				dateCells.put(cal.get(Calendar.DAY_OF_MONTH), new Point(xPos,yPos));
+			
+				if (Utils.isSameDate(cal, calToday)) {
+					canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_today.png"), xPos-4, yPos-4, null);
+				}
+				
+				canvas.drawText(""+day, xPos, yPos+5, paintSmallNumerals);
+				
+				if (dow==Calendar.SUNDAY)
+					yPos += 13;
 			}
 			
-			canvas.drawText(""+day, xPos, yPos+5, paintSmallNumerals);
-			
-			if (dow==Calendar.SUNDAY)
-				yPos += 13;
-		}
-		
-		if (calendarEntries!=null) {
-			
-			for (Utils.CalendarEntry entry : calendarEntries) {
-				cal.setTimeInMillis(entry.startTimestamp);
+			if (calendarEntries!=null) {
 				
-				if( cal.get(Calendar.MONTH) == month ) {
-					final int dom = cal.get(Calendar.DAY_OF_MONTH);
-					final Point cellLoc = dateCells.get(dom);
+				for (Utils.CalendarEntry entry : calendarEntries) {
+					cal.setTimeInMillis(entry.startTimestamp);
 					
-					if(entry.isAllDay) {
-						canvas.drawLine( cellLoc.x-1, cellLoc.y+6, cellLoc.x+9, cellLoc.y+6, paintBlack);
-					}
-					else {
-						// Each horizontal pixel represents 2 hours, giving a span of 7am to 11pm
-						final int hour = cal.get(Calendar.HOUR_OF_DAY);						
-						int xStart = java.lang.Math.max(0, (hour - 7)/2 );
-						int xEnd = java.lang.Math.min(8, xStart + (int)((entry.endTimestamp - entry.startTimestamp) / DateUtils.HOUR_IN_MILLIS * 2 ) );
+					if( cal.get(Calendar.MONTH) == month ) {
+						final int dom = cal.get(Calendar.DAY_OF_MONTH);
+						final Point cellLoc = dateCells.get(dom);
 						
-						if( xEnd > xStart )
-							canvas.drawRect( new Rect( cellLoc.x+xStart, cellLoc.y+6, cellLoc.x+xEnd, cellLoc.y+9 ), paintBlack);
+						if(entry.isAllDay) {
+							canvas.drawLine( cellLoc.x-1, cellLoc.y+6, cellLoc.x+9, cellLoc.y+6, paintBlack);
+						}
+						else {
+							// Each horizontal pixel represents 2 hours, giving a span of 7am to 11pm
+							final int hour = cal.get(Calendar.HOUR_OF_DAY);						
+							int xStart = java.lang.Math.max(0, (hour - 7)/2 );
+							int xEnd = java.lang.Math.min(8, xStart + (int)((entry.endTimestamp - entry.startTimestamp) / DateUtils.HOUR_IN_MILLIS * 2 ) );
+							
+							if( xEnd > xStart )
+								canvas.drawRect( new Rect( cellLoc.x+xStart, cellLoc.y+6, cellLoc.x+xEnd, cellLoc.y+9 ), paintBlack);
+						}
 					}
 				}
 			}
+		} else if (currentView == ViewMode.Agenda) {
+			canvas.drawBitmap(Utils.getBitmap(context, "calendar_app_agenda.png"), 0, 0, null);	
+			
+			canvas.drawText(DateFormat.getDateFormat(context).format(cal.getTimeInMillis()), 4, 8, paintSmall);
+			
+			int yPos = 11;
+			
+			Calendar lastDate = Calendar.getInstance();
+			lastDate.setTimeInMillis(0);
+
+			if (calendarEntries!=null) {
+				
+				for (Utils.CalendarEntry entry : calendarEntries) {
+					
+					if (entry.isOngoing() || entry.isFuture(displayDate) )
+					{
+						Calendar date = Calendar.getInstance();
+						date.setTimeInMillis(entry.startTimestamp);
+					
+						if (!Utils.isSameDate(date, lastDate)) {		
+							String dateHeader = "";
+							if (Utils.isSameDate(date, calToday)) {
+								dateHeader = "TODAY";
+							} else if (Utils.isSameDate(date, calTomorrow)) {
+								dateHeader = "TOMORROW";
+							} else {
+								dateHeader = DateFormat.getDateFormat(context).format(entry.startTimestamp);
+							}
+							
+							StaticLayout layout = Utils.buildText(context, dateHeader, 88, Layout.Alignment.ALIGN_NORMAL, Color.BLACK, FontSize.SMALL);
+
+							canvas.save();
+							canvas.clipRect(new Rect(4,11,92,92));
+							canvas.translate(4, yPos);
+							layout.draw(canvas);
+							canvas.restore();
+							yPos += layout.getHeight()+1;
+							
+						}
+						
+						
+						lastDate = date;
+						
+						StringBuilder builder = new StringBuilder();
+						
+						if (!entry.isAllDay) {
+							builder.append(DateFormat.getTimeFormat(context).format(entry.startTimestamp));
+							builder.append(": ");
+						}
+						
+						builder.append(entry.title);
+					
+						if (entry.isAllDay) {
+							builder.append(" (All day)");
+						}
+					
+						StaticLayout layout = Utils.buildText(context, builder.toString(), 84, Layout.Alignment.ALIGN_NORMAL, Color.BLACK, FontSize.SMALL);
+
+						canvas.save();
+						canvas.clipRect(new Rect(8,11,92,92));
+						canvas.translate(8, yPos);
+						layout.draw(canvas);
+						canvas.restore();
+						yPos += layout.getHeight()+1;
+						
+						if( yPos > 92 )
+							break;
+					}
+					
+				}
+			}			
+		}
+		
+		if (calendarEntries==null) {
+			canvas.drawBitmap(Utils.getBitmap(context, "busy.png"), 0, 80, null);	
 		}
 		
 		drawDigitalAppSwitchIcon(context, canvas, preview);
 		
 		return bitmap;
 	}
+	
+	private void setDate(Context context, Calendar cal) {
+		if (Utils.isDifferentMonth(cal, displayDate)) {
+			lastRefresh = 0;
+			calendarEntries = null;
+		}
+		displayDate = cal;
+		if (calendarEntries==null)
+			refresh(context);
+	}
+	
+	private void advance(Context context, int amount) {
+		Calendar newDate = (Calendar)displayDate.clone();
+		newDate.add(currentView==ViewMode.MonthOverview ? Calendar.MONTH : Calendar.DAY_OF_MONTH, amount);
+		setDate(context, newDate);
+	}
 
 	@Override
 	public int buttonPressed(Context context, int id) {
+		
+		switch (id) {
+		case CALENDAR_FLIPVIEW:
+			currentView = (currentView+1) % ViewMode.max;
+			return BUTTON_USED;
+			
+		case CALENDAR_TODAY:
+			setDate(context, Calendar.getInstance());
+			return BUTTON_USED;
+				
+		case CALENDAR_PREV:
+			advance(context, -1);
+			return BUTTON_USED;
+			
+		case CALENDAR_NEXT:
+			advance(context, 1);
+			return BUTTON_USED;
+		}
 		return BUTTON_NOT_USED;
 	}
 
