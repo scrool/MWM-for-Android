@@ -99,12 +99,12 @@ public abstract class ApplicationBase {
 			paintSmall.setTypeface(FontCache.instance(context).SmallNumerals.face);
 			paintSmall.setTextAlign(Align.RIGHT);
 			  
-			int w = (int)paintSmall.measureText(time);
+			int w = (int)paintSmall.measureText(time)+1;
 			
 			canvas.drawRect(new Rect(93-w,0,96,9), paint2);
 			canvas.drawRect(new Rect(94-w,0,96,8), paint1);
 			canvas.drawRect(new Rect(95-w,0,96,7), paint2);
-			canvas.drawText(time, 96, 6, paintSmall);
+			canvas.drawText(time, 95, 6, paintSmall);
 			
 			if (!preview)
 				Utils.setAppClockRefreshAlarm(context);
