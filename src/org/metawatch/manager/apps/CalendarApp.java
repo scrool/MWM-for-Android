@@ -186,8 +186,7 @@ public class CalendarApp extends ApplicationBase {
 			canvas.drawText(df.format(cal.getTime()), 4, 8, paintSmall);
 			
 			final int month = cal.get(Calendar.MONTH);
-			final int today = cal.get(Calendar.DAY_OF_MONTH);
-			
+
 			int yPos = 18;
 			
 			Map<Integer,Point> dateCells = new HashMap<Integer,Point>(); 
