@@ -651,25 +651,27 @@ public class MetaWatchService extends Service {
 				BluetoothDevice bluetoothDevice = bluetoothAdapter
 						.getRemoteDevice(Preferences.watchMacAddress);
 			
+				int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+				
 				if (Preferences.skipSDP) {
-					Method method = bluetoothDevice.getClass().getMethod(
-							"createRfcommSocket", new Class[] { int.class });
-					bluetoothSocket = (BluetoothSocket) method.invoke(
-							bluetoothDevice, 1);
+				    Method method;
+				    if (Preferences.insecureBtSocket && currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD_MR1) {
+				    	method = bluetoothDevice.getClass().getMethod("createInsecureRfcommSocket", new Class[] { int.class });
+				    } else {
+				    	method = bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
+				    }
+				    bluetoothSocket = (BluetoothSocket) method.invoke(bluetoothDevice, 1);
 				} else {
 					UUID uuid = UUID
 							.fromString("00001101-0000-1000-8000-00805F9B34FB");
-					
-					int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-					
+										
 					if (Preferences.insecureBtSocket && currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD_MR1) {
 						bluetoothSocket = bluetoothDevice
 								.createInsecureRfcommSocketToServiceRecord(uuid);
 					} else {
 						bluetoothSocket = bluetoothDevice
 								.createRfcommSocketToServiceRecord(uuid);
-					}
-					
+					}				
 				}
 
 				bluetoothAdapter.cancelDiscovery();
