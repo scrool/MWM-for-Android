@@ -109,13 +109,12 @@ public class Utils {
 		public long startTimestamp = 0;
 		public boolean isAllDay = false;
 		
-		public boolean isOngoing() {
-			final long now = System.currentTimeMillis();
-			return startTimestamp < now && now < (endTimestamp-Preferences.readCalendarMinDurationToMeetingEnd*60*1000);
+		public boolean isOngoing(final long timestampNow) {
+			return startTimestamp < timestampNow && timestampNow < (endTimestamp-Preferences.readCalendarMinDurationToMeetingEnd*60*1000);
 		}
 		
-		public boolean isFuture(Calendar date) {
-			return date.getTimeInMillis() < endTimestamp;
+		public boolean isFuture(final long timestampNow) {
+			return timestampNow < endTimestamp;
 		}
 		
 		public String displayTime() {
@@ -123,7 +122,7 @@ public class Utils {
 			{
 				return "None";
 			}
-			else if( isOngoing() && Preferences.readCalendarDuringMeeting ) {
+			else if( isOngoing(System.currentTimeMillis()) && Preferences.readCalendarDuringMeeting ) {
 				final long now = System.currentTimeMillis();
 				return String.valueOf(endTimestamp-(Preferences.readCalendarMinDurationToMeetingEnd+1)*60*1000-now);
 			}

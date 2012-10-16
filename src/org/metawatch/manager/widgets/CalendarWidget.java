@@ -107,7 +107,7 @@ public class CalendarWidget implements InternalWidget {
 				}
 				if (!Preferences.readCalendarDuringMeeting) {
 					// Only update the current meeting if it is not ongoing
-					if (calendarEntry!=null && calendarEntry.isOngoing()) {
+					if (calendarEntry!=null && calendarEntry.isOngoing(System.currentTimeMillis())) {
 						readCalendar = false;
 					}
 				}

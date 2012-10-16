@@ -248,7 +248,7 @@ public class CalendarApp extends ApplicationBase {
 				
 				for (Utils.CalendarEntry entry : calendarEntries) {
 					
-					if (entry.isOngoing() || entry.isFuture(displayDate) )
+					if (entry.isOngoing(displayDate.getTimeInMillis()) || entry.isFuture(displayDate.getTimeInMillis()) )
 					{
 						Calendar date = Calendar.getInstance();
 						date.setTimeInMillis(entry.startTimestamp);
