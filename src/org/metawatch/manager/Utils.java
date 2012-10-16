@@ -46,7 +46,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -101,7 +103,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class Utils {
-
+	
 	public static class CalendarEntry {
 		public String title = "---";
 		public String location = "---";
@@ -319,23 +321,37 @@ public class Utils {
 		return missed;
 	}
 	
-	// This block of code gets calendar names - will be useful!
-	//	ContentResolver cr = context.getContentResolver();
-	//	Cursor cursor = ch.add( cr.query(Uri.parse("content://com.android.calendar/calendars"), new String[]{ "_id","name"}, null, null, null) );
-	//	cursor.moveToFirst();
-	//	String[] CalNames = new String[cursor.getCount()];
-	//	int[] CalIds = new int[cursor.getCount()];
-	//	for (int i = 0; i < CalNames.length; i++) {
-	//		CalIds[i] = cursor.getInt(0);
-	//		CalNames[i] = cursor.getString(1);
-	//		cursor.moveToNext();
-	//  }
+	public static Map<String, Integer> getCalendars(Context context) {
+	
+		CursorHandler ch = new CursorHandler();
+		
+		try {
+			Map<String, Integer> map = new HashMap<String, Integer>();
+			
+			ContentResolver cr = context.getContentResolver();
+			Cursor cursor = ch.add( cr.query(Uri.parse("content://com.android.calendar/calendars"), new String[]{ "_id","name"}, null, null, null) );
+			cursor.moveToFirst();
+			for (int i = 0; i < cursor.getCount(); i++) {
+				map.put(cursor.getString(1), cursor.getInt(0));
+				cursor.moveToNext();
+			}
+			return map;
+		} finally {
+			ch.closeAll();
+		}
+	}
 	
 	public static List<CalendarEntry> readCalendar(Context context, long startTime, long endTime, boolean singleEvent) {
 		
 		List<CalendarEntry> entries = new ArrayList<CalendarEntry>();
 		
 		CursorHandler ch = new CursorHandler();
+		
+//		Map<String, Integer> calNames = getCalendars(context);
+//		for(String name : calNames.keySet())
+//		{
+//			Log.d(MetaWatch.TAG, "Calendar "+name+" id: "+calNames.get(name));
+//		}
 		
 		try {
 			ContentResolver cr = context.getContentResolver();
@@ -345,7 +361,6 @@ public class Utils {
 			ContentUris.appendId(builder, endTime );	        
 			Cursor eventCursor = ch.add(cr.query(builder.build(),
 					new String[] { "event_id", "begin", "end", "allDay"}, null, null, "startDay ASC, startMinute ASC"));
-			// For a full list of available columns see http://tinyurl.com/yfbg76w
 
 			while (eventCursor.moveToNext()) {
 				boolean isAllDay = !eventCursor.getString(3).equals("0");

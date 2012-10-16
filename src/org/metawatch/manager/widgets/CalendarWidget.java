@@ -135,9 +135,7 @@ public class CalendarWidget implements InternalWidget {
 						AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 						am.set(AlarmManager.RTC_WAKEUP, calendarEntry.endTimestamp, sender);						
 					}
-					
-					
-					
+										
 					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarWidget.refresh() stop");   
 				}
 				
