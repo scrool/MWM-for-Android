@@ -68,7 +68,7 @@ public class Idle {
 	private static boolean busy = false;
 	private static Object busyObj = new Object();
 	
-	private static boolean isBusy() {
+	public static boolean isBusy() {
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.isBusy()");
 		synchronized (busyObj) {
 			if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.busy="+busy);
