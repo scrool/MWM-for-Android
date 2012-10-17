@@ -341,6 +341,8 @@ public class CalendarApp extends ApplicationBase {
 			return BUTTON_USED;
 			
 		case CALENDAR_TODAY:
+			lastRefresh = 0;
+			calendarEntries = null;
 			setDate(context, Calendar.getInstance());
 			return BUTTON_USED;
 				
