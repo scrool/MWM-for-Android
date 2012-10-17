@@ -20,6 +20,7 @@ import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.Monitors.LocationData;
+import org.metawatch.manager.Utils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -233,9 +234,9 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 						+ rp.getStatusLine());
 			}
 		} catch (SAXException e) {
-			throw new IOException(e);
+			throw Utils.createCompatibleIOException(e);
 		} catch (ParserConfigurationException e) {
-			throw new IOException(e);
+			throw Utils.createCompatibleIOException(e);
 		}
 	}
 
@@ -304,9 +305,9 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 						+ rp.getStatusLine());
 			}
 		} catch (SAXException e) {
-			throw new IOException(e);
+			throw Utils.createCompatibleIOException(e);
 		} catch (ParserConfigurationException e) {
-			throw new IOException(e);
+			throw Utils.createCompatibleIOException(e);
 		}
 
 	}

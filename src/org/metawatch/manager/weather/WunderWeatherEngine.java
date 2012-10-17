@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.metawatch.manager.Idle;
 import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
+import org.metawatch.manager.Utils;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.Monitors.LocationData;
@@ -255,7 +256,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		} catch (Exception e) {
 			if (Preferences.logging)
 				Log.e(MetaWatch.TAG, "Error in http connection " + e.toString());
-			throw new IOException(e);
+			throw Utils.createCompatibleIOException(e);
 		}
 
 		// convert response to string
@@ -299,7 +300,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 			} catch (JSONException e) {
 				if (Preferences.logging)
 					Log.e(MetaWatch.TAG, "Error parsing data " + e.toString());
-				throw new IOException(e);
+				throw Utils.createCompatibleIOException(e);
 			}
 		}
 		return jArray;

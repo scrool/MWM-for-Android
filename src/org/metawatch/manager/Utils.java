@@ -1033,4 +1033,13 @@ public class Utils {
                 cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH));
     }
     
+    public static IOException createCompatibleIOException( Throwable cause ) {
+		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+		if (currentapiVersion > android.os.Build.VERSION_CODES.FROYO) {
+			return new IOException( cause );
+		} else {
+			return new IOException( cause.toString() );
+		}
+    }
+    
 }
