@@ -55,13 +55,19 @@ public class ImageViewer extends Activity {
         Intent i = getIntent();
         String action = i.getAction();
         Uri u = null;
+        
+        if (action==null) {
+        	if (Preferences.logging) Log.e(MetaWatch.TAG, "ImageViewer.onCreate() null action");
+        	finish();
+        	return;
+        }
 
         if (action.equals(Intent.ACTION_VIEW)) {
         	u = i.getData();
         } else if (action.equals(Intent.ACTION_SEND)) {
         	u = i.getParcelableExtra(Intent.EXTRA_STREAM);
         } else {
-        	if (Preferences.logging) Log.e(MetaWatch.TAG, "Unknown intent: " + action);
+        	if (Preferences.logging) Log.e(MetaWatch.TAG, "ImageViewer.onCreate() Unknown intent: " + action);
         	finish();
         	return;
         }
