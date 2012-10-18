@@ -115,7 +115,7 @@ public class CalendarWidget implements InternalWidget {
 					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarWidget.refresh() start");
 					
 					long startTime = System.currentTimeMillis();
-					long endTime = startTime + DateUtils.DAY_IN_MILLIS;
+					long endTime = startTime + DateUtils.HOUR_IN_MILLIS * Preferences.calendarLookahead;
 					
 					if (!Preferences.readCalendarDuringMeeting) {
 						startTime -= DateUtils.MINUTE_IN_MILLIS; // to have some safety margin in case the meeting is just starting

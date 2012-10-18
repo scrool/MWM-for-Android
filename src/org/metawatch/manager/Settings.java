@@ -32,6 +32,8 @@
 
 package org.metawatch.manager;
 
+import java.util.Map;
+
 import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.apps.AppManager;
@@ -42,13 +44,14 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
-import android.preference.PreferenceCategory;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.util.Log;
 
 public class Settings extends PreferenceActivity {
@@ -157,6 +160,29 @@ public class Settings extends PreferenceActivity {
 			
 			appGroup.addPreference(test);		
 		}
+		
+		
+		ListPreferenceMultiSelect calendars = (ListPreferenceMultiSelect) findPreference("DisplayCalendars");
+		final Map<String, Integer> calData = Utils.getCalendars(this);
+		
+    	Resources res = getResources();
+		
+		CharSequence[] entriesArray = new CharSequence[calData.size()+1];
+		CharSequence[] entryValuesArray = new CharSequence[calData.size()+1];
+		
+		entriesArray[0] = res.getString(R.string.settings_calendar_all);
+		entryValuesArray[0] = "#ALL#";
+		
+		int i=1;
+		for(String name : calData.keySet())
+		{
+			entriesArray[i] = name;
+			entryValuesArray[i] = calData.get(name).toString();
+			i++;
+		}
+			
+		calendars.setEntries(entriesArray);
+		calendars.setEntryValues(entryValuesArray);
 		
 		super.onResume();
 	}

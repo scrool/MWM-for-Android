@@ -347,11 +347,7 @@ public class Utils {
 		
 		CursorHandler ch = new CursorHandler();
 		
-//		Map<String, Integer> calNames = getCalendars(context);
-//		for(String name : calNames.keySet())
-//		{
-//			Log.d(MetaWatch.TAG, "Calendar "+name+" id: "+calNames.get(name));
-//		}
+		if (Preferences.logging) Log.d(MetaWatch.TAG, "Calendars to display: "+ ((Preferences.displayCalendars.trim().isEmpty() || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars ) );
 		
 		try {
 			ContentResolver cr = context.getContentResolver();
@@ -371,7 +367,7 @@ public class Utils {
 				entry.isAllDay = isAllDay;
 				String uid2 = eventCursor.getString(0);	
 				Uri CALENDAR_URI = Uri.parse("content://com.android.calendar/events/" + uid2);
-				final String selection = Preferences.displayCalendars.trim().isEmpty() ? null : "calendar_id IN (" + Preferences.displayCalendars + ")";
+				final String selection = ( Preferences.displayCalendars.trim().isEmpty() || Preferences.displayCalendars.contains("#ALL#")) ? null : "calendar_id IN (" + Preferences.displayCalendars + ")";
 				Cursor c = ch.add(cr.query(CALENDAR_URI, new String[] { "title", "eventLocation", "description",}, selection, null, null)); 
 				if (c.moveToFirst())
 				{	

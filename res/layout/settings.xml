@@ -383,7 +383,20 @@
 		    />
 
 	</PreferenceScreen>	
+
+	<PreferenceScreen
+	    android:title="@string/settings_calendar_screen"
+	    >
+	    
+		<org.metawatch.manager.ListPreferenceMultiSelect android:defaultValue="#ALL#"
+		    android:key="DisplayCalendars"
+		    android:title="@string/settings_calendars_to_show" android:dialogTitle="@string/settings_calendars_to_show"
+		    android:summary="@string/settings_calendars_to_show_desc"
+		    android:entries="@array/settings_calendar_names"
+		    android:entryValues="@array/settings_calendar_values"/>
 	
+	</PreferenceScreen>
+		
 	<PreferenceScreen
 	    android:title="@string/settings_watch_widgets"
 	    >
@@ -471,6 +484,15 @@
 		<PreferenceScreen
 		    android:title="@string/settings_calendar_widgets"
 		    >	    
+		    
+		    <EditTextPreference
+				android:title="@string/settings_calendar_lookahead" android:dialogTitle="@string/settings_calendar_lookahead"
+				android:key="CalendarLookahead"
+				android:summary="@string/settings_calendar_lookahead_desc"
+				android:inputType="number"
+				android:defaultValue="24"
+				/>
+			    
 			<CheckBoxPreference
 				android:title="@string/settings_Read_calendar_during_meeting"
 				android:key="ReadCalendarDuringMeeting"
@@ -536,6 +558,7 @@
 		</PreferenceCategory>
 	    			    
 	</PreferenceScreen>
+
 	
 	<Preference
 		android:title="@string/settings_choose_theme"

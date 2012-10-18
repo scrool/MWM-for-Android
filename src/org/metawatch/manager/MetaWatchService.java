@@ -232,6 +232,7 @@ public class MetaWatchService extends Service {
 		public static boolean alignWidgetRowToBottom = false;
 		public static boolean displayWidgetIconOnTop = true;
 		public static String displayCalendars = "";
+		public static int calendarLookahead = 24;
 	}
 
 	public final class WatchType {
@@ -272,6 +273,11 @@ public class MetaWatchService extends Service {
 					Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
 					Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.IDLE);
 				}
+			}
+			
+			if (key.contains("Calendar")) {
+				Monitors.calendarChangedTimestamp = System.currentTimeMillis();
+				Idle.updateIdle(context, true);
 			}
 		}
 	};
@@ -381,7 +387,9 @@ public class MetaWatchService extends Service {
 				Preferences.alignWidgetRowToBottom);
 		Preferences.displayWidgetIconOnTop = sharedPreferences.getBoolean("DisplayWidgetIconOnTop", 
 				Preferences.displayWidgetIconOnTop);
-
+		Preferences.displayCalendars = sharedPreferences.getString("DisplayCalendars", 
+				Preferences.displayCalendars);
+		
 		
 		boolean silent = sharedPreferences.getBoolean("SilentMode", silentMode );
 		if (silent!=silentMode)
@@ -398,6 +406,10 @@ public class MetaWatchService extends Service {
 							Integer.toString(Preferences.smsLoopInterval)));
 			Preferences.appLaunchMode = Integer.valueOf(sharedPreferences.getString(
 					"AppLaunchMode", Integer.toString(Preferences.appLaunchMode)));
+			Preferences.calendarLookahead = Integer.valueOf(sharedPreferences
+					.getString("CalendarLookahead", 
+							Integer.toString(Preferences.calendarLookahead)));
+			
 			
 		} catch (NumberFormatException e) {
 		}
