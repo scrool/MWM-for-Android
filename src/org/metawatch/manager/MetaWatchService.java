@@ -231,6 +231,7 @@ public class MetaWatchService extends Service {
 		public static boolean showTestWidgets = false;
 		public static boolean alignWidgetRowToBottom = false;
 		public static boolean displayWidgetIconOnTop = true;
+		public static String displayCalendars = "";
 	}
 
 	public final class WatchType {

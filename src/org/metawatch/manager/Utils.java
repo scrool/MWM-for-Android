@@ -371,20 +371,21 @@ public class Utils {
 				entry.isAllDay = isAllDay;
 				String uid2 = eventCursor.getString(0);	
 				Uri CALENDAR_URI = Uri.parse("content://com.android.calendar/events/" + uid2);
-				Cursor c = ch.add(cr.query(CALENDAR_URI,new String[] { "title", "eventLocation", "description",}, null, null, null)); 
+				final String selection = Preferences.displayCalendars.trim().isEmpty() ? null : "calendar_id IN (" + Preferences.displayCalendars + ")";
+				Cursor c = ch.add(cr.query(CALENDAR_URI, new String[] { "title", "eventLocation", "description",}, selection, null, null)); 
 				if (c.moveToFirst())
 				{	
 					entry.title = c.getString(c.getColumnIndex("title"));
 					entry.location = c.getString(c.getColumnIndex("eventLocation"));    
+				
+					entry.startTimestamp = eventCursor.getLong(1);
+					entry.endTimestamp = eventCursor.getLong(2);
+					
+					entries.add(entry);
+	
+					if (singleEvent)
+						return entries;
 				}
-				
-				entry.startTimestamp = eventCursor.getLong(1);
-				entry.endTimestamp = eventCursor.getLong(2);
-				
-				entries.add(entry);
-
-				if (singleEvent)
-					return entries;
 			}   
 		}
 		catch(Exception x) {
