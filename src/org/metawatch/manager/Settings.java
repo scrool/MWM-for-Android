@@ -56,6 +56,10 @@ import android.util.Log;
 
 public class Settings extends PreferenceActivity {
 
+	static CharSequence[] entriesArray;
+	static CharSequence[] entryValuesArray;
+
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -161,32 +165,31 @@ public class Settings extends PreferenceActivity {
 			appGroup.addPreference(test);		
 		}
 		
-		
 		ListPreferenceMultiSelect calendars = (ListPreferenceMultiSelect) findPreference("DisplayCalendars");
-		final Map<String, Integer> calData = Utils.getCalendars(this);
-		
-    	Resources res = getResources();
-		
-		CharSequence[] entriesArray = new CharSequence[calData.size()+1];
-		CharSequence[] entryValuesArray = new CharSequence[calData.size()+1];
-		
-		entriesArray[0] = res.getString(R.string.settings_calendar_all);
-		entryValuesArray[0] = "#ALL#";
-		
-		int i=1;
-		for(String name : calData.keySet())
-		{
-			entriesArray[i] = name;
-			entryValuesArray[i] = calData.get(name).toString();
-			i++;
-		}
+		if (calendars != null) {
+			final Map<String, Integer> calData = Utils.getCalendars(this);
 			
-		calendars.setEntries(entriesArray);
-		calendars.setEntryValues(entryValuesArray);
+	    	Resources res = getResources();
+			
+			entriesArray = new CharSequence[calData.size()+1];
+			entryValuesArray = new CharSequence[calData.size()+1];
+			
+			entriesArray[0] = res.getString(R.string.settings_calendar_all);
+			entryValuesArray[0] = "#ALL#";
+			
+			int i=1;
+			for(String name : calData.keySet())
+			{
+				entriesArray[i] = name == null ? "" : name;
+				entryValuesArray[i] = calData.get(name).toString();
+				i++;
+			}
+				
+			calendars.setEntries(entriesArray);
+			calendars.setEntryValues(entryValuesArray);
+		}
 		
 		super.onResume();
 	}
 	
-	
-
 }
