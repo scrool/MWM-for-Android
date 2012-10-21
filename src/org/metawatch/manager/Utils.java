@@ -347,7 +347,7 @@ public class Utils {
 		
 		CursorHandler ch = new CursorHandler();
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Calendars to display: "+ ((Utils.stringIsEmpty(Preferences.displayCalendars)) || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars ) );
+		if (Preferences.logging) Log.d(MetaWatch.TAG, "Calendars to display: "+ ((Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars ) );
 		
 		try {
 			ContentResolver cr = context.getContentResolver();
