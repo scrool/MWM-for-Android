@@ -210,6 +210,7 @@ public class MetaWatchStatus extends Activity {
     }
 
 	private static void setButtonState(Context context) {
-		toggleButton.setChecked(MetaWatchService.isRunning());
+		if (toggleButton!=null)
+			toggleButton.setChecked(MetaWatchService.isRunning());
 	}
 }
