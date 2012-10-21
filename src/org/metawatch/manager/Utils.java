@@ -347,7 +347,7 @@ public class Utils {
 		
 		CursorHandler ch = new CursorHandler();
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Calendars to display: "+ ((Preferences.displayCalendars.trim().isEmpty() || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars ) );
+		if (Preferences.logging) Log.d(MetaWatch.TAG, "Calendars to display: "+ ((Utils.stringIsEmpty(Preferences.displayCalendars)) || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars ) );
 		
 		try {
 			ContentResolver cr = context.getContentResolver();
@@ -367,7 +367,7 @@ public class Utils {
 				entry.isAllDay = isAllDay;
 				String uid2 = eventCursor.getString(0);	
 				Uri CALENDAR_URI = Uri.parse("content://com.android.calendar/events/" + uid2);
-				final String selection = ( Preferences.displayCalendars.trim().isEmpty() || Preferences.displayCalendars.contains("#ALL#")) ? null : "calendar_id IN (" + Preferences.displayCalendars + ")";
+				final String selection = ( Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? null : "calendar_id IN (" + Preferences.displayCalendars + ")";
 				Cursor c = ch.add(cr.query(CALENDAR_URI, new String[] { "title", "eventLocation", "description",}, selection, null, null)); 
 				if (c.moveToFirst())
 				{	
@@ -997,7 +997,7 @@ public class Utils {
 		canvas.restore();	
     }
     
-    // String.isEmpty doesn't work on 2.1
+    // isEmpty doesn't work before 2.3
     public static boolean stringIsEmpty(final String string) {
     	return string.trim().equals("");
     }
