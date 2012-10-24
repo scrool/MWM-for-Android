@@ -1,6 +1,7 @@
 package org.metawatch.manager.apps;
 
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -85,7 +86,15 @@ public abstract class ApplicationBase {
 	
 	protected void drawDigitalAppSwitchIcon(Context context, Canvas canvas, boolean preview) {		
 		if (Preferences.clockOnAppScreens) {
-			String time = DateFormat.getTimeFormat(context).format(new Date());
+					
+			SimpleDateFormat df;
+					
+			if (DateFormat.is24HourFormat(context))
+				df = new SimpleDateFormat("HH:mm");
+			else
+				df = new SimpleDateFormat("h:mm");
+			
+			String time = df.format(new Date());
 			
 			Paint paint1 = new Paint();
 			paint1.setColor(Color.BLACK);
