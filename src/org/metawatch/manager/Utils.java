@@ -330,10 +330,12 @@ public class Utils {
 			
 			ContentResolver cr = context.getContentResolver();
 			Cursor cursor = ch.add( cr.query(Uri.parse("content://com.android.calendar/calendars"), new String[]{ "_id","name"}, null, null, null) );
-			cursor.moveToFirst();
-			for (int i = 0; i < cursor.getCount(); i++) {
-				map.put(cursor.getString(1), cursor.getInt(0));
-				cursor.moveToNext();
+			if (cursor !=  null) {
+				cursor.moveToFirst();
+				for (int i = 0; i < cursor.getCount(); i++) {
+					map.put(cursor.getString(1), cursor.getInt(0));
+					cursor.moveToNext();
+				}
 			}
 			return map;
 		} finally {

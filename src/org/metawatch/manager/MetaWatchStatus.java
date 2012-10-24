@@ -86,6 +86,9 @@ public class MetaWatchStatus extends Activity {
     static void displayStatus(Context context) {
     	setButtonState(context);
     	
+    	if(textView==null)
+    		return;
+    	
     	Resources res = context.getResources();
     	textView.setText(res.getString(R.string.app_name_long));
     	textView.append("\n\n");

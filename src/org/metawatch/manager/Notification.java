@@ -551,27 +551,32 @@ public class Notification {
 
 		StringBuilder builder = new StringBuilder();
 		
-		if(currentNotification!=null) {
-			builder.append(" Displaying: ");
-			builder.append(currentNotification.description);
-			builder.append("\n\n");
-		}
-		
-		if(notificationQueue.size()>0) {
-			for(NotificationType notification : notificationQueue){
-				builder.append(" * ");
-			    builder.append(notification.description);
-			    builder.append("\n");		    
+		try {
+			if(currentNotification!=null) {
+				builder.append(" Displaying: ");
+				builder.append(currentNotification.description);
+				builder.append("\n\n");
 			}
+			
+			if(notificationQueue.size()>0) {
+				for(NotificationType notification : notificationQueue){
+					builder.append(" * ");
+				    builder.append(notification.description);
+				    builder.append("\n");		    
+				}
+			}
+			
+			NotificationType lastNotification = lastNotification();
+			if(lastNotification!=null) {
+				builder.append("\n Last: ");
+				builder.append(lastNotification.description);
+				builder.append("\n");
+			}
+			return builder.toString();
 		}
-		
-		NotificationType lastNotification = lastNotification();
-		if(lastNotification!=null) {
-			builder.append("\n Last: ");
-			builder.append(lastNotification.description);
-			builder.append("\n");
+		catch (java.lang.NullPointerException e) {
 		}
-		return builder.toString();
+		return "";
 	}
 	
 	public static NotificationType lastNotification() {
