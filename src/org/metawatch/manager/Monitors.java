@@ -145,10 +145,8 @@ public class Monitors {
 			
 			try {
 				locationFinder = new LocationFinder(context);
-				
-				RefreshLocation();
-				
 				createLocationReceiver(context);
+				RefreshLocation();
 			} catch (IllegalArgumentException e) {
 				if (Preferences.logging)
 					Log.d(MetaWatch.TAG,"Failed to initialise Geolocation "+e.getMessage());
@@ -351,20 +349,22 @@ public class Monitors {
 				try {
 					Location location = (Location) intent.getExtras().get(LocationFinder.KEY_LOCATION_CHANGED);
 					
-					LocationData.latitude = location.getLatitude();
-					LocationData.longitude = location.getLongitude();
-					
-					LocationData.timeStamp = location.getTime();
-					
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "location changed "+location.toString() );
-					
-					LocationData.received = true;
-					MetaWatchService.notifyClients();
-					
-					if (!weatherData.received /*&& !WeatherData.updating*/) {
-						if (Preferences.logging) Log.d(MetaWatch.TAG, "First location - getting weather");
+					if (location != null) {
+						LocationData.latitude = location.getLatitude();
+						LocationData.longitude = location.getLongitude();
 						
-						Monitors.updateWeatherData(context);
+						LocationData.timeStamp = location.getTime();
+						
+						if (Preferences.logging) Log.d(MetaWatch.TAG, "location changed "+location.toString() );
+						
+						LocationData.received = true;
+						MetaWatchService.notifyClients();
+						
+						if (!weatherData.received /*&& !WeatherData.updating*/) {
+							if (Preferences.logging) Log.d(MetaWatch.TAG, "First location - getting weather");
+							
+							Monitors.updateWeatherData(context);
+						}
 					}
 				} catch (java.lang.NullPointerException e) {
 					if (Preferences.logging) Log.d(MetaWatch.TAG, "onLocationChanged: NullPointerException");
