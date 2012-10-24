@@ -337,6 +337,21 @@
     <string name="settings_silent_mode">Lautlos-Modus</string>
     <string name="settings_silent_mode_desc">Mute notifications, and stop updating the idle screen.  Toggle with a long press on the idle page switch button.</string>
     
+    <string name="settings_calendar_screen">Calendar</string>
+    <string name="settings_calendars_to_show">Calendars to show</string>
+    <string name="settings_calendars_to_show_desc">Specify which calendars should be shown in the calendar widgets and app.</string>
+    <string name="settings_calendar_all">All</string>
+    <string name="settings_calendar_lookahead">Calendar lookahead (hours))</string>
+    <string name="settings_calendar_lookahead_desc">How many hours ahead the calendar widgets should search</string>
+    
+  	<string-array name="settings_calendar_values"> 
+	<item>#ALL#</item>
+	</string-array>
+    
+	<string-array name="settings_calendar_names">
+	<item>All</item>  
+	</string-array>
+    
     <string name="main_service_toggle_on">Service läuft. Click zum Stoppen.</string>
     <string name="main_service_toggle_off">Service gestoppt. Click zum Starten.</string>
 

@@ -337,6 +337,21 @@
     <string name="settings_silent_mode">サイレントモード</string>
     <string name="settings_silent_mode_desc">通知振動や画面更新をしない。アイドル画面切り替えボタン(MetaWatchの右上ボタン)の長押しでモードを変更することができます。</string>
     
+    <string name="settings_calendar_screen">カレンダ</string>
+    <string name="settings_calendars_to_show">表示カレンダ</string>
+    <string name="settings_calendars_to_show_desc">カレンダウィジェットやアプリの表示対象にするカレンダの指定</string>
+    <string name="settings_calendar_all">全てのカレンダ</string>
+    <string name="settings_calendar_lookahead">カレンダの先読み(時間)</string>
+    <string name="settings_calendar_lookahead_desc">何時間先の予定をカレンダウィジェットで表示するか</string>
+    
+  	<string-array name="settings_calendar_values"> 
+	<item>#ALL#</item>
+	</string-array>
+    
+	<string-array name="settings_calendar_names">
+	<item>すべてのカレンダ</item>  
+	</string-array>
+    
     <string name="main_service_toggle_on">実行中。クリックで停止。</string>
     <string name="main_service_toggle_off">停止中。クリックで開始。</string>
 

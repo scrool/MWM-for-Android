@@ -337,6 +337,21 @@
     <string name="settings_silent_mode">Modo Silêncio</string>
     <string name="settings_silent_mode_desc">Desactivar notificações e não actualizar o ecrã idle. Active/desactive deixando o dedo no botão de troca das páginas idle.</string>
     
+    <string name="settings_calendar_screen">Calendário</string>
+    <string name="settings_calendars_to_show">Calendários visíveis</string>
+    <string name="settings_calendars_to_show_desc">Especificar quais calendários são mostrados na widget e app de calendário.</string>
+    <string name="settings_calendar_all">Todos</string>
+    <string name="settings_calendar_lookahead">Próximas horas visíveis no calendário</string>
+    <string name="settings_calendar_lookahead_desc">Tempo até ao qual as widgets de calendário procuram eventos</string>
+    
+  	<string-array name="settings_calendar_values"> 
+	<item>#ALL#</item>
+	</string-array>
+    
+	<string-array name="settings_calendar_names">
+	<item>Todos</item>  
+	</string-array>
+    
     <string name="main_service_toggle_on">Serviço em execução. Toque para parar.</string>
     <string name="main_service_toggle_off">Serviço parado. Toque para começar.</string>
 
