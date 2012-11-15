@@ -786,7 +786,8 @@ public class MetaWatchService extends Service {
                 // we are going through the list from back to front
                 // so this is safe to do inside the loop.
                 mClients.remove(i);
-            }
+            } catch (NullPointerException e) {
+                mClients.remove(i);
         }
     }
 	
