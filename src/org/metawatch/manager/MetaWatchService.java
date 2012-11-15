@@ -788,6 +788,7 @@ public class MetaWatchService extends Service {
                 mClients.remove(i);
             } catch (NullPointerException e) {
                 mClients.remove(i);
+            }
         }
     }
 	

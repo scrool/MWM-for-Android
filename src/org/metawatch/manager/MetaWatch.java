@@ -89,7 +89,7 @@ public class MetaWatch extends TabActivity {
 			String key = Utils.ReadInputStream(inputStream);
 			key=key.trim();
 			if (Preferences.logging) Log.d(MetaWatch.TAG, "BugSense enabled");
-			BugSenseHandler.setup(this, key);
+			BugSenseHandler.initAndStartSession(this, key);
 		} catch (IOException e) {
 			if (Preferences.logging) Log.d(MetaWatch.TAG, "No BugSense keyfile found");
 		}
