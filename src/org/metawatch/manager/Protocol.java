@@ -207,7 +207,7 @@ public class Protocol {
 			bytes[0] = 0x01;
 			bytes[1] = (byte) (bytes.length+2); // packet length
 			bytes[2] = eMessageType.WriteBuffer.msg; 
-			bytes[3] = (byte) bufferType; 
+			bytes[3] = (byte) (bufferType & 3); 
 
 			bytes[4] = (byte) i; // row A
 			for (int j = 0; j < 12; j++)
@@ -443,17 +443,17 @@ public class Protocol {
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.updateLcdDisplay(): bufferType="+bufferType);
 		byte[] bytes = new byte[4];
 		
-		//boolean isGen2 = false; // TODO: Get this from the watch!
-		boolean isGen2 = true;
+		boolean isGen2 = MetaWatchService.watchGen==2;
 		
 		bytes[0] = eMessageType.start;
 		bytes[1] = (byte) (bytes.length+2); // length
 		bytes[2] = eMessageType.UpdateDisplay.msg; // update display
-		if (isGen2 /*&& bufferType != MetaWatchService.WatchBuffers.IDLE*/)
+
+		if (isGen2)
 			bytes[3] = (byte) (bufferType);
 		else
 			bytes[3] = (byte) (bufferType+16); // Undocumented, but fw 3.1.0 and earlier seems to need this!
-		
+
 		enqueue(bytes);
 	}
 	

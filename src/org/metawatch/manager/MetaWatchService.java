@@ -97,6 +97,7 @@ public class MetaWatchService extends Service {
 
 	public static volatile int connectionState;
 	public static int watchType;
+	public static int watchGen = 1; // 1 for original dev watches, 2 = Strata / Frame
 	public static int watchState;
 	public static boolean fakeWatch = false; 	// Setting this to true disables all the bt comms, and just pretends its connected to a watch.  Enable by setting the MAC address to ANALOG or DIGITAL
 
@@ -709,9 +710,9 @@ public class MetaWatchService extends Service {
 			//if( Preferences.autoClockFormat )
 			//	Protocol.setTimeDateFormat(this);
 			
-			Protocol.getRealTimeClock();
+			//Protocol.getRealTimeClock();
 			Protocol.getDeviceType();
-			Protocol.configureIdleBufferSize(true, true);
+			//Protocol.configureIdleBufferSize(true, true);
 			
 			// Disable built in action for Right top immediate
 			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); 
@@ -720,7 +721,7 @@ public class MetaWatchService extends Service {
 
 			Notification.startNotificationSender(this);
 			
-			Idle.updateIdle(this, true);
+			//Idle.updateIdle(this, true);
 			
 		} catch (IOException ioexception) {
 			if (Preferences.logging) Log.d(MetaWatch.TAG, ioexception.toString());
@@ -1045,8 +1046,9 @@ public class MetaWatchService extends Service {
 																			// type
 				if (bytes[4] == 1 || bytes[4] == 4) {
 					watchType = WatchType.ANALOG;
+					watchGen = 1;
 					if (Preferences.logging) Log.d(MetaWatch.TAG,
-							"MetaWatchService.readFromDevice(): device type response; analog watch");
+							"MetaWatchService.readFromDevice(): device type response; analog watch (gen1)");
 
 					if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
 						Idle.toIdle(this);
@@ -1063,12 +1065,23 @@ public class MetaWatchService extends Service {
 					
 				} else {
 					watchType = WatchType.DIGITAL;
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
-							"MetaWatchService.readFromDevice(): device type response; digital watch");
-
+					
+					if (bytes[4] == 5 || bytes[4] == 6) {
+						watchGen = 2; 
+						if (Preferences.logging) Log.d(MetaWatch.TAG,
+								"MetaWatchService.readFromDevice(): device type response; Strata/Frame (gen2)");
+					}
+					else {
+						watchGen = 1;
+						if (Preferences.logging) Log.d(MetaWatch.TAG,
+								"MetaWatchService.readFromDevice(): device type response; digital watch (gen1)");
+					}
+					
 					Protocol.configureMode();
 					Protocol.setNvalLcdInvert(Preferences.invertLCD);
 
+					Protocol.configureIdleBufferSize(true, true);
+					
 					if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
 						Idle.toIdle(this);
 						Idle.updateIdle(this, true);
