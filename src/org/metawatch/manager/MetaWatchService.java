@@ -365,6 +365,8 @@ public class MetaWatchService extends Service {
 				Preferences.themeName);
 		Preferences.hideEmptyWidgets = sharedPreferences.getBoolean("HideEmptyWidgets",
 				Preferences.hideEmptyWidgets);
+		Preferences.inverseMediaPlayerButtons = sharedPreferences.getBoolean("InverseMediaPlayerButtons",
+				Preferences.inverseMediaPlayerButtons);
 		
 		boolean silent = sharedPreferences.getBoolean("SilentMode", silentMode );
 		if (silent!=silentMode)
