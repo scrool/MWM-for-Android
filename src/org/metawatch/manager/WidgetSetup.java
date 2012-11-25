@@ -18,6 +18,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -300,7 +301,10 @@ public class WidgetSetup extends Activity {
     }
     
     private void refreshPreview() {
-    	Idle.updateIdlePages(this, true);
+    	if (Preferences.logging) Log.d(MetaWatch.TAG, "WidgetSetup.refreshPreview() start");
+    	if (!Idle.isBusy())
+    		Idle.updateIdlePages(this, true);
+    	
     	LinearLayout ll = (LinearLayout) findViewById(R.id.idlePreviews);
     	
     	ll.removeAllViews();
@@ -347,6 +351,7 @@ public class WidgetSetup extends Activity {
 	    		ll.addView(v);
     		}
     	}
+    	if (Preferences.logging) Log.d(MetaWatch.TAG, "WidgetSetup.refreshPreview() end");
     }
     
     private void storeWidgetLayout() {

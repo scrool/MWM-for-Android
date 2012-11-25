@@ -75,7 +75,11 @@
 
     <string name="settings_Display_widget_row_separator">Lignes de séparation</string>
     <string name="settings_Display_widget_row_separator_desc">Affiche une ligne de séparation entre les lignes de widgets</string>
-
+    <string name="settings_Align_widget_row_to_bottom">La colonne de widget descend</string>
+    <string name="settings_Align_widget_row_to_bottom_desc">Aligner les widgets en bas de l\'écran</string>
+    <string name="settings_Display_widget_icon_on_top">Toujours afficher l\'icone du widget</string>
+    <string name="settings_Display_widget_icon_on_top_desc">Affiche l\'icone en haut de la ligne, avec la valeur en dessous</string>
+    
     <string name="settings_Overlay_weather_text">Texte en surimpression</string>
     <string name="settings_Overlay_weather_text_desc">Dessine le texte (temps et emplacement) au dessus de l\'icône météo</string>
 
@@ -107,6 +111,10 @@
     <string name="settings_idle_app_buffer">Horloge en mémoire</string>
     <string name="settings_idle_app_buffer_desc">Permet de garder l\'affichage de l\'horloge et des widgets à l\'écran quand la connexion avec le smartphone est perdue.</string>    
         
+    <string name="settings_apps_show_clock">Horloge visible sur l\'écran d\'applications</string>
+    <string name="settings_apps_show_clock_desc">Affiche une peite horloge sur la page d\'applications, au lieux des commandes de changement de page</string>    
+    
+    
     <string-array name="settings_font_size_name"> 
    	<item>Petit</item>
    	<item>Moyen</item>
@@ -235,6 +243,8 @@
     
     <string name="settings_hide_empty_widgets">Cacher les widgets vides</string>
     <string name="settings_hide_empty_widgets_desc">Cache tous les widgets qui affichent 0 ou n\'ont pas reçus de données.</string>
+    <string name="settings_hidden_widgets_reserve_space">Réserver la place d\'un widget caché</string>
+    <string name="settings_hidden_widgets_reserve_space_desc">Un widget caché \'réserve\' la place qu\'il occupera quand il aura quelque chose a afficher</string>
     
     <string name="settings_weather_provider">Service météo</string>
     <string name="settings_weather_provider_desc">Choisir ou désactiver la source d\'information météo</string>
@@ -292,7 +302,7 @@
     <string name="settings_watch_voltage_freq">Fréquence d\'enregistrement</string>
     
     <string name="settings_auto_connect">Connexion automatique au démarrage</string>
-    <string name="settings_auto_connect_desc">Essaie de se connecter automatiquement à la montre au démarrage de l\'application</string>
+    <string name="settings_auto_connect_desc">Restaurer le dernier état de connexion au démarrage</string>
     
     <string name="settings_notify_on_connect">Notification de connexion</string>
     <string name="settings_notify_on_connect_desc">Envoi une notification à la montre après s\'y être connecté.</string>
@@ -312,6 +322,9 @@
     <string name="settings_screenshots">Captures d\'écran</string>
     <string name="settings_screenshots_desc">Enregistre les captures d\'écran de la montre sur votre carte SD. ATTENTION, cette option peut remplir votre carte SD et ralentis l\'affichage</string>
     
+    <string name="settings_test_widgets">Montrer les widgets de test</string>
+    <string name="settings_test_widgets_desc">Montre les widget de test de la disposition. (redémarrage nécessaire)</string>
+    
     <string name="settings_backup">Sauvegarde/restauration</string>
     <string name="settings_backup_backup">Sauvegarde</string>
     <string name="settings_backup_backup_desc">Sauvegarde des réglages sur la carte SD</string>
@@ -324,6 +337,21 @@
     <string name="settings_silent_mode">Mode silencieux</string>
     <string name="settings_silent_mode_desc">Rends les notifications silencieuses, et arrête de mettre à jour les widgets. Bascule actif et inactif par une pression longue sur le bouton de changement de page.</string>
     
+    <string name="settings_calendar_screen">Calendrier</string>
+    <string name="settings_calendars_to_show">Calendriers à afficher</string>
+    <string name="settings_calendars_to_show_desc">Spécifie quel calendrier(s) doivent apparaitre dans le widget et l\'application</string>
+    <string name="settings_calendar_all">Tous</string>
+    <string name="settings_calendar_lookahead">Avancée du calendrier (en heures)</string>
+    <string name="settings_calendar_lookahead_desc">Spécifie combien d\'heures dans le futur le widget va rechercher le prochain événement.</string>
+    
+  	<string-array name="settings_calendar_values"> 
+	<item>#ALL#</item>
+	</string-array>
+    
+	<string-array name="settings_calendar_names">
+	<item>Tous</item>  
+	</string-array>
+    
     <string name="main_service_toggle_on">Le service est actif. Cliquez pour l\'arrêter.</string>
     <string name="main_service_toggle_off">Le service est inactif. Cliquez pour le démarrer.</string>
 
@@ -333,8 +361,8 @@
   	<string name="ui_tab_widgets">Widgets</string>
   	<string name="ui_tab_tests">Tests</string>
   	
-  	<string name="ui_tab_downloaded_themes">Downloaded</string>
-  	<string name="ui_tab_theme_gallery">Gallery</string>
+  	<string name="ui_tab_downloaded_themes">Téléchargé</string>
+  	<string name="ui_tab_theme_gallery">Galerie</string>
   	  
     
     <string name="device_selection_search_button">Recherche de l\'appareil</string>
@@ -374,5 +402,7 @@
 	
 	<string name="status_message_queue">Taille de la queue des messages:</string>
 	<string name="status_notification_queue">Taille de la queue des notifications:</string>
+	
+	<string name="widget_picker_title">Selectionnez un widget</string>
 	
 </resources>

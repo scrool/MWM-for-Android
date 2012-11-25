@@ -308,7 +308,7 @@ public class ActionsApp extends ApplicationBase {
 		drawDigitalAppSwitchIcon(context, canvas, preview);
 		canvas.drawBitmap(Utils.getBitmap(context, "action_down.bmp"), 87, 43, null);
 		
-		final int currentType = currentActions.get(currentSelection).getSecondaryType();
+		final int currentType = currentActions == null || currentActions.size() == 0 ? 0 : currentActions.get(currentSelection).getSecondaryType();
 		//TODO split the secodary icons to separate files and draw them in addition to the right icon.
 		if (currentType == Action.SECONDARY_RESET) {
 			canvas.drawBitmap(Utils.getBitmap(context, "action_reset_right.bmp"), 79, 87, null);

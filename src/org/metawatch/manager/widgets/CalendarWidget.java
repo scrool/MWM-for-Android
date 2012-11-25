@@ -2,6 +2,7 @@ package org.metawatch.manager.widgets;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 import org.metawatch.manager.FontCache;
@@ -10,14 +11,19 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.Monitors;
 import org.metawatch.manager.Utils;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint.Align;
+import android.graphics.Point;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 public class CalendarWidget implements InternalWidget {
@@ -49,12 +55,8 @@ public class CalendarWidget implements InternalWidget {
 	private TextPaint paintSmallNumerals;
 	private TextPaint paintNumerals;
 
-	private String meetingTime = "None";
-	private String meetingTitle = "";
-	private String meetingLocation = "";
-	private long meetingStartTimestamp = 0;
-	private long meetingEndTimestamp = 0;
-
+	private Utils.CalendarEntry calendarEntry = new Utils.CalendarEntry();
+	
 	public void init(Context context, ArrayList<CharSequence> widgetIds) {
 		this.context = context;
 
@@ -99,23 +101,41 @@ public class CalendarWidget implements InternalWidget {
 
 				boolean readCalendar = false;
 				long time = System.currentTimeMillis();
-				if ((time - lastRefresh > 5*60*1000) || (Monitors.calendarChanged)) {
+				if ((time - lastRefresh > 5 * DateUtils.MINUTE_IN_MILLIS) || (Monitors.calendarChangedTimestamp > lastRefresh)) {
 					readCalendar = true;
 					lastRefresh = System.currentTimeMillis();
 				}
 				if (!Preferences.readCalendarDuringMeeting) {
 					// Only update the current meeting if it is not ongoing
-					if ((time>=meetingStartTimestamp) && (time<meetingEndTimestamp-Preferences.readCalendarMinDurationToMeetingEnd*60*1000)) {
+					if (calendarEntry!=null && calendarEntry.isOngoing(System.currentTimeMillis())) {
 						readCalendar = false;
 					}
 				}
 				if (readCalendar) {
 					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarWidget.refresh() start");
-					meetingTime = Utils.readCalendar(context, 0);
-					meetingStartTimestamp = Utils.Meeting_StartTimestamp;
-					meetingEndTimestamp = Utils.Meeting_EndTimestamp;
-					meetingLocation = Utils.Meeting_Location != null ? Utils.Meeting_Location : "";
-					meetingTitle = Utils.Meeting_Title != null ? Utils.Meeting_Title : "";
+					
+					long startTime = System.currentTimeMillis();
+					long endTime = startTime + DateUtils.HOUR_IN_MILLIS * Preferences.calendarLookahead;
+					
+					if (!Preferences.readCalendarDuringMeeting) {
+						startTime -= DateUtils.MINUTE_IN_MILLIS; // to have some safety margin in case the meeting is just starting
+					}
+					
+					List<Utils.CalendarEntry> entries = Utils.readCalendar(context, startTime, endTime, true);
+					
+					if(entries==null || entries.size()==0) {
+						calendarEntry = new Utils.CalendarEntry();
+					}
+					else {
+						calendarEntry = entries.get(0);
+						
+						// Refresh when the next entry ends
+						Intent intent = new Intent("org.metawatch.manager.UPDATE_CALENDAR");
+						PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+						AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+						am.set(AlarmManager.RTC_WAKEUP, calendarEntry.endTimestamp, sender);						
+					}
+										
 					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarWidget.refresh() stop");   
 				}
 				
@@ -159,7 +179,7 @@ public class CalendarWidget implements InternalWidget {
 	private InternalWidget.WidgetData GenWidget(String widget_id) {
 		InternalWidget.WidgetData widget = new InternalWidget.WidgetData();
 
-		widget.priority = meetingTime.equals("None") ? 0 : 1;	
+		widget.priority = calendarEntry == null ? 0 : 1;	
 
 		String iconFile = "idle_calendar.bmp";
 		if (widget_id.equals(id_0)) {
@@ -215,92 +235,97 @@ public class CalendarWidget implements InternalWidget {
 		Canvas canvas = new Canvas(widget.bitmap);
 		canvas.drawColor(Color.WHITE);
 
+		Point iconOffset = Utils.getIconOffset(widget.height);
+		Point textOffset = Utils.getTextOffset(widget.height);
+		
+		String meetingTime = calendarEntry.displayTime();
+		
 		if (widget.height == 16 && icon != null) {
-			if (icon != null)
-				canvas.drawBitmap(icon, widget.width == 16 ? 2 : 0, 0, null);
+			canvas.drawBitmap(icon, widget.width == 16 ? 2 : 0, iconOffset.y, null);
+
 			if(meetingTime.equals("None"))
-				canvas.drawText("-", widget.width == 16 ? 8 : 6, 15, paintSmallNumerals);
+				canvas.drawText("-", widget.width == 16 ? 8 : 6, textOffset.y, paintSmallNumerals);
 			else {
 				// Strip out colon to make it fit;
 				String time = meetingTime.replace(":", "");
 
 				if (widget.width==16) {
-					canvas.drawText(time, 8, 15, paintSmallNumerals);
+					canvas.drawText(time, 8, textOffset.y, paintSmallNumerals);
 				}
 				else {
 					paintSmallNumerals.setTextAlign(Align.LEFT);
-					canvas.drawText(time, 0, 15, paintSmallNumerals);
+					canvas.drawText(time, 0, textOffset.y, paintSmallNumerals);
 					paintSmallNumerals.setTextAlign(Align.CENTER);
 				}
 			}
 		}
 		else if (widget.height == 46 && icon != null){
-			canvas.drawBitmap(icon, 11, 6, null);
+			canvas.drawBitmap(icon, 11, iconOffset.y, null);
 		
 			if ((Preferences.displayLocationInSmallCalendarWidget)&&
-					(!meetingTime.equals("None"))&&(meetingLocation!=null)&&
-					(!meetingLocation.equals("---"))&&(widget_id.equals(id_0))&&
-					(meetingLocation.length()>0)&&(meetingLocation.length()<=3)) {
-				canvas.drawText(meetingLocation, 23, 18, paintSmall);        
+					(!meetingTime.equals("None"))&&(calendarEntry.location!=null)&&
+					(!calendarEntry.location.equals("---"))&&(widget_id.equals(id_0))&&
+					(calendarEntry.location.length()>0)&&(calendarEntry.location.length()<=3)) {
+				canvas.drawText(calendarEntry.location, 23, (iconOffset.y+13), paintSmall);        
 			}
 			else 
 			{
 				Calendar c = Calendar.getInstance(); 
 				if ((Preferences.eventDateInCalendarWidget)&&
 						(!meetingTime.equals("None"))) {
-					c.setTimeInMillis(meetingStartTimestamp);
+					c.setTimeInMillis(calendarEntry.startTimestamp);
 				}
 				int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
 				if(dayOfMonth<10) {
-					canvas.drawText(""+dayOfMonth, 23, 19, paintNumerals);
+					canvas.drawText(""+dayOfMonth, 23, (iconOffset.y+13), paintNumerals);
 				}
 				else
 				{
-					canvas.drawText(""+dayOfMonth/10, 20, 19, paintNumerals);
-					canvas.drawText(""+dayOfMonth%10, 26, 19, paintNumerals);
+					canvas.drawText(""+dayOfMonth/10, 20, (iconOffset.y+13), paintNumerals);
+					canvas.drawText(""+dayOfMonth%10, 26, (iconOffset.y+13), paintNumerals);
 				}
 			}
-			canvas.drawText(meetingTime, 24, 40, paintLarge);
+			canvas.drawText(meetingTime, 24, textOffset.y, paintLarge);
 		}
-		else if (icon!=null) {
-			canvas.drawBitmap(icon, 0, 3, null);
+		else if (icon!=null){
+			canvas.drawBitmap(icon, 0, iconOffset.y, null);
 
 			if ((Preferences.displayLocationInSmallCalendarWidget)&&
-					(!meetingTime.equals("None"))&&(meetingLocation!=null)&&
-					(!meetingLocation.equals("---"))&&(widget_id.equals(id_0))&&
-					(meetingLocation.length()>0)&&(meetingLocation.length()<=3)) {
-				canvas.drawText(meetingLocation, 12, 15, paintSmall);        
+					(!meetingTime.equals("None"))&&(calendarEntry.location!=null)&&
+					(!calendarEntry.location.equals("---"))&&(widget_id.equals(id_0))&&
+					(calendarEntry.location.length()>0)&&(calendarEntry.location.length()<=3)) {
+				canvas.drawText(calendarEntry.location, 12, (iconOffset.y+13), paintSmall);        
 			}
 			else 
 			{
 				Calendar c = Calendar.getInstance(); 
 				if ((Preferences.eventDateInCalendarWidget)&&
 						(!meetingTime.equals("None"))) {
-					c.setTimeInMillis(meetingStartTimestamp);
+					c.setTimeInMillis(calendarEntry.startTimestamp);
 				}
 				int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
 				if(dayOfMonth<10) {
-					canvas.drawText(""+dayOfMonth, 12, 16, paintNumerals);
+					canvas.drawText(""+dayOfMonth, 12, (iconOffset.y+13), paintNumerals);
 				}
 				else
 				{
-					canvas.drawText(""+dayOfMonth/10, 9, 16, paintNumerals);
-					canvas.drawText(""+dayOfMonth%10, 15, 16, paintNumerals);
+					canvas.drawText(""+dayOfMonth/10, 9, (iconOffset.y+13), paintNumerals);
+					canvas.drawText(""+dayOfMonth%10, 15, (iconOffset.y+13), paintNumerals);
 				}
 			}
-			canvas.drawText(meetingTime, 12, 30, paintSmall);
+			canvas.drawText(meetingTime, 12, textOffset.y, paintSmall);
 		}
 
 		String text = "";
 		if (iconFile==null)
 			text = meetingTime;
-		if ((meetingTitle!=null)) {
+		if ((calendarEntry.title!=null)) {
 			if (text.length()>0)
 				text += " : ";
-			text += meetingTitle;
+			text += calendarEntry.title;
 		}
-		if ((meetingLocation !=null) && (meetingLocation.length()>0))
-			text += " - " + meetingLocation;
+		if ((calendarEntry.location !=null) && (calendarEntry.location.length()>0))
+			text += " - " + calendarEntry.location;
 		
 		if (widget_id.equals(id_1) || widget_id.equals(id_4) ) {
 			

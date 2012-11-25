@@ -105,9 +105,9 @@ public class NowPlayingWidget implements InternalWidget {
 		canvas.drawColor(Color.WHITE);
 		
 		Bitmap image = Utils.getBitmap(context, "idle_music.bmp");
-		canvas.drawBitmap(image, 0, 0, null);
+		canvas.drawBitmap(image, 0, 1, null);
 		
-		Utils.autoText(context, canvas, trackInfoText, 17, 0, widget.width-17, widget.height, Layout.Alignment.ALIGN_CENTER, Color.BLACK);
+		Utils.autoText(context, canvas, trackInfoText, 17, 1, widget.width-17, widget.height-2, Layout.Alignment.ALIGN_CENTER, Color.BLACK);
 		
 		return widget;
 	}

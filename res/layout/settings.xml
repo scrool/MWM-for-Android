@@ -352,7 +352,14 @@
 			android:defaultValue="false"
 			/>
 
-		<CheckBoxPreference
+	    <CheckBoxPreference
+			android:title="@string/settings_Align_widget_row_to_bottom"
+			android:key="AlignWidgetRowToBottom"
+			android:summary="@string/settings_Align_widget_row_to_bottom_desc"
+			android:defaultValue="false"
+			/>
+
+	    <CheckBoxPreference
 			android:title="@string/settings_clock_every_page"
 			android:key="ClockOnEveryPage"
 			android:summary="@string/settings_clock_every_page_desc"
@@ -367,9 +374,29 @@
 			android:defaultValue="true"
 			android:dependency="ClockOnEveryPage"
 			/>
+		
+		<CheckBoxPreference
+		    android:title="@string/settings_apps_show_clock"
+		    android:key="ClockOnAppBuffers"
+		    android:summary="@string/settings_apps_show_clock_desc"
+		    android:defaultValue="false"
+		    />
 
 	</PreferenceScreen>	
+
+	<PreferenceScreen
+	    android:title="@string/settings_calendar_screen"
+	    >
+	    
+		<org.metawatch.manager.ListPreferenceMultiSelect android:defaultValue="#ALL#"
+		    android:key="DisplayCalendars"
+		    android:title="@string/settings_calendars_to_show" android:dialogTitle="@string/settings_calendars_to_show"
+		    android:summary="@string/settings_calendars_to_show_desc"
+		    android:entries="@array/settings_calendar_names"
+		    android:entryValues="@array/settings_calendar_values"/>
 	
+	</PreferenceScreen>
+		
 	<PreferenceScreen
 	    android:title="@string/settings_watch_widgets"
 	    >
@@ -387,7 +414,21 @@
 	        android:defaultValue="false"
 			/>
 		
-		<PreferenceScreen
+	    <CheckBoxPreference
+	        android:title="@string/settings_hidden_widgets_reserve_space"
+	        android:key="HiddenWidgetsReserveSpace"
+	        android:summary="@string/settings_hidden_widgets_reserve_space_desc"
+	        android:defaultValue="false"
+			/>
+		
+	    <CheckBoxPreference
+			android:title="@string/settings_Display_widget_icon_on_top"
+			android:key="DisplayWidgetIconOnTop"
+			android:summary="@string/settings_Display_widget_icon_on_top_desc"
+			android:defaultValue="true"
+			/>
+	    
+	    <PreferenceScreen
 		    android:title="@string/settings_weather_widgets"
 		    >
 	
@@ -443,6 +484,15 @@
 		<PreferenceScreen
 		    android:title="@string/settings_calendar_widgets"
 		    >	    
+		    
+		    <EditTextPreference
+				android:title="@string/settings_calendar_lookahead" android:dialogTitle="@string/settings_calendar_lookahead"
+				android:key="CalendarLookahead"
+				android:summary="@string/settings_calendar_lookahead_desc"
+				android:inputType="number"
+				android:defaultValue="24"
+				/>
+			    
 			<CheckBoxPreference
 				android:title="@string/settings_Read_calendar_during_meeting"
 				android:key="ReadCalendarDuringMeeting"
@@ -515,6 +565,7 @@
 		</PreferenceCategory>
 	    			    
 	</PreferenceScreen>
+
 	
 	<Preference
 		android:title="@string/settings_choose_theme"
@@ -632,6 +683,13 @@
 			android:summary="@string/settings_screenshots_desc"
 			android:defaultValue="false"
 		    />			
+		    
+		<CheckBoxPreference
+		    android:title="@string/settings_test_widgets"
+		    android:key="TestWidgets"
+		    android:summary="@string/settings_test_widgets_desc"
+		    android:defaultValue="false"
+		    />
 	</PreferenceScreen>	
 	
 	<PreferenceScreen
