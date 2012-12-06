@@ -446,8 +446,11 @@ public class Protocol {
 		bytes[0] = eMessageType.start;
 		bytes[1] = (byte) (bytes.length+2); // length
 		bytes[2] = eMessageType.UpdateDisplay.msg; // update display
-		bytes[3] = (byte) (bufferType + 16);
-
+		if (bufferType == MetaWatchService.WatchBuffers.APPLICATION)
+			bytes[3] = (byte) (bufferType);
+		else
+			bytes[3] = (byte) (bufferType+16);
+		
 		enqueue(bytes);
 	}
 	

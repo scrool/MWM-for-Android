@@ -60,10 +60,13 @@ import android.util.Log;
 
 public class Idle {
 	
+	final static byte IDLE_DUMMY = 64;
+	
 	final static byte IDLE_NEXT_PAGE = 60;
 	final static byte IDLE_OLED_DISPLAY = 61;
 	final static byte QUICK_BUTTON = 62;
 	final static byte TOGGLE_SILENT = 63;
+	final static byte MEDIA_PLAYER = 64;
 	
 	private static boolean busy = false;
 	private static Object busyObj = new Object();
@@ -515,9 +518,11 @@ public class Idle {
 			sendLcdIdle(context, true);
 				
 			if (numPages()>1) {
-				Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); // Disable built in action for Right top immediate
+				//Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); // Disable built in action for Right top immediate
+				Protocol.enableButton(0, 0, IDLE_DUMMY, MetaWatchService.WatchBuffers.IDLE); // Right top immediate
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right top press
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.APPLICATION); // Right top press
+				Protocol.enableButton(5, 0, MEDIA_PLAYER, MetaWatchService.WatchBuffers.IDLE); // left middle - press
 			}
 			
 			Protocol.enableButton(0, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
