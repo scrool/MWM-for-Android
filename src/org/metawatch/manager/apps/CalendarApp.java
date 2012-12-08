@@ -62,8 +62,11 @@ public class CalendarApp extends ApplicationBase {
 			Protocol.enableButton(1, 1, CALENDAR_FLIPVIEW, MetaWatchService.WatchBuffers.APPLICATION); // right middle - press
 			Protocol.enableButton(2, 1, CALENDAR_TODAY, MetaWatchService.WatchBuffers.APPLICATION); // right bottom - press
 			
-			Protocol.enableButton(5, 1, CALENDAR_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left middle - press
-			Protocol.enableButton(6, 1, CALENDAR_PREV, MetaWatchService.WatchBuffers.APPLICATION); // left top - press
+			final int leftLower = getLeftLowerButtonCode();
+			final int leftUpper = getLeftUpperButtonCode();
+			
+			Protocol.enableButton(leftLower, 1, CALENDAR_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left bottom - press
+			Protocol.enableButton(leftUpper, 1, CALENDAR_PREV, MetaWatchService.WatchBuffers.APPLICATION); // left middle - press			
 		}
 	}
 
@@ -72,8 +75,12 @@ public class CalendarApp extends ApplicationBase {
 		if (watchType == WatchType.DIGITAL) {
 			Protocol.disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION);
 			Protocol.disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
-			Protocol.disableButton(5, 1, MetaWatchService.WatchBuffers.APPLICATION);
-			Protocol.disableButton(6, 1, MetaWatchService.WatchBuffers.APPLICATION);
+			
+			final int leftLower = getLeftLowerButtonCode();
+			final int leftUpper = getLeftUpperButtonCode();
+
+			Protocol.disableButton(leftLower, 1, MetaWatchService.WatchBuffers.APPLICATION);
+			Protocol.disableButton(leftUpper, 1, MetaWatchService.WatchBuffers.APPLICATION);
 		}
 	}
 	

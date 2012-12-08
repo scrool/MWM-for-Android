@@ -443,13 +443,11 @@ public class Protocol {
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.updateLcdDisplay(): bufferType="+bufferType);
 		byte[] bytes = new byte[4];
 		
-		boolean isGen2 = MetaWatchService.watchGen==2;
-		
 		bytes[0] = eMessageType.start;
 		bytes[1] = (byte) (bytes.length+2); // length
 		bytes[2] = eMessageType.UpdateDisplay.msg; // update display
 
-		if (isGen2)
+		if (MetaWatchService.isGen2())
 			bytes[3] = (byte) (bufferType);
 		else
 			bytes[3] = (byte) (bufferType+16); // Undocumented, but fw 3.1.0 and earlier seems to need this!

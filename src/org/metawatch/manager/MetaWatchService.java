@@ -117,6 +117,8 @@ public class MetaWatchService extends Service {
 		editor.commit();
 		
 	}
+	
+	public static boolean isGen2() { return watchGen!=1; }
 
 	final static class ConnectionState {
 		static final int DISCONNECTED = 0;

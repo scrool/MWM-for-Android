@@ -51,7 +51,13 @@ public class ExternalApp extends ApplicationBase {
 				for (int type=0; type<4; ++type) {
 					int code = 200 + ((button-1)*4) + type;
 					int actualButton = button;
-					if (actualButton>3) actualButton++;
+					if (MetaWatchService.isGen2()) {
+						if (actualButton>3) actualButton++;
+					}
+					else {
+						if (actualButton>4) actualButton++;
+					}
+							
 					Protocol.enableButton(actualButton, type, code, MetaWatchService.WatchBuffers.APPLICATION);
 				}
 			}
