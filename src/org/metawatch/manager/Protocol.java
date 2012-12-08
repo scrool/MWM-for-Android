@@ -442,14 +442,17 @@ public class Protocol {
 	public static void updateLcdDisplay(int bufferType) {
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.updateLcdDisplay(): bufferType="+bufferType);
 		byte[] bytes = new byte[4];
-
+		
+		//boolean isGen2 = false; // TODO: Get this from the watch!
+		boolean isGen2 = true;
+		
 		bytes[0] = eMessageType.start;
 		bytes[1] = (byte) (bytes.length+2); // length
 		bytes[2] = eMessageType.UpdateDisplay.msg; // update display
-		if (bufferType == MetaWatchService.WatchBuffers.APPLICATION)
+		if (isGen2 /*&& bufferType != MetaWatchService.WatchBuffers.IDLE*/)
 			bytes[3] = (byte) (bufferType);
 		else
-			bytes[3] = (byte) (bufferType+16);
+			bytes[3] = (byte) (bufferType+16); // Undocumented, but fw 3.1.0 and earlier seems to need this!
 		
 		enqueue(bytes);
 	}

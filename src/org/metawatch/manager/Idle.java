@@ -60,7 +60,7 @@ import android.util.Log;
 
 public class Idle {
 	
-	final static byte IDLE_DUMMY = 64;
+	//final static byte IDLE_DUMMY = 65;
 	
 	final static byte IDLE_NEXT_PAGE = 60;
 	final static byte IDLE_OLED_DISPLAY = 61;
@@ -188,11 +188,11 @@ public class Idle {
 		}
 		
 		public int screenMode(int watchType) {
-			if (Preferences.appBufferForClocklessPages) {
-				boolean showsClock = (pageIndex==0 || Preferences.clockOnEveryPage);
-				if (watchType == MetaWatchService.WatchType.DIGITAL && !showsClock)
-					return MetaWatchService.WatchBuffers.APPLICATION;
-			}
+		//	if (Preferences.appBufferForClocklessPages) {
+		//		boolean showsClock = (pageIndex==0 || Preferences.clockOnEveryPage);
+		//		if (watchType == MetaWatchService.WatchType.DIGITAL && !showsClock)
+		//			return MetaWatchService.WatchBuffers.APPLICATION;
+		//	}
 			
 			return MetaWatchService.WatchBuffers.IDLE;
 		}
@@ -492,7 +492,9 @@ public class Idle {
 		
 		Protocol.sendLcdBitmap(createIdle(context), mode);
 		if (mode == MetaWatchService.WatchBuffers.IDLE)
-			Protocol.configureIdleBufferSize(showClock, false);
+			Protocol.configureIdleBufferSize(showClock, true);
+		
+		if (Preferences.logging) Log.d(MetaWatch.TAG, "sendLcdIdle: Drawing idle screen on buffer "+mode);
 		Protocol.updateLcdDisplay(mode);
 		
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "sendLcdIdle end");
@@ -517,12 +519,16 @@ public class Idle {
 		if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
 			sendLcdIdle(context, true);
 				
+//			// Disable built in action for Right top immediate
+//			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); 
+//			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.APPLICATION); 
+			
 			if (numPages()>1) {
-				//Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); // Disable built in action for Right top immediate
-				Protocol.enableButton(0, 0, IDLE_DUMMY, MetaWatchService.WatchBuffers.IDLE); // Right top immediate
+// disabled until I can further debug gen2 stuff!				Protocol.enableButton(0, 0, IDLE_DUMMY, MetaWatchService.WatchBuffers.IDLE); // Right top immediate
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right top press
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.APPLICATION); // Right top press
 				Protocol.enableButton(5, 0, MEDIA_PLAYER, MetaWatchService.WatchBuffers.IDLE); // left middle - press
+			
 			}
 			
 			Protocol.enableButton(0, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
