@@ -51,7 +51,8 @@ public class ExternalApp extends ApplicationBase {
 				for (int type=0; type<4; ++type) {
 					int code = 200 + ((button-1)*4) + type;
 					int actualButton = button;
-					if (MetaWatchService.isGen2()) {
+					// Gen2 watches have LED on top left rather than bottom left button
+					if (MetaWatchService.isGen2()) {	
 						if (actualButton>3) actualButton++;
 					}
 					else {
