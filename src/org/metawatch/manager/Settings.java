@@ -223,7 +223,7 @@ public class Settings extends PreferenceActivity {
 					  "Chris Sewell<br>Geoff Willingham<br>Dobie Wollert<p>"+
 					  "<b>Translation Team</b><br>"+
 					  "Miguel Branco<br>Didi Pfeifle<br>Geurt Pieter Maassen van den Brink<br>Thierry Schork<br>"+
-					  "Kamosan Software<p>"+
+					  "Kamosan Software<p>Erisi Roberto<p>"+
 					  "<p>&copy; Copyright 2011-2012 Meta Watch Ltd.</p>" +
 					  "</center></body></html>";
 		webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null);
