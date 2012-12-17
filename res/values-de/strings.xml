@@ -352,6 +352,9 @@
 	<item>All</item>  
 	</string-array>
     
+	<string name="settings_about">About</string>
+	<string name="settings_exit">Disconnect and Exit</string>
+	
     <string name="main_service_toggle_on">Service läuft. Click zum Stoppen.</string>
     <string name="main_service_toggle_off">Service gestoppt. Click zum Starten.</string>
 

@@ -352,6 +352,9 @@
 	<item>All</item>  
 	</string-array>
     
+	<string name="settings_about">About</string>
+	<string name="settings_exit">Disconnect and Exit</string>
+	
     <string name="main_service_toggle_on">Programma loopt. Klikken om te stoppen.</string>
     <string name="main_service_toggle_off">Programma gestopt. Klikken om te starten.</string>
 
