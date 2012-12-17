@@ -56,7 +56,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Window;
-import android.webkit.WebView;
 import android.widget.TabHost;
 
 import com.bugsense.trace.BugSenseHandler;
