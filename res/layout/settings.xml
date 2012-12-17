@@ -700,7 +700,16 @@
 			android:summary="@string/settings_backup_restore_desc"
 			/>
 	</PreferenceScreen>
+	
+	<Preference
+		android:title="@string/settings_about"
+		android:key="About"
+		/>
 
+	<Preference
+		android:title="@string/settings_exit"
+		android:key="Exit"
+		/>
 	
 </PreferenceScreen>
 

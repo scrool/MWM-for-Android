@@ -55,9 +55,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.Window;
 import android.webkit.WebView;
 import android.widget.TabHost;
@@ -144,65 +141,13 @@ public class MetaWatch extends TabActivity {
     	
     	MetaWatchStatus.displayStatus(this);
     }
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.menu, menu);
-	    return true;
-	}
 	
 	@Override
 	protected void onStart() {
 		super.onStart();
 
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-	    case R.id.about:
-	    	showAbout();
-	        return true;
-	    case R.id.exit:	        
-	    	exit();
-	        return true;
-	    default:
-	        return super.onOptionsItemSelected(item);
-	    }
-	}
-        
-    void exit() {
-    	stopService(new Intent(this, MetaWatchService.class));
-    	MetaWatchService.setPreviousConnectionState(context, false);
-    	System.exit(0);
-    }
-    
-    void showAbout() {
-    	
-    	WebView webView = new WebView(this);
-		String html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>About</title></head><body><center>" + 
-						"<img src=\"banner.jpg\" width=\"100%\">" +
-						"<p>Version " + Utils.getVersion(this) + ".</p>" +
-						"<b>MetaWatch Community Team</b><br>" +
-						"Joakim Andersson<br>Chris Boyle<br>Garth Bushell<br>Prash D<br>Matthias Gruenewald<br>"+
-						"Richard Munn<br>Craig Oliver<br>Didi Pfeifle<br>Thierry Schork<br>Kyle Schroeder<br>"+
-						"Chris Sewell<br>Geoff Willingham<br>Dobie Wollert<p>"+
-						"<b>Translation Team</b><br>"+
-						"Miguel Branco<br>Didi Pfeifle<br>Geurt Pieter Maassen van den Brink<br>Thierry Schork<br>"+
-						"Kamosan Software<p>"+
-						"<p>&copy; Copyright 2011-2012 Meta Watch Ltd.</p>" +
-						"</center></body></html>";
-        webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null);
-        
-        new AlertDialog.Builder(this).setView(webView).setCancelable(true).setPositiveButton("OK", new DialogInterface.OnClickListener() {			
-			//@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		}).show();        
-    }
-    
+	}     
+      
     /**
      * Handler of incoming messages from service.
      */

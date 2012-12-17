@@ -41,8 +41,10 @@ import org.metawatch.manager.apps.ApplicationBase.AppData;
 import org.metawatch.manager.widgets.WidgetManager;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -53,6 +55,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.util.Log;
+import android.webkit.WebView;
 
 public class Settings extends PreferenceActivity {
 
@@ -136,6 +139,22 @@ public class Settings extends PreferenceActivity {
 			}
 		});
 		
+		Preference about = findPreference("About");
+		about.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			public boolean onPreferenceClick(Preference arg0) {
+				showAbout();
+				return false;
+			}
+		});
+		
+		Preference exit = findPreference("Exit");
+		exit.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			public boolean onPreferenceClick(Preference arg0) {
+				exit();
+				return false;
+			}
+		});
+		
 		// InsecureBtSocket requires API10 or higher
 		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 		if (currentapiVersion < android.os.Build.VERSION_CODES.GINGERBREAD_MR1) {
@@ -190,6 +209,37 @@ public class Settings extends PreferenceActivity {
 		}
 		
 		super.onResume();
+	}
+	
+	void showAbout() {
+	    	
+		WebView webView = new WebView(this);
+		String html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>About</title></head><body><center>" + 
+					  "<img src=\"banner.jpg\" width=\"100%\">" +
+					  "<p>Version " + Utils.getVersion(this) + ".</p>" +
+					  "<b>MetaWatch Community Team</b><br>" +
+					  "Joakim Andersson<br>Chris Boyle<br>Garth Bushell<br>Prash D<br>Matthias Gruenewald<br>"+
+					  "Richard Munn<br>Craig Oliver<br>Didi Pfeifle<br>Thierry Schork<br>Kyle Schroeder<br>"+
+					  "Chris Sewell<br>Geoff Willingham<br>Dobie Wollert<p>"+
+					  "<b>Translation Team</b><br>"+
+					  "Miguel Branco<br>Didi Pfeifle<br>Geurt Pieter Maassen van den Brink<br>Thierry Schork<br>"+
+					  "Kamosan Software<p>"+
+					  "<p>&copy; Copyright 2011-2012 Meta Watch Ltd.</p>" +
+					  "</center></body></html>";
+		webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null);
+		
+		new AlertDialog.Builder(this).setView(webView).setCancelable(true).setPositiveButton("OK", new DialogInterface.OnClickListener() {			
+			//@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		}).show();        
+	}
+	  
+	void exit() {
+		stopService(new Intent(this, MetaWatchService.class));
+		MetaWatchService.setPreviousConnectionState(this, false);
+		System.exit(0);
 	}
 	
 }
