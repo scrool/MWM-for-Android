@@ -474,6 +474,10 @@ public class Protocol {
 			bytes[3] = (byte) (bufferType+16); // Undocumented, but fw 3.1.0 and earlier seems to need this!
 
 		enqueue(bytes);
+		
+		if(MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2) {
+			changeMode(bufferType);
+		}
 	}
 	
 	public static void oledChangeMode(int bufferType) {
@@ -1038,6 +1042,18 @@ public class Protocol {
 			enqueue(bytes);
 		}
 
+	}
+	
+	public static void changeMode(int mode) {
+		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.changeMode()");
+		byte[] bytes = new byte[4];
+
+		bytes[0] = eMessageType.start;
+		bytes[1] = (byte) (bytes.length+2); // length
+		bytes[2] = eMessageType.ChangeModeMsg.msg;
+		bytes[3] = (byte) (mode+0x10);
+	
+		enqueue(bytes);
 	}
 
 	public static int getQueueLength() {
