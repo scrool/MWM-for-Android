@@ -353,7 +353,7 @@
 	</string-array>
     
 	<string name="settings_about">About</string>
-	<string name="settings_exit">Disconnect and Exit</string>
+	<string name="settings_exit">切断して終了</string>
 	
     <string name="main_service_toggle_on">実行中。クリックで停止。</string>
     <string name="main_service_toggle_off">停止中。クリックで開始。</string>

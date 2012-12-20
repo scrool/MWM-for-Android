@@ -352,8 +352,8 @@
 	<item>Tous</item>  
 	</string-array>
     
-	<string name="settings_about">About</string>
-	<string name="settings_exit">Disconnect and Exit</string>
+	<string name="settings_about">À propos</string>
+	<string name="settings_exit">Déconnecter et quitter</string>
 	
     <string name="main_service_toggle_on">Le service est actif. Cliquez pour l\'arrêter.</string>
     <string name="main_service_toggle_off">Le service est inactif. Cliquez pour le démarrer.</string>

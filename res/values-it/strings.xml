@@ -20,7 +20,7 @@
 	<string name="settings_TD_Vibrate_Pattern">Vibrazione TouchDown</string>
 	<string name="settings_Alarm">Allarme</string>
 	<string name="settings_Alarm_desc">Allarme sveglia</string>
-	<string name="settings_Alarm_Vibrate_Pattern">Alarm Vibrate Pattern</string>
+	<string name="settings_Alarm_Vibrate_Pattern">Vibrazione Allarme</string>
 	<string name="settings_Music">Musica</string>
 	<string name="settings_Music_desc">Brano Musicale/info artista</string>
     <string name="settings_Music_Vibrate_Pattern">Vibrazione Musica</string>
@@ -47,7 +47,7 @@
 	<string name="settings_OtherApps">Impostazioni Altre Applicazioni</string>
 	<string name="settings_OtherApps_desc">Impostare i singoli modelli di vibrazione e che applicazioni che includano le notifiche</string>
 
-	<string name="settings_CancelButton">Cancel</string>
+	<string name="settings_CancelButton">Cancella</string>
 
 	<string name="settings_Font_Size">Dimensione Carattere</string>
 	
@@ -352,8 +352,8 @@
 	<item>Tutti</item>  
 	</string-array>
     
-	<string name="settings_about">About</string>
-	<string name="settings_exit">Disconnect and Exit</string>
+	<string name="settings_about">Circa</string>
+	<string name="settings_exit">Dsconnetti e Esci</string>
 	
     <string name="main_service_toggle_on">Servizio in esecuzione. Fare clic per interrompere</string>
     <string name="main_service_toggle_off">Servizio interrotto. Fare clic per avviare.</string>
