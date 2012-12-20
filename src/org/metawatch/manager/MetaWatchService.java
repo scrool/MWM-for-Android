@@ -96,11 +96,11 @@ public class MetaWatchService extends Service {
 	public static PowerManager.WakeLock wakeLock;
 
 	public static volatile int connectionState;
-	public static int watchType;
-	public static int watchGen = 1; // 1 for original dev watches, 2 = Strata / Frame
+	public static int watchType = WatchType.UNKNOWN;
+	public static int watchGen = WatchGen.UNKNOWN;
 	public static int watchState;
 	public static boolean fakeWatch = false; 	// Setting this to true disables all the bt comms, and just pretends its connected to a watch.  Enable by setting the MAC address to ANALOG or DIGITAL
-
+	
 	public static TestSmsLoop testSmsLoop;
 	private boolean lastConnectionState = false;
 	
@@ -117,8 +117,6 @@ public class MetaWatchService extends Service {
 		editor.commit();
 		
 	}
-	
-	public static boolean isGen2() { return watchGen!=1; }
 
 	final static class ConnectionState {
 		static final int DISCONNECTED = 0;
@@ -242,8 +240,15 @@ public class MetaWatchService extends Service {
 	}
 
 	public final class WatchType {
+		public static final int UNKNOWN = 0;
 		public static final int ANALOG = 1;
 		public static final int DIGITAL = 2;
+	}
+	
+	public final class WatchGen {
+		public static final int UNKNOWN = 0;
+		public static final int GEN1 = 1;	// Original dev watches
+		public static final int GEN2 = 2;	// Strata / Frame
 	}
 	
 	@Override
@@ -584,7 +589,9 @@ public class MetaWatchService extends Service {
 
 		connectionState = ConnectionState.CONNECTING;
 		watchState = WatchStates.OFF;
-		watchType = WatchType.DIGITAL;
+		watchType = WatchType.UNKNOWN;
+		watchGen = WatchGen.UNKNOWN;
+		Monitors.getRTCTimestamp = 0;
 
 		if (bluetoothAdapter == null)
 			bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -1048,7 +1055,7 @@ public class MetaWatchService extends Service {
 																			// type
 				if (bytes[4] == 1 || bytes[4] == 4) {
 					watchType = WatchType.ANALOG;
-					watchGen = 1;
+					watchGen = WatchGen.GEN1;
 					if (Preferences.logging) Log.d(MetaWatch.TAG,
 							"MetaWatchService.readFromDevice(): device type response; analog watch (gen1)");
 
@@ -1069,12 +1076,12 @@ public class MetaWatchService extends Service {
 					watchType = WatchType.DIGITAL;
 					
 					if (bytes[4] == 5 || bytes[4] == 6) {
-						watchGen = 2; 
+						watchGen = WatchGen.GEN2; 
 						if (Preferences.logging) Log.d(MetaWatch.TAG,
 								"MetaWatchService.readFromDevice(): device type response; Strata/Frame (gen2)");
 					}
 					else {
-						watchGen = 1;
+						watchGen = WatchGen.GEN1;
 						if (Preferences.logging) Log.d(MetaWatch.TAG,
 								"MetaWatchService.readFromDevice(): device type response; digital watch (gen1)");
 					}
@@ -1096,8 +1103,9 @@ public class MetaWatchService extends Service {
 						Notification.addBitmapNotification(this, Utils.getBitmap(this, "splash.png"), new VibratePattern(false, 0, 0, 0), 10000, "Splash");
 					}
 					
-					Protocol.queryNvalTime();
 				}
+			
+				Protocol.getRealTimeClock();
 				
 				SharedPreferences sharedPreferences = PreferenceManager
 						.getDefaultSharedPreferences(context);
@@ -1155,7 +1163,7 @@ public class MetaWatchService extends Service {
 				
 				Monitors.rtcOffset = (int)(roundTrip/2000);
 				
-				Protocol.sendRtcNow(context);
+				Protocol.setRealTimeClock(context);
 				
 			} else {
 				if (Preferences.logging) Log.d(MetaWatch.TAG,

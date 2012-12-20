@@ -228,7 +228,7 @@ public abstract class ApplicationBase {
 	
 	int getLeftUpperButtonCode() 
 	{
-		if (MetaWatchService.isGen2()) 
+		if (MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2) 
 		{
 			return 5; // Left middle
 		}
@@ -240,7 +240,7 @@ public abstract class ApplicationBase {
 	
 	int getLeftLowerButtonCode() 
 	{
-		if (MetaWatchService.isGen2()) 
+		if (MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2) 
 		{
 			return 3; // Left bottom
 		}

@@ -547,6 +547,11 @@ public class Idle {
 	
 	public static void updateIdle(final Context context, final boolean refresh) {
 		
+		if (MetaWatchService.watchType == MetaWatchService.WatchType.UNKNOWN) {
+			if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.updateIdle() skipped - yet unknown watch type");
+			return;
+		}
+		
 		if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE ) {
 			Thread thread = new Thread("UpdateIdle") {
 	

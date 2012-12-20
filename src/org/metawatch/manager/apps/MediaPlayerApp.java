@@ -150,7 +150,7 @@ public class MediaPlayerApp extends ApplicationBase {
 				Utils.autoText(context, canvas, lowerText.toString(), 0, 54, 96, 35, Layout.Alignment.ALIGN_CENTER, Color.BLACK);
 			}
 			
-			if (MetaWatchService.isGen2()) {
+			if (MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2) {
 				canvas.drawBitmap(Utils.getBitmap(context, "media_led.bmp"), 0,-1, null);
 				
 				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_up.bmp"), -1,44, null);

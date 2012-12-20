@@ -75,6 +75,7 @@ public class Protocol {
 				try {
 					byte[] message = sendQueue.take();
 					send(message);
+					
 					Thread.sleep(Preferences.packetWait);
 
 				} catch (InterruptedException ie) {
@@ -318,9 +319,9 @@ public class Protocol {
 		}
 	}
 
-	public static void sendRtcNow(Context context) {
+	public static void setRealTimeClock(Context context) {
 		try {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.sendRtcNow()");
+			if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.setRealTimeClock()");
 
 			Date date = new Date();
 			Calendar calendar = Calendar.getInstance();
@@ -342,7 +343,7 @@ public class Protocol {
 			bytes[9] = (byte) calendar.get(Calendar.HOUR_OF_DAY);
 			bytes[10] = (byte) calendar.get(Calendar.MINUTE);
 			bytes[11] = (byte) (calendar.get(Calendar.SECOND) + Monitors.rtcOffset);
-
+			
 			pushhead(bytes);
 
 		} catch (Exception x) {
@@ -357,6 +358,7 @@ public class Protocol {
 		bytes[1] = (byte) (bytes.length+2); // length
 		bytes[2] = eMessageType.GetRealTimeClock.msg;
 		bytes[3] = 0;
+	
 
 		Monitors.getRTCTimestamp = System.currentTimeMillis();	
 		pushhead(bytes);
@@ -441,14 +443,33 @@ public class Protocol {
 
 	public static void updateLcdDisplay(int bufferType) {
 		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.updateLcdDisplay(): bufferType="+bufferType);
+		//byte[] bytes = new byte[MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2 ? 5 : 4];
 		byte[] bytes = new byte[4];
+
 		
 		bytes[0] = eMessageType.start;
 		bytes[1] = (byte) (bytes.length+2); // length
 		bytes[2] = eMessageType.UpdateDisplay.msg; // update display
 
-		if (MetaWatchService.isGen2())
-			bytes[3] = (byte) (bufferType);
+		if (MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2) {
+			//bytes[3] = (byte) (bufferType);
+			
+			final int mode = bufferType;
+			final boolean showGrid = false;
+			final int pageId = 0;
+			final boolean changePage = false;
+			
+			int baseCode = 0x00;
+			if (mode == 0)
+			{
+				baseCode = 0x80;
+			}
+			int code = baseCode | ((showGrid ? 0 : 1) << 6)
+				| ((changePage ? 1 : 0) << 5) | (pageId << 2) | mode;
+			bytes[3] = (byte) (code & 0xFF);		
+			//bytes[4] = 0x00;
+			
+		}
 		else
 			bytes[3] = (byte) (bufferType+16); // Undocumented, but fw 3.1.0 and earlier seems to need this!
 
@@ -639,22 +660,6 @@ public class Protocol {
 		bytes[3] = 0;
 
 		enqueue(bytes);		
-	}
-
-	public static void queryNvalTime() {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Protocol.queryNvalTime()");
-		byte[] bytes = new byte[7];
-
-		bytes[0] = eMessageType.start;
-		bytes[1] = (byte) (bytes.length+2); // length
-		bytes[2] = eMessageType.NvalOperationMsg.msg; // nval operations
-		bytes[3] = 0x01; // read
-
-		bytes[4] = 0x09;
-		bytes[5] = 0x20;
-		bytes[6] = 0x01; // size
-
-		enqueue(bytes);
 	}
 
 	public static void setTimeDateFormat(Context context) {
