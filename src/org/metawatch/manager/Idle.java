@@ -188,7 +188,10 @@ public class Idle {
 		}
 		
 		public int screenMode(int watchType) {
-			if (Preferences.appBufferForClocklessPages) {
+			// Always use app buffer for clockless pages on gen2 watches
+			// this works around a bug in the fw that stops clockless idle
+			// screens displaying properly
+			if (Preferences.appBufferForClocklessPages || MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2) {
 				boolean showsClock = (pageIndex==0 || Preferences.clockOnEveryPage);
 				if (watchType == MetaWatchService.WatchType.DIGITAL && !showsClock)
 					return MetaWatchService.WatchBuffers.APPLICATION;
