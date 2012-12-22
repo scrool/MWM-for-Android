@@ -518,13 +518,8 @@ public class Idle {
 		
 		if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
 			sendLcdIdle(context, true);
-				
-//			// Disable built in action for Right top immediate
-//			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); 
-//			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.APPLICATION); 
-			
+							
 			if (numPages()>1) {
-// disabled until I can further debug gen2 stuff!				Protocol.enableButton(0, 0, IDLE_DUMMY, MetaWatchService.WatchBuffers.IDLE); // Right top immediate
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right top press
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.APPLICATION); // Right top press
 				Protocol.enableButton(5, 0, MEDIA_PLAYER, MetaWatchService.WatchBuffers.IDLE); // left middle - press
