@@ -188,11 +188,11 @@ public class Idle {
 		}
 		
 		public int screenMode(int watchType) {
-		//	if (Preferences.appBufferForClocklessPages) {
-		//		boolean showsClock = (pageIndex==0 || Preferences.clockOnEveryPage);
-		//		if (watchType == MetaWatchService.WatchType.DIGITAL && !showsClock)
-		//			return MetaWatchService.WatchBuffers.APPLICATION;
-		//	}
+			if (Preferences.appBufferForClocklessPages) {
+				boolean showsClock = (pageIndex==0 || Preferences.clockOnEveryPage);
+				if (watchType == MetaWatchService.WatchType.DIGITAL && !showsClock)
+					return MetaWatchService.WatchBuffers.APPLICATION;
+			}
 			
 			return MetaWatchService.WatchBuffers.IDLE;
 		}
