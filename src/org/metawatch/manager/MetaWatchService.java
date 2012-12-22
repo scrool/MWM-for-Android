@@ -719,9 +719,7 @@ public class MetaWatchService extends Service {
 			//if( Preferences.autoClockFormat )
 			//	Protocol.setTimeDateFormat(this);
 			
-			//Protocol.getRealTimeClock();
 			Protocol.getDeviceType();
-			//Protocol.configureIdleBufferSize(true, true);
 			
 			// Disable built in action for Right top immediate
 			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); 
@@ -729,8 +727,6 @@ public class MetaWatchService extends Service {
 			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); 
 
 			Notification.startNotificationSender(this);
-			
-			//Idle.updateIdle(this, true);
 			
 		} catch (IOException ioexception) {
 			if (Preferences.logging) Log.d(MetaWatch.TAG, ioexception.toString());
