@@ -37,9 +37,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
-import org.metawatch.manager.MetaWatchService.QuickButton;
 import org.metawatch.manager.MetaWatchService.WatchType;
+import org.metawatch.manager.actions.Action;
 import org.metawatch.manager.actions.ActionManager;
+import org.metawatch.manager.actions.AppManagerAction;
+import org.metawatch.manager.actions.ContainerAction;
 import org.metawatch.manager.apps.ActionsApp;
 import org.metawatch.manager.apps.AppManager;
 import org.metawatch.manager.apps.ApplicationBase;
@@ -64,9 +66,9 @@ public class Idle {
 	
 	final static byte IDLE_NEXT_PAGE = 60;
 	final static byte IDLE_OLED_DISPLAY = 61;
-	final static byte QUICK_BUTTON = 62;
+	final static byte RIGHT_QUICK_BUTTON = 62;
 	final static byte TOGGLE_SILENT = 63;
-	final static byte MEDIA_PLAYER = 64;
+	final static byte LEFT_QUICK_BUTTON = 64;
 	
 	private static boolean busy = false;
 	private static Object busyObj = new Object();
@@ -106,20 +108,20 @@ public class Idle {
 		}
 		
 		public void activate(final Context context, int watchType) {
-			if (Preferences.quickButton != QuickButton.DISABLED) {
+			//if (Preferences.quickButton != QuickButton.DISABLED) {
 				if (watchType == MetaWatchService.WatchType.DIGITAL) {
 					Protocol.disableButton(1, 0, MetaWatchService.WatchBuffers.IDLE); // Disable built in action for Right middle immediate
-					Protocol.enableButton(1, 1, Idle.QUICK_BUTTON, screenMode(watchType)); // Right middle - press
+					Protocol.enableButton(1, 1, Idle.RIGHT_QUICK_BUTTON, screenMode(watchType)); // Right middle - press
 				}
-			}
+			//}
 		}
 
 		public void deactivate(final Context context, int watchType) {
-			if (Preferences.quickButton != QuickButton.DISABLED) {
+			//if (Preferences.quickButton != QuickButton.DISABLED) {
 				if (watchType == MetaWatchService.WatchType.DIGITAL) {
 					Protocol.disableButton(1, 1, screenMode(watchType)); // Right middle - press
 				}
-			}
+			//}
 		}
 		
 		public Bitmap draw(final Context context, boolean preview, Bitmap bitmap, int watchType) {
@@ -525,7 +527,7 @@ public class Idle {
 			if (numPages()>1) {
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right top press
 				Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.APPLICATION); // Right top press
-				Protocol.enableButton(5, 0, MEDIA_PLAYER, MetaWatchService.WatchBuffers.IDLE); // left middle - press
+				Protocol.enableButton(5, 0, LEFT_QUICK_BUTTON, MetaWatchService.WatchBuffers.IDLE); // left middle - press
 			
 			}
 			
@@ -610,14 +612,28 @@ public class Idle {
 		return ApplicationBase.BUTTON_NOT_USED;
 	}
 	
-	public static void quickButtonAction(Context context) {
-		switch(Preferences.quickButton) {
-		case QuickButton.NOTIFICATION_REPLAY:
-			Notification.replay(context);
-			break;
-		case QuickButton.OPEN_ACTIONS:
-			AppManager.getApp(ActionsApp.APP_ID).open(context, false);
-			break;
+	public static void quickButtonAction(Context context, String actionId) {
+		
+		if(actionId.startsWith(AppManagerAction.appManagerPrefix)) {
+			String appId = actionId.replace(AppManagerAction.appManagerPrefix, "");
+			if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.quickButtonAction() app: "+appId);
+			AppManager.getApp(appId).open(context, true);
+		}
+		else {
+			Action action = ActionManager.getAction(actionId);
+			if(action!=null) {
+				if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.quickButtonAction() "+action.getName());
+				
+				if(action instanceof ContainerAction) {
+					ActionManager.displayAction(context, (ContainerAction)action);
+				}
+				else {
+					action.performAction(context);
+				}
+			}
+			else {
+				if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.quickButtonAction() couldn't find action "+actionId);
+			}
 		}
 	}
 

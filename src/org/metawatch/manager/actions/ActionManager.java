@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.metawatch.manager.Call;
 import org.metawatch.manager.MediaControl;
+import org.metawatch.manager.Notification;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
 import org.metawatch.manager.actions.InternalActions.PhoneCallAction;
@@ -27,6 +28,7 @@ public class ActionManager {
 	static PhoneCallAction phoneCallAction = null;
 	static AppManagerAction appManagerAction = null;
 	static QuickDialAction quickDialAction = null;
+	static Action lastNotificationAction = null;
 	
 	public static void initActions(final Context context) {
 		if(actions.size()==0) {
@@ -136,6 +138,28 @@ public class ActionManager {
 			addAction(new InternalActions.VoiceSearchAction());
 			addAction( new InternalActions.ToggleWatchSilentAction());
 			
+			lastNotificationAction = new Action() {
+				
+				public String getName() {
+					return "Last Notification";
+				}
+				
+				public String getId() {
+					return "lastNotification";
+				}
+				
+				public String bulletIcon() {
+					return "bullet_triangle.bmp";
+				}
+	
+				public int performAction(Context context) {
+					Notification.replay(context);
+					// DONT_UPDATE since the idle screen overwrites the notification otherwise.
+					return ApplicationBase.BUTTON_USED_DONT_UPDATE;
+				}
+			};
+			
+			addAction(lastNotificationAction);			
 			
 		}
 	}
@@ -217,6 +241,23 @@ public class ActionManager {
 		}
 		*/
 		
+		
+		return result;
+	}
+	
+	public static List<Action> getBindableActions(final Context context) {
+		List<Action> result = new ArrayList<Action>();
+
+		initActions(context);
+		
+		result.add(quickDialAction);
+		result.add(lastNotificationAction);
+		result.add(notificationsAction);
+		result.add(appManagerAction);
+		result.add(phoneSettingsAction);
+		
+		appManagerAction.refreshSubActions(context);
+		result.addAll(appManagerAction.getSubActions());
 		
 		return result;
 	}

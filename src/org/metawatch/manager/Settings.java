@@ -32,10 +32,13 @@
 
 package org.metawatch.manager;
 
+import java.util.List;
 import java.util.Map;
 
 import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.actions.Action;
+import org.metawatch.manager.actions.ActionManager;
 import org.metawatch.manager.apps.AppManager;
 import org.metawatch.manager.apps.ApplicationBase.AppData;
 import org.metawatch.manager.widgets.WidgetManager;
@@ -50,6 +53,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
@@ -183,6 +187,8 @@ public class Settings extends PreferenceActivity {
 			
 			appGroup.addPreference(test);		
 		}
+	
+		setQuickButtonPreferences();
 		
 		ListPreferenceMultiSelect calendars = (ListPreferenceMultiSelect) findPreference("DisplayCalendars");
 		if (calendars != null) {
@@ -209,6 +215,36 @@ public class Settings extends PreferenceActivity {
 		}
 		
 		super.onResume();
+	}
+
+	private void setQuickButtonPreferences() {
+		List<Action> actions = ActionManager.getBindableActions(this);
+		
+		final int items = actions.size();
+		
+		entriesArray = new CharSequence[items];
+		entryValuesArray = new CharSequence[items];
+		
+		int i=0;
+		for(Action action : actions) {
+			entriesArray[i] = action.getName();
+			entryValuesArray[i] = action.getId();				
+			i++;
+		}
+		
+		ListPreference leftQuickButton = (ListPreference) findPreference("QuickButtonL");
+		if (leftQuickButton != null) {
+			leftQuickButton.setEntries(entriesArray);
+			leftQuickButton.setEntryValues(entryValuesArray);
+			
+		}
+		
+		ListPreference rightQuickButton = (ListPreference) findPreference("QuickButtonR");
+		if (rightQuickButton != null) {
+			rightQuickButton.setEntries(entriesArray);
+			rightQuickButton.setEntryValues(entryValuesArray);
+			
+		}
 	}
 	
 	void showAbout() {

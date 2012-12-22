@@ -311,16 +311,27 @@
 	<PreferenceScreen
 		android:title="@string/settings_Digital"
 		>
- 		
+
 		<ListPreference 
 			android:entries="@array/settings_quick_button_name" 
 			android:entryValues="@array/settings_quick_button_value" 
-			android:dialogTitle="@string/settings_quick_button_action" 
-			android:key="QuickButton" 
-			android:title="@string/settings_quick_button_action"
-			android:summary="@string/settings_quick_button_action_desc"
+			android:dialogTitle="@string/settings_left_quick_button_action" 
+			android:key="QuickButtonL" 
+			android:title="@string/settings_left_quick_button_action"
+			android:summary="@string/settings_left_quick_button_action_desc"
 			android:negativeButtonText="@string/settings_CancelButton"
- 			android:defaultValue="1"
+ 			android:defaultValue=":launch:org.metawatch.manager.apps.MediaPlayerApp"
+ 			/>	    
+	    		
+		<ListPreference 
+			android:entries="@array/settings_quick_button_name" 
+			android:entryValues="@array/settings_quick_button_value" 
+			android:dialogTitle="@string/settings_right_quick_button_action" 
+			android:key="QuickButtonR" 
+			android:title="@string/settings_right_quick_button_action"
+			android:summary="@string/settings_right_quick_button_action_desc"
+			android:negativeButtonText="@string/settings_CancelButton"
+ 			android:defaultValue="lastNotification"
  			/>
 		
 		<CheckBoxPreference

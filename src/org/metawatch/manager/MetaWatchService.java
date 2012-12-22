@@ -167,12 +167,6 @@ public class MetaWatchService extends Service {
 		public static volatile boolean CALL = false;
 	}
 	
-	public final static class QuickButton {
-		public final static int DISABLED = 0;
-		public final static int NOTIFICATION_REPLAY = 1;
-		public final static int OPEN_ACTIONS = 2;
-	}
-	
 	public final static class AppLaunchMode {
 		public static final int POPUP = 0;
 		public static final int APP_PAGE = 1;
@@ -209,7 +203,8 @@ public class MetaWatchService extends Service {
 		public static int fontSize = 2;
 		public static int smsLoopInterval = 15;
 		public static int idleMusicControlMethod = MediaControl.MUSICSERVICECOMMAND;
-		public static int quickButton = QuickButton.NOTIFICATION_REPLAY;
+		public static String quickButtonL = ":launch:org.metawatch.manager.apps.MediaPlayerApp";
+		public static String quickButtonR = "lastNotification";
 		public static boolean notificationLarger = false;
 		public static boolean autoConnect = false;
 		public static boolean autoRestart = false;
@@ -349,9 +344,10 @@ public class MetaWatchService extends Service {
 		Preferences.idleMusicControlMethod = Integer.parseInt(
 				sharedPreferences.getString("IdleMusicControlMethod", 
 				Integer.toString(Preferences.idleMusicControlMethod)));
-		Preferences.quickButton = Integer.parseInt(
-				sharedPreferences.getString("QuickButton", 
-				Integer.toString(Preferences.quickButton)));
+		Preferences.quickButtonL = sharedPreferences.getString("QuickButtonL", 
+				Preferences.quickButtonL);
+		Preferences.quickButtonR = sharedPreferences.getString("QuickButtonR", 
+				Preferences.quickButtonR);
 		Preferences.autoConnect = sharedPreferences.getBoolean(
 				"AutoConnect", Preferences.autoConnect);	
 		Preferences.autoRestart = sharedPreferences.getBoolean("AutoRestart", 
@@ -1244,8 +1240,12 @@ public class MetaWatchService extends Service {
 					
 					switch (button) {
 					
-					case Idle.QUICK_BUTTON:
-						Idle.quickButtonAction(this);
+					case Idle.LEFT_QUICK_BUTTON:
+						Idle.quickButtonAction(context, Preferences.quickButtonL);
+						break;
+					
+					case Idle.RIGHT_QUICK_BUTTON:
+						Idle.quickButtonAction(context, Preferences.quickButtonR);
 						break;
 						
 					case Idle.IDLE_NEXT_PAGE:							
@@ -1271,10 +1271,6 @@ public class MetaWatchService extends Service {
 						
 						lastOledCrownPress = time;
 						Idle.sendOledIdle(this);
-						break;
-						
-					case Idle.MEDIA_PLAYER:
-						AppManager.getApp(MediaPlayerApp.APP_ID).open(context, false);
 						break;
 													
 					case Application.TOGGLE_APP:

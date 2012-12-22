@@ -9,6 +9,8 @@ import org.metawatch.manager.apps.ApplicationBase.AppData;
 import android.content.Context;
 
 public class AppManagerAction extends ContainerAction {
+	
+	public static String appManagerPrefix = ":launch:";
 
 	public String id = "apps";
 	public String getId() {
@@ -33,7 +35,7 @@ public class AppManagerAction extends ContainerAction {
 			subActions.add(new Action() {
 				
 				public String getId() {
-					return "launch"+a.id;
+					return appManagerPrefix+a.id;
 				}
 				
 				public String getName() {

@@ -93,9 +93,12 @@
     <string name="settings_analog_pause_scroll">Pause Before Scrolling</string>
     <string name="settings_analog_pause_scroll_desc">Pause a few seconds before scrolling long messages on the analog watch</string>
         
-    <string name="settings_quick_button_action">Quick Button Action</string>
-    <string name="settings_quick_button_action_desc">Action for Right Middle Button on non-app idle pages</string>    
-        
+    <string name="settings_left_quick_button_action">Left Quick Button Action</string>
+    <string name="settings_left_quick_button_action_desc">Action for Left Middle Button on widget screens</string>    
+
+    <string name="settings_right_quick_button_action">Right Quick Button Action</string>
+    <string name="settings_right_quick_button_action_desc">Action for Right Middle Button on widget screens</string>   
+    
     <string name="settings_sticky_notifications">Sticky Notifications</string>  
     <string name="settings_sticky_notifications_desc">Use sticky notifications (that stay on screen until manually dismissed)</string>   
         
@@ -213,15 +216,11 @@
 	</string-array>
     
     <string-array name="settings_quick_button_name"> 
-   	<item>Disabled (Toggle Seconds)</item>
-   	<item>Replay Latest Notification</item>
-   	<item>Open/Go to the Actions App</item>   
+   	<item> </item>
 	</string-array> 
 
 	<string-array name="settings_quick_button_value"> 
 	<item>0</item>
-   	<item>1</item>
-   	<item>2</item>
 	</string-array>
     
     <string name="settings_Digital">Digital Watch</string>
