@@ -209,7 +209,7 @@ public class MetaWatchService extends Service {
 		public static int fontSize = 2;
 		public static int smsLoopInterval = 15;
 		public static int idleMusicControlMethod = MediaControl.MUSICSERVICECOMMAND;
-		public static int quickButton = QuickButton.DISABLED;
+		public static int quickButton = QuickButton.NOTIFICATION_REPLAY;
 		public static boolean notificationLarger = false;
 		public static boolean autoConnect = false;
 		public static boolean autoRestart = false;

@@ -320,7 +320,7 @@
 			android:title="@string/settings_quick_button_action"
 			android:summary="@string/settings_quick_button_action_desc"
 			android:negativeButtonText="@string/settings_CancelButton"
- 			android:defaultValue="0"
+ 			android:defaultValue="1"
  			/>
 		
 		<CheckBoxPreference
