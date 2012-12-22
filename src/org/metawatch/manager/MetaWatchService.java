@@ -230,6 +230,7 @@ public class MetaWatchService extends Service {
 		public static boolean showActionsInCall = true;
 		public static String themeName = "";
 		public static boolean hideEmptyWidgets = false;
+		public static boolean inverseMediaPlayerButtons = false;
 		public static boolean clockOnAppScreens = false;
 		public static boolean hiddenWidgetsReserveSpace = false;
 		public static boolean showTestWidgets = false;
@@ -388,6 +389,8 @@ public class MetaWatchService extends Service {
 				Preferences.themeName);
 		Preferences.hideEmptyWidgets = sharedPreferences.getBoolean("HideEmptyWidgets",
 				Preferences.hideEmptyWidgets);
+		Preferences.inverseMediaPlayerButtons = sharedPreferences.getBoolean("InverseMediaPlayerButtons",
+				Preferences.inverseMediaPlayerButtons);
 		Preferences.clockOnAppScreens = sharedPreferences.getBoolean("ClockOnAppBuffers",
 				Preferences.clockOnAppScreens);
 		Preferences.showTestWidgets = sharedPreferences.getBoolean("TestWidgets", 
@@ -1037,6 +1040,12 @@ public class MetaWatchService extends Service {
 				} else if (bytes[4] == 0x10) {
 					if (Preferences.logging) Log.d(MetaWatch.TAG,
 							"MetaWatchService.readFromDevice(): scroll complete.");
+				} else if (bytes[4] == 0x02) {
+					if (Preferences.logging) Log.d(MetaWatch.TAG,
+							"MetaWatchService.readFromDevice(): mode timeout.");
+					// The watch switches back to idle mode (showing the initial page) after 10 minutes
+					// Activate the last used idle page in this case
+					Idle.toIdle(context);
 				}
 			}
 

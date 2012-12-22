@@ -59,13 +59,25 @@ public class MediaPlayerApp extends ApplicationBase {
 			final int leftLower = getLeftLowerButtonCode();
 			final int leftUpper = getLeftUpperButtonCode();
 			
-			Protocol.enableButton(leftLower, 1, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left middle - press
-			Protocol.enableButton(leftLower, 2, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left middle - hold
-			Protocol.enableButton(leftLower, 3, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left middle - long hold
-			
-			Protocol.enableButton(leftUpper, 1, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left top - press
-			Protocol.enableButton(leftUpper, 2, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left top - hold
-			Protocol.enableButton(leftUpper, 3, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left top - long hold
+			if (Preferences.inverseMediaPlayerButtons) {
+				Protocol.enableButton(leftLower, 1, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left middle - press
+				Protocol.enableButton(leftLower, 2, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left middle - hold
+				Protocol.enableButton(leftLower, 3, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left middle - long hold
+
+				Protocol.enableButton(leftUpper, 1, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left top - press
+				Protocol.enableButton(leftUpper, 2, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left top - hold
+				Protocol.enableButton(leftUpper, 3, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left top - long hold
+				
+			} else {
+				
+				Protocol.enableButton(leftLower, 1, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left middle - press
+				Protocol.enableButton(leftLower, 2, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left middle - hold
+				Protocol.enableButton(leftLower, 3, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left middle - long hold
+				
+				Protocol.enableButton(leftUpper, 1, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left top - press
+				Protocol.enableButton(leftUpper, 2, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left top - hold
+				Protocol.enableButton(leftUpper, 3, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left top - long hold
+			}
 		}
 		else if (watchType == WatchType.ANALOG) {
 			Protocol.enableButton(0, 1, TOGGLE, MetaWatchService.WatchBuffers.APPLICATION); // top - press
@@ -134,7 +146,7 @@ public class MediaPlayerApp extends ApplicationBase {
 				canvas.drawBitmap(Utils.getBitmap(context, "media_player_idle.png"), 0, 0, null);				
 			}
 			else {	
-				canvas.drawBitmap(Utils.getBitmap(context, "media_player.png"), 0, 0, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_player.png"), 0, 0, null);				
 				
 				StringBuilder lowerText = new StringBuilder();
 				if(!lastTrack.artist.equals("")) {
@@ -150,21 +162,29 @@ public class MediaPlayerApp extends ApplicationBase {
 				Utils.autoText(context, canvas, lowerText.toString(), 0, 54, 96, 35, Layout.Alignment.ALIGN_CENTER, Color.BLACK);
 			}
 			
+			int colVolume = -1;
+			int colNextPrev = 7;
+			
+			if (Preferences.inverseMediaPlayerButtons) {
+				colVolume = 7;
+				colNextPrev = -1;
+			}
+			
 			if (MetaWatchService.watchGen == MetaWatchService.WatchGen.GEN2) {
 				canvas.drawBitmap(Utils.getBitmap(context, "media_led.bmp"), 0,-1, null);
 				
-				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_up.bmp"), -1,44, null);
-				canvas.drawBitmap(Utils.getBitmap(context, "media_next.bmp"), 7,44, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_up.bmp"), colVolume,44, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_next.bmp"), colNextPrev,44, null);
 				
-				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_down.bmp"), -1,88, null);
-				canvas.drawBitmap(Utils.getBitmap(context, "media_prev.bmp"), 7,88, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_down.bmp"), colVolume,88, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_prev.bmp"), colNextPrev,88, null);
 			}
 			else {
-				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_up.bmp"), -1,-1, null);
-				canvas.drawBitmap(Utils.getBitmap(context, "media_next.bmp"), 7,-1, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_up.bmp"), colVolume,-1, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_next.bmp"), colNextPrev,-1, null);
 				
-				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_down.bmp"), -1,44, null);
-				canvas.drawBitmap(Utils.getBitmap(context, "media_prev.bmp"), 7,44, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_vol_down.bmp"), colVolume,44, null);
+				canvas.drawBitmap(Utils.getBitmap(context, "media_prev.bmp"), colNextPrev,44, null);
 				
 				canvas.drawBitmap(Utils.getBitmap(context, "media_led.bmp"), 0,88, null);
 			}
