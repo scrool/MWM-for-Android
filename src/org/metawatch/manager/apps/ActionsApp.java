@@ -6,10 +6,9 @@ import java.util.ListIterator;
 import java.util.Stack;
 
 import org.metawatch.manager.FontCache;
+import org.metawatch.manager.FontCache.FontSize;
 import org.metawatch.manager.Idle;
 import org.metawatch.manager.MetaWatchService;
-import org.metawatch.manager.FontCache.FontSize;
-import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Protocol;
 import org.metawatch.manager.Utils;

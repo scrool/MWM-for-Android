@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Date;
+import java.util.Calendar;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,10 +17,10 @@ import org.json.JSONObject;
 import org.metawatch.manager.Idle;
 import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
-import org.metawatch.manager.Utils;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.Monitors.LocationData;
+import org.metawatch.manager.Utils;
 
 import android.content.Context;
 import android.util.Log;
@@ -148,9 +148,9 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 
 				boolean isDay = true;
 
-				Date dt = new Date();
-				int hours = dt.getHours();
-				int minutes = dt.getMinutes();
+				Calendar cal = Calendar.getInstance();
+				int hours = cal.get(Calendar.HOUR_OF_DAY);
+				int minutes = cal.get(Calendar.MINUTE);
 
 				if ((hours < weatherData.sunriseH)
 						|| (hours == weatherData.sunriseH && minutes < weatherData.sunriseM)

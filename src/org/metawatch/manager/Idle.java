@@ -42,7 +42,6 @@ import org.metawatch.manager.actions.Action;
 import org.metawatch.manager.actions.ActionManager;
 import org.metawatch.manager.actions.AppManagerAction;
 import org.metawatch.manager.actions.ContainerAction;
-import org.metawatch.manager.apps.ActionsApp;
 import org.metawatch.manager.apps.AppManager;
 import org.metawatch.manager.apps.ApplicationBase;
 import org.metawatch.manager.apps.ApplicationBase.AppData;

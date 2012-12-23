@@ -45,7 +45,6 @@ import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -952,12 +951,11 @@ public class Utils {
 		return ticksToText(context, ticks, false);
 	}
     public static String ticksToText(Context context, long ticks, boolean trimDateIfToday) {   	
-    	final Calendar cal = Calendar.getInstance();
-    	cal.setTimeInMillis(ticks);
-    	Date date = cal.getTime();
-    	Date today = new Date();
+    	final Calendar date = Calendar.getInstance();
+    	date.setTimeInMillis(ticks);
+    	Calendar today = Calendar.getInstance();
     	StringBuilder builder = new StringBuilder();
-    	if(date.getYear()!=today.getYear() || date.getMonth()!=today.getMonth() || date.getDay()!=today.getDay() || (!trimDateIfToday))
+    	if(!isSameDate(date, today) || (!trimDateIfToday))
     	{
     		builder.append(DateFormat.getDateFormat(context).format(date));
     		builder.append(" ");
@@ -1006,8 +1004,8 @@ public class Utils {
 	
     public static void setAppClockRefreshAlarm(Context context) {
 
-    	Date date = new Date();
-    	final int seconds = date.getSeconds();
+    	Calendar cal = Calendar.getInstance();
+    	final int seconds = cal.get(Calendar.SECOND);
     	final long ms = 1000*(60-seconds);
     	
 		Intent intent = new Intent("org.metawatch.manager.UPDATE_APPSCREEN_CLOCK");

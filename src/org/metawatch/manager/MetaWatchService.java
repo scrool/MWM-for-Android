@@ -43,10 +43,7 @@ import java.util.UUID;
 import org.metawatch.communityedition.R;
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.actions.ActionManager;
-import org.metawatch.manager.apps.ActionsApp;
-import org.metawatch.manager.apps.AppManager;
 import org.metawatch.manager.apps.ApplicationBase;
-import org.metawatch.manager.apps.MediaPlayerApp;
 import org.metawatch.manager.widgets.WidgetManager;
 
 import android.annotation.TargetApi;
