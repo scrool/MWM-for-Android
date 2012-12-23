@@ -957,10 +957,10 @@ public class Utils {
     	StringBuilder builder = new StringBuilder();
     	if(!isSameDate(date, today) || (!trimDateIfToday))
     	{
-    		builder.append(DateFormat.getDateFormat(context).format(date));
+    		builder.append(DateFormat.getDateFormat(context).format(date.getTime()));
     		builder.append(" ");
     	}
-    	builder.append(DateFormat.getTimeFormat(context).format(date));
+    	builder.append(DateFormat.getTimeFormat(context).format(date.getTime()));
     	return builder.toString();
     }
     
