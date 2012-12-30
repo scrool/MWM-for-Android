@@ -717,11 +717,6 @@ public class MetaWatchService extends Service {
 			
 			Protocol.getDeviceType();
 			
-			// Disable built in action for Right top immediate
-			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); 
-			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.APPLICATION); 
-			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); 
-
 			Notification.startNotificationSender(this);
 			
 		} catch (IOException ioexception) {
@@ -1088,7 +1083,12 @@ public class MetaWatchService extends Service {
 					Protocol.setNvalLcdInvert(Preferences.invertLCD);
 
 					Protocol.configureIdleBufferSize(true, true);
-					
+				
+					// Disable built in action for Right top immediate
+					Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE); 
+					Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.APPLICATION); 
+					Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); 					
+				
 					if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
 						Idle.toIdle(this);
 						Idle.updateIdle(this, true);
