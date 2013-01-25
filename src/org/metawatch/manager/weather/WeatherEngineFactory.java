@@ -1,8 +1,8 @@
 package org.metawatch.manager.weather;
 
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
+import org.metawatch.manager.MetaWatchStatus;
 
 import android.util.Log;
 
@@ -31,7 +31,7 @@ public class WeatherEngineFactory {
 		int engineId = Preferences.weatherProvider;
 		if (currentEngine == null || engineId != currentEngineId) {
 			if (Preferences.logging)
-				Log.d(MetaWatch.TAG, "Creating new weather engine with id "
+				Log.d(MetaWatchStatus.TAG, "Creating new weather engine with id "
 						+ engineId);
 
 			currentEngineId = engineId;

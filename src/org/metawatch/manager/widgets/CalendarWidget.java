@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.metawatch.manager.FontCache;
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Monitors;
 import org.metawatch.manager.Utils;
 
@@ -112,7 +112,7 @@ public class CalendarWidget implements InternalWidget {
 					}
 				}
 				if (readCalendar) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarWidget.refresh() start");
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "CalendarWidget.refresh() start");
 					
 					long startTime = System.currentTimeMillis();
 					long endTime = startTime + DateUtils.HOUR_IN_MILLIS * Preferences.calendarLookahead;
@@ -136,7 +136,7 @@ public class CalendarWidget implements InternalWidget {
 						am.set(AlarmManager.RTC_WAKEUP, calendarEntry.endTimestamp, sender);						
 					}
 										
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarWidget.refresh() stop");   
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "CalendarWidget.refresh() stop");   
 				}
 				
 			}

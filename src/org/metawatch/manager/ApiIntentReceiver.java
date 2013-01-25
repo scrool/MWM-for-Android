@@ -56,7 +56,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		MetaWatchService.autoStartService(context);
 		
 		final String action = intent.getAction();
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "ApiIntentReceiver.onReceive(): received intent, action='"+action+"'");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "ApiIntentReceiver.onReceive(): received intent, action='"+action+"'");
 		
 		// add digital watch check
 		
@@ -85,7 +85,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		}
 		
 		else if (action.equals("org.metawatch.manager.WIDGET_UPDATE")) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "WIDGET_UPDATE received");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "WIDGET_UPDATE received");
 			WidgetManager.getFromIntent(context, intent);
 			return;
 		}
@@ -196,7 +196,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 				
 				NotificationBuilder.createSmart(context, title, text, icon, sticky, vibrate);
 				
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"ApiIntentReceiver.onReceive(): sending text notification; text='"
 								+ text + "'");
 			} else if (intent.hasExtra("array")) {

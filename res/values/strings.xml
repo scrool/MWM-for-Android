@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MetaWatch</string>
-    <string name="app_name_long">MetaWatch Manager - Community Edition</string>
+    <string name="app_name_long">MetaWatch Manager - Noah Edition</string>
     
     <string name="settings_Notifications">Notifications</string>
 	<string name="settings_Call">Call</string>
@@ -408,5 +408,7 @@
 	<string name="settings_Inverse_Media_Player_Buttons_desc">Changes the order of the volume up/next song and volume down/previous song buttons</string>
 	
 	<string name="widget_picker_title">Select a widget</string>
+	
+	<string name="statistics">Statistics</string>
 	
 </resources>

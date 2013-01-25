@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.metawatch.manager.Idle;
-import org.metawatch.manager.MetaWatch;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Utils;
 
 import android.content.Context;
@@ -32,7 +32,7 @@ public class PictureWidget implements InternalWidget {
 
 		public void onEvent(int event, String path) {
 			synchronized (this) {
-				Log.d(MetaWatch.TAG, "Pictures updated!");
+				Log.d(MetaWatchStatus.TAG, "Pictures updated!");
 				parent.loadPictures();
 				Idle.updateIdle(context, true);
 			}

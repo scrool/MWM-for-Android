@@ -37,13 +37,13 @@ import java.util.List;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 
-import com.google.android.gm.contentprovider.GmailContract;
-
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+
+import com.google.android.gm.contentprovider.GmailContract;
 
 public class GmailAPIMonitor implements GmailMonitor {
 	public static boolean isSupported(Context context) {
@@ -127,7 +127,7 @@ public class GmailAPIMonitor implements GmailMonitor {
 			}
 		} catch (Exception e) {
 			// handle exception
-			Log.e(MetaWatch.TAG, e.getMessage());
+			Log.e(MetaWatchStatus.TAG, e.getMessage());
 		}
 		finally {
 			ch.closeAll();
@@ -140,7 +140,7 @@ public class GmailAPIMonitor implements GmailMonitor {
 				context.getContentResolver().registerContentObserver(objAccnt.uri, true, contentObserver);
 			} catch (Exception x) {
 				if (Preferences.logging)
-					Log.e(MetaWatch.TAG, x.toString());
+					Log.e(MetaWatchStatus.TAG, x.toString());
 			}
 		}
 	}
@@ -205,7 +205,7 @@ public class GmailAPIMonitor implements GmailMonitor {
 			unreadCnt += c.getInt(c.getColumnIndexOrThrow(GmailContract.Labels.NUM_UNREAD_CONVERSATIONS));
 		} catch (Exception x) {
 			if (Preferences.logging)
-				Log.d(MetaWatch.TAG, "GmailAPIMonitor.getUnreadCount(): caught exception: " + x.toString());
+				Log.d(MetaWatchStatus.TAG, "GmailAPIMonitor.getUnreadCount(): caught exception: " + x.toString());
 		} finally {
 			ch.closeAll();
 		}
@@ -240,11 +240,11 @@ public class GmailAPIMonitor implements GmailMonitor {
 			}
 		} catch (Exception x) {
 			if (Preferences.logging)
-				Log.d(MetaWatch.TAG, "GmailAPIMonitor.getUnreadCount(): caught exception: " + x.toString());
+				Log.d(MetaWatchStatus.TAG, "GmailAPIMonitor.getUnreadCount(): caught exception: " + x.toString());
 		}
 		
 		if (Preferences.logging)
-			Log.d(MetaWatch.TAG, "GmailAPIMonitor.getUnreadCount(): found " + unreadCnt + " unread messages");
+			Log.d(MetaWatchStatus.TAG, "GmailAPIMonitor.getUnreadCount(): found " + unreadCnt + " unread messages");
 		return unreadCnt;
 	}
 }

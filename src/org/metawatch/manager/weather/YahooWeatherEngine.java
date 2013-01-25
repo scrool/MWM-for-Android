@@ -16,9 +16,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.metawatch.manager.Idle;
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.Utils;
 import org.xml.sax.Attributes;
@@ -138,7 +138,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 		try {
 			if (isUpdateRequired(weatherData)) {
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG,
+					Log.d(MetaWatchStatus.TAG,
 							"Monitors.updateWeatherDataYahoo(): start");
 
 				// http://developer.yahoo.com/geo/placefinder/guide/requests.html#gflags-parameter
@@ -174,10 +174,10 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 				weatherData.error = true;
 			
 			if (Preferences.logging)
-				Log.e(MetaWatch.TAG, "Exception while retreiving weather", e);
+				Log.e(MetaWatchStatus.TAG, "Exception while retreiving weather", e);
 		} finally {
 			if (Preferences.logging)
-				Log.d(MetaWatch.TAG, "Monitors.updateWeatherData(): finish");
+				Log.d(MetaWatchStatus.TAG, "Monitors.updateWeatherData(): finish");
 		}
 
 		return weatherData;
@@ -191,7 +191,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 			String placeFinderUrl, WeatherData weatherData) throws IOException {
 		try {
 			if (Preferences.logging)
-				Log.d(MetaWatch.TAG, "Placefinder URL: " + placeFinderUrl);
+				Log.d(MetaWatchStatus.TAG, "Placefinder URL: " + placeFinderUrl);
 
 			// Ask YAHOO PLACEFINDER to search the WOEID.
 			HttpClient hc = new DefaultHttpClient();
@@ -204,7 +204,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 
 				String s = EntityUtils.toString(rp.getEntity());
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, "Got placefinder response " + s);
+					Log.d(MetaWatchStatus.TAG, "Got placefinder response " + s);
 
 				YahooPlacefinderHandler handler = new YahooPlacefinderHandler();
 				xr.setContentHandler(handler);
@@ -223,7 +223,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 				// DEBUG
 
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, "Got WOEID: " + woeId + " and CITY: "
+					Log.d(MetaWatchStatus.TAG, "Got WOEID: " + woeId + " and CITY: "
 							+ city);
 
 				// Seconds web service access, now with WOEID
@@ -264,7 +264,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 				url += "&u=c";
 			}
 			if (Preferences.logging)
-				Log.d(MetaWatch.TAG, "Weather URL: " + url);
+				Log.d(MetaWatchStatus.TAG, "Weather URL: " + url);
 
 			// Ask Yahoo Weather API
 			HttpClient hc = new DefaultHttpClient();
@@ -277,7 +277,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 
 				String s = EntityUtils.toString(rp.getEntity());
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, "Got Weather API response " + s);
+					Log.d(MetaWatchStatus.TAG, "Got Weather API response " + s);
 
 				YahooWeatherHandler handler = new YahooWeatherHandler();
 				xr.setContentHandler(handler);
@@ -296,7 +296,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 				weatherData.received = true;
 
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, "Got weather data: " + weatherData);
+					Log.d(MetaWatchStatus.TAG, "Got weather data: " + weatherData);
 
 				return weatherData;
 
@@ -366,7 +366,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 		public void startElement(String uri, String localName, String qName,
 				Attributes attributes) throws SAXException {
 			// if (Preferences.logging)
-			// Log.d(MetaWatch.TAG, "startElement " + localName);
+			// Log.d(MetaWatchStatus.TAG, "startElement " + localName);
 
 			if (localName.equals("condition")) {
 				// <yweather:condition text="Partly Cloudy" code="30" temp="64"
@@ -376,7 +376,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 				temp = attributes.getValue("temp");
 
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, "Weather Condition " + text + " "
+					Log.d(MetaWatchStatus.TAG, "Weather Condition " + text + " "
 							+ code + " " + temp);
 
 			} else if (localName.equals("forecast")) {

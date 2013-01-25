@@ -1,8 +1,8 @@
 package org.metawatch.manager.apps;
 
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Protocol;
 
 import android.content.Context;
@@ -107,7 +107,7 @@ public class ExternalApp extends ApplicationBase {
 			int button = 1+(id/4);
 			int type = id%4;
 		
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Sending button press: "+button+" "+type);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Sending button press: "+button+" "+type);
 			
 			Intent intent = new Intent("org.metawatch.manager.BUTTON_PRESS");
 			intent.putExtra("id", appData.id);

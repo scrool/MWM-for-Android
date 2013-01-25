@@ -73,18 +73,18 @@ public class Idle {
 	private static Object busyObj = new Object();
 	
 	public static boolean isBusy() {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.isBusy()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.isBusy()");
 		synchronized (busyObj) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.busy="+busy);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.busy="+busy);
 			return busy;
 		}
 	}
 	
 	private static void setBusy(boolean isBusy) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.setBusy()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.setBusy()");
 		synchronized (busyObj) {
 			busy = isBusy;
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.setBusy("+isBusy+")");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.setBusy("+isBusy+")");
 		}
 	}
 	
@@ -331,7 +331,7 @@ public class Idle {
 	}
 	
 	public static void updateIdlePages(Context context, boolean refresh) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.updateIdlePages start");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 		try {
 			setBusy(true);
 			
@@ -424,7 +424,7 @@ public class Idle {
 			setBusy(false);
 		}
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.updateIdlePages end");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages end");
 	}
 
 	static Bitmap createIdle(Context context) {
@@ -467,16 +467,16 @@ public class Idle {
 	
 	private static void sendLcdIdle(Context context, boolean refresh) {
 		if(MetaWatchService.watchState != MetaWatchService.WatchStates.IDLE) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Ignoring sendLcdIdle as not in idle");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
 			return;
 		}
 		
 		if (isBusy()) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Ignoring sendLcdIdle as Idle is busy");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as Idle is busy");
 			return;
 		}
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "sendLcdIdle start");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "sendLcdIdle start");
 		
 		final int mode = getScreenMode(MetaWatchService.WatchType.DIGITAL);
 		boolean showClock = false;
@@ -498,14 +498,14 @@ public class Idle {
 		if (mode == MetaWatchService.WatchBuffers.IDLE)
 			Protocol.configureIdleBufferSize(showClock, true);
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "sendLcdIdle: Drawing idle screen on buffer "+mode);
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "sendLcdIdle: Drawing idle screen on buffer "+mode);
 		Protocol.updateLcdDisplay(mode);
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "sendLcdIdle end");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "sendLcdIdle end");
 	}
 	
 	public static void toIdle(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.toIdle()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.toIdle()");
 		
 		if (Notification.isActive())
 			return;
@@ -547,7 +547,7 @@ public class Idle {
 	public static void updateIdle(final Context context, final boolean refresh) {
 		
 		if (MetaWatchService.watchType == MetaWatchService.WatchType.UNKNOWN) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.updateIdle() skipped - yet unknown watch type");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.updateIdle() skipped - yet unknown watch type");
 			return;
 		}
 		
@@ -556,7 +556,7 @@ public class Idle {
 	
 				@Override
 				public void run() {
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.updateIdle()");
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
 					long timestamp = System.currentTimeMillis();
 					
 					if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL)
@@ -564,7 +564,7 @@ public class Idle {
 					else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
 						updateOledIdle(context, refresh);
 					
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "updateIdle took " + (System.currentTimeMillis()-timestamp) + " ms" );
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "updateIdle took " + (System.currentTimeMillis()-timestamp) + " ms" );
 				}
 			};
 			thread.start();
@@ -615,13 +615,13 @@ public class Idle {
 		
 		if(actionId.startsWith(AppManagerAction.appManagerPrefix)) {
 			String appId = actionId.replace(AppManagerAction.appManagerPrefix, "");
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.quickButtonAction() app: "+appId);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.quickButtonAction() app: "+appId);
 			AppManager.getApp(appId).open(context, true);
 		}
 		else {
 			Action action = ActionManager.getAction(actionId);
 			if(action!=null) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.quickButtonAction() "+action.getName());
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.quickButtonAction() "+action.getName());
 				
 				if(action instanceof ContainerAction) {
 					ActionManager.displayAction(context, (ContainerAction)action);
@@ -631,20 +631,20 @@ public class Idle {
 				}
 			}
 			else {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.quickButtonAction() couldn't find action "+actionId);
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.quickButtonAction() couldn't find action "+actionId);
 			}
 		}
 	}
 
 	public static void activateButtons(final Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.activateButtons()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.activateButtons()");
 		if(idlePages != null && idlePages.size()>currentPage) {
 			idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
 		}
 	}
 
 	public static void deactivateButtons(final Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Idle.deactivateButtons()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Idle.deactivateButtons()");
 		if(idlePages != null && idlePages.size()>currentPage) {
 			idlePages.get(currentPage).deactivate(context, MetaWatchService.watchType);
 		}

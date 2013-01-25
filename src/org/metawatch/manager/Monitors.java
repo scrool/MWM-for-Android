@@ -104,21 +104,21 @@ public class Monitors {
 	
 	
 	public static void updateGmailUnreadCount(String account, int count) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Monitors.updateGmailUnreadCount(): account='"
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Monitors.updateGmailUnreadCount(): account='"
 				+ account + "' count='" + count + "'");
 		gmailUnreadCounts.put(account, count);
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"Monitors.updateGmailUnreadCount(): new unread count is: "
 						+ gmailUnreadCounts.get(account));
 	}
 	
 	public static int getGmailUnreadCount() {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Monitors.getGmailUnreadCount()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Monitors.getGmailUnreadCount()");
 		int totalCount = 0;
 		for (String key : gmailUnreadCounts.keySet()) {
 			Integer accountCount = gmailUnreadCounts.get(key);
 			totalCount += accountCount.intValue();
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Monitors.getGmailUnreadCount(): account='"
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Monitors.getGmailUnreadCount(): account='"
 					+ key + "' accountCount='" + accountCount
 					+ "' totalCount='" + totalCount + "'");
 		}
@@ -127,20 +127,20 @@ public class Monitors {
 	
 	public static int getGmailUnreadCount(String account) {
 		int count = gmailUnreadCounts.get(account);
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Monitors.getGmailUnreadCount('"+account+"') returning " + count);
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Monitors.getGmailUnreadCount('"+account+"') returning " + count);
 		return count;
 	}
 	
 	public static void start(Context context/*, TelephonyManager telephonyManager*/) {
 		// start weather updater
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"Monitors.start()");
 		
 		createBatteryLevelReciever(context);
 				
 		if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG,
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 					"Initialising Geolocation");
 			
 			try {
@@ -149,11 +149,11 @@ public class Monitors {
 				RefreshLocation();
 			} catch (IllegalArgumentException e) {
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG,"Failed to initialise Geolocation "+e.getMessage());
+					Log.d(MetaWatchStatus.TAG,"Failed to initialise Geolocation "+e.getMessage());
 			}
 		}
 		else {
-			if (Preferences.logging) Log.d(MetaWatch.TAG,"Geolocation disabled");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG,"Geolocation disabled");
 		}
 		
 		CallStateListener phoneListener = new CallStateListener(context);
@@ -203,7 +203,7 @@ public class Monitors {
 		
 		Location location = locationFinder.getLastBestKnownLocation();
 		if (location!=null) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Updated location");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Updated location");
 			
 			LocationData.latitude = location.getLatitude();
 			LocationData.longitude = location.getLongitude();
@@ -216,7 +216,7 @@ public class Monitors {
 	
 	public static void stop(Context context) {
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"Monitors.stop()");
 		
 		contentResolverMessages.unregisterContentObserver(contentObserverMessages);
@@ -270,7 +270,7 @@ public class Monitors {
 		
 	
 	static void startAlarmTicker(Context context) {		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "startAlarmTicker()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "startAlarmTicker()");
 		alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		intent = new Intent(context, AlarmReceiver.class);
 		intent.putExtra("action_update", "update");
@@ -313,7 +313,7 @@ public class Monitors {
 		public void onChange(boolean selfChange) {
 			super.onChange(selfChange);			
 			// change in call history database
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "call history change");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "call history change");
 			Idle.updateIdle(context, true);
 		}
 	}
@@ -331,7 +331,7 @@ public class Monitors {
 		public void onChange(boolean selfChange) {
 			super.onChange(selfChange);     
 			// change in calendar database
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "calendar change");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "calendar change");
 				calendarChangedTimestamp = System.currentTimeMillis();
 				Idle.updateIdle(context, true);
 			}
@@ -355,19 +355,19 @@ public class Monitors {
 						
 						LocationData.timeStamp = location.getTime();
 						
-						if (Preferences.logging) Log.d(MetaWatch.TAG, "location changed "+location.toString() );
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "location changed "+location.toString() );
 						
 						LocationData.received = true;
 						MetaWatchService.notifyClients();
 						
 						if (!weatherData.received /*&& !WeatherData.updating*/) {
-							if (Preferences.logging) Log.d(MetaWatch.TAG, "First location - getting weather");
+							if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "First location - getting weather");
 							
 							Monitors.updateWeatherData(context);
 						}
 					}
 				} catch (java.lang.NullPointerException e) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "onLocationChanged: NullPointerException");
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "onLocationChanged: NullPointerException");
 				}
 			}
 		};

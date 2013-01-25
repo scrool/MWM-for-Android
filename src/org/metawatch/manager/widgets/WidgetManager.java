@@ -6,19 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.metawatch.manager.Idle;
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
-import org.metawatch.manager.widgets.WidgetRow;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.widgets.InternalWidget.WidgetData;
-import org.metawatch.manager.widgets.GmailWidget;
-import org.metawatch.manager.widgets.K9Widget;
-import org.metawatch.manager.widgets.MissedCallsWidget;
-import org.metawatch.manager.widgets.SmsWidget;
-//import org.metawatch.manager.widgets.TestWidget;
-import org.metawatch.manager.widgets.WeatherWidget;
-import org.metawatch.manager.widgets.CalendarWidget;
 
 import android.content.Context;
 import android.content.Intent;
@@ -127,7 +119,7 @@ public class WidgetManager {
 	
 	public static void getFromIntent(Context context, Intent intent) {
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "WidgetManager.getFromIntent()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "WidgetManager.getFromIntent()");
 		
 		synchronized (lock) {
 						
@@ -141,7 +133,7 @@ public class WidgetManager {
 				!b.containsKey("height") ||
 				!b.containsKey("priority") ||
 				!b.containsKey("array") ) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "Malformed WIDGET_UPDATE intent");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Malformed WIDGET_UPDATE intent");
 				return;
 			}
 			
@@ -160,7 +152,7 @@ public class WidgetManager {
 				dataCache = new HashMap<String,WidgetData>();
 			
 			dataCache.put(widget.id, widget);
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Received widget "+widget.id+ " successfully");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Received widget "+widget.id+ " successfully");
 			
 			Idle.updateIdle(context, false); // false as we don't want to trigger another UPDATE broadcast
 			

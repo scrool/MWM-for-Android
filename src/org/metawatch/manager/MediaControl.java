@@ -86,7 +86,7 @@ public class MediaControl {
 	
 	
 	public static void next(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "MediaControl.next()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MediaControl.next()");
 		if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND){
 			context.sendBroadcast(new Intent("com.android.music.musicservicecommand.next"));
 		}
@@ -96,7 +96,7 @@ public class MediaControl {
 	}
 	
 	public static void previous(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "MediaControl.previous()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MediaControl.previous()");
 		if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND){
 			context.sendBroadcast(new Intent("com.android.music.musicservicecommand.previous"));
 		}
@@ -106,7 +106,7 @@ public class MediaControl {
 	}
 	
 	public static void togglePause(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "MediaControl.togglePause()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MediaControl.togglePause()");
 		if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND){
 			context.sendBroadcast(new Intent("com.android.music.musicservicecommand.togglepause"));
 		}
@@ -163,13 +163,13 @@ public class MediaControl {
 	}
 
 	public static void volumeDown(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "MediaControl.volumeDown()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MediaControl.volumeDown()");
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
 	}
 	
 	public static void volumeUp(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "MediaControl.volumeUp()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MediaControl.volumeUp()");
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
 	}
@@ -197,7 +197,7 @@ public class MediaControl {
 
 		/* Ignore if track info hasn't changed. */
 		if (artist.equals(lastTrack.artist) && track.equals(lastTrack.track) && album.equals(lastTrack.album)) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "updateNowPlaying(): Track info hasn't changed, ignoring");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "updateNowPlaying(): Track info hasn't changed, ignoring");
 			return;
 		}
 		

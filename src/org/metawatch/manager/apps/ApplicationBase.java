@@ -8,10 +8,10 @@ import java.util.List;
 import org.metawatch.manager.Application;
 import org.metawatch.manager.FontCache;
 import org.metawatch.manager.Idle;
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.AppLaunchMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Utils;
 import org.metawatch.manager.actions.Action;
 import org.metawatch.manager.actions.ActionManager;
@@ -23,8 +23,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.Paint.Align;
+import android.graphics.Rect;
 import android.preference.PreferenceManager;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
@@ -75,7 +75,7 @@ public abstract class ApplicationBase {
 			Field f = Preferences.class.getDeclaredField(pageSetting);
 			f.setBoolean(null, value);
 		} catch (Exception e) {
-			if (Preferences.logging) Log.e(MetaWatch.TAG, "Error while changing preference attribute", e);
+			if (Preferences.logging) Log.e(MetaWatchStatus.TAG, "Error while changing preference attribute", e);
 		}
 		
 	}
@@ -142,7 +142,7 @@ public abstract class ApplicationBase {
 	
 	public void open(Context context, boolean forcePopup) {
 		if(appState != INACTIVE) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "InternalApp.open(): Ignored, app is not active.");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "InternalApp.open(): Ignored, app is not active.");
 			return;
 		}
 		

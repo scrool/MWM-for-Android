@@ -88,10 +88,10 @@ public class BitmapCache {
 	            	if( entryName.toLowerCase().endsWith(".bmp") || entryName.toLowerCase().endsWith(".png")) {	            	
 		            	Bitmap bitmap = BitmapFactory.decodeByteArray(buffer, 0, size);
 		            	if (bitmap !=null) {
-		            		//if (Preferences.logging) Log.d(MetaWatch.TAG, "Loaded "+ze.getName());
+		            		//if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Loaded "+ze.getName());
 		            		newCache.put(entryName, bitmap);
 		            	} else {
-		            		if (Preferences.logging) Log.d(MetaWatch.TAG, "Failed to load "+ze.getName());
+		            		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Failed to load "+ze.getName());
 		            	}           	
 	            	}
 	            	else if( entryName.toLowerCase().endsWith(".xml")) {

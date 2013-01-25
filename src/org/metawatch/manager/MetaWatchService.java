@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.actions.ActionManager;
 import org.metawatch.manager.apps.ApplicationBase;
@@ -254,7 +253,7 @@ public class MetaWatchService extends Service {
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
 			
-			if (Preferences.logging) Log.d(MetaWatch.TAG, 
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, 
 					"onSharedPreferenceChanged "+key);
 			
 			MetaWatchService.loadPreferences(context);
@@ -493,7 +492,7 @@ public class MetaWatchService extends Service {
 		
 		if(Preferences.autoConnect && getPreviousConnectionState(context)==true) {
 			context.startService(new Intent(context, MetaWatchService.class));
-			if (Preferences.logging) Log.v(MetaWatch.TAG, "Service auto started");
+			if (Preferences.logging) Log.v(MetaWatchStatus.TAG, "Service auto started");
 		} 
 	}
 	
@@ -506,7 +505,7 @@ public class MetaWatchService extends Service {
 				.getDefaultSharedPreferences(this);
 		boolean hideNotificationIcon = sharedPreferences.getBoolean(
 				"HideNotificationIcon", false);
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"MetaWatchService.createNotification(): hideNotificationIcon="
 						+ hideNotificationIcon);
 		int notificationIcon = (hideNotificationIcon ? R.drawable.transparent_square
@@ -522,7 +521,7 @@ public class MetaWatchService extends Service {
 
 	private PendingIntent createNotificationPendingIntent() {
 		return PendingIntent.getActivity(this, 0, new Intent(this,
-				MetaWatch.class), 0);
+				MetaWatchStatus.class), 0);
 	}
 
 	public void updateNotification() {
@@ -530,7 +529,7 @@ public class MetaWatchService extends Service {
 				.getDefaultSharedPreferences(this);
 		boolean hideNotificationIcon = sharedPreferences.getBoolean(
 				"HideNotificationIcon", false);
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"MetaWatchService.updateNotification(): hideNotificationIcon="
 						+ hideNotificationIcon);
 		switch (connectionState) {
@@ -566,7 +565,7 @@ public class MetaWatchService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"MetaWatchService.onCreate()");
 		
 		instance = this;
@@ -611,7 +610,7 @@ public class MetaWatchService extends Service {
 	    // We want this service to continue running until it is explicitly
 	    // stopped, so return sticky.
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"MetaWatchService.onStartCommand()");
 		
 		if (connectionState == ConnectionState.DISCONNECTED)
@@ -627,7 +626,7 @@ public class MetaWatchService extends Service {
 		serviceThread.quit();
 		instance=null;
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"MetaWatchService.onDestroy()");
 		PreferenceManager.getDefaultSharedPreferences(context).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
 		
@@ -655,7 +654,7 @@ public class MetaWatchService extends Service {
 				MetaWatchService.watchType = MetaWatchService.WatchType.ANALOG;
 			}
 
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Remote device address: '"
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Remote device address: '"
 					+ Preferences.watchMacAddress + "'");
 			
 			if (!MetaWatchService.fakeWatch) {
@@ -720,19 +719,19 @@ public class MetaWatchService extends Service {
 			Notification.startNotificationSender(this);
 			
 		} catch (IOException ioexception) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, ioexception.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, ioexception.toString());
 		} catch (SecurityException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 		} catch (NoSuchMethodException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 		} catch (IllegalArgumentException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 		} catch (IllegalAccessException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 		} catch (InvocationTargetException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 		} catch (NullPointerException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 		} finally {
 			if(wakeLock != null && wakeLock.isHeld()) {
 				wakeLock.release();
@@ -756,7 +755,7 @@ public class MetaWatchService extends Service {
 
 		@Override
 		public void handleMessage(Message msg) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "handleMessage "+msg);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "handleMessage "+msg);
 			switch (msg.what) {
             case Msg.REGISTER_CLIENT:
                 mClients.add(msg.replyTo);
@@ -862,7 +861,7 @@ public class MetaWatchService extends Service {
 			} 
 			catch(Throwable T)
 			{
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "serviceThread: " + T.getMessage());	
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "serviceThread: " + T.getMessage());	
 			}
 			finally
 			{				
@@ -886,10 +885,10 @@ public class MetaWatchService extends Service {
 		int result = 0;
 		switch (connectionState) {
 		case ConnectionState.DISCONNECTED:
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "state: disconnected");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "state: disconnected");
 			break;
 		case ConnectionState.CONNECTING:
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "state: connecting");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "state: connecting");
 			// create initial connection or reconnect
 			updateNotification();					
 			connect(MetaWatchService.this);
@@ -900,12 +899,12 @@ public class MetaWatchService extends Service {
 			}
 			break;
 		case ConnectionState.CONNECTED:
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "state: connected");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "state: connected");
 			// read from input stream
 			readFromDevice();
 			break;
 		case ConnectionState.DISCONNECTING:
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "state: disconnecting");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "state: disconnecting");
 			// exit			
 			result = -1;
 			break;
@@ -938,13 +937,13 @@ public class MetaWatchService extends Service {
 				long sleep = voltageFrequency * 60 * 1000;
 				alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, sleep,
 						sender);
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchService.start(): Set voltage reading every "
 								+ sleep + "ms");
 			}
 			
 		} catch (NumberFormatException nfe) {
-			if (Preferences.logging) Log.e(MetaWatch.TAG,
+			if (Preferences.logging) Log.e(MetaWatchStatus.TAG,
 					"MetaWatchService.start(): bad voltage frequency string '"
 							+ voltageFrequencyString + "'");
 		}
@@ -963,7 +962,7 @@ public class MetaWatchService extends Service {
 		
 		try {
 			byte[] bytes = new byte[256];
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "before blocking read");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "before blocking read");
 			// Do a proper read loop 
 			int haveread = 0;
 			int lengthtoread = 4;
@@ -981,7 +980,7 @@ public class MetaWatchService extends Service {
 			// print received
 			String str = "received: ";
 			int len = (bytes[1] & 0xFF);
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "packet length: " + len);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "packet length: " + len);
 
 			for (int i = 0; i < len; i++) {
 				// str+= Byte.toString(bytes[i]) + ", ";
@@ -989,13 +988,13 @@ public class MetaWatchService extends Service {
 						+ Integer.toString((bytes[i] & 0xff) + 0x100, 16)
 								.substring(1) + ", ";
 			}
-			if (Preferences.logging) Log.d(MetaWatch.TAG, str);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, str);
 			/*
 			 * switch (bytes[2]) { case eMessageType.GetDeviceTypeResponse.msg:
-			 * if (Preferences.logging) Log.d(MetaWatch.TAG, "received: device type response"); break;
+			 * if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: device type response"); break;
 			 * case eMessageType.NvalOperationResponseMsg.msg:
-			 * if (Preferences.logging) Log.d(MetaWatch.TAG, "received: nval response"); break; case
-			 * eMessageType.StatusChangeEvent.msg: if (Preferences.logging) Log.d(MetaWatch.TAG,
+			 * if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: nval response"); break; case
+			 * eMessageType.StatusChangeEvent.msg: if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 			 * "received: status change event"); break; }
 			 */
 			/*
@@ -1004,32 +1003,32 @@ public class MetaWatchService extends Service {
 			 * Protocol.setNvalTime(true); }
 			 */
 			if (bytes[2] == eMessageType.NvalOperationResponseMsg.msg) {
-			    if (Preferences.logging) Log.d(MetaWatch.TAG,
+			    if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
                         "MetaWatchService.readFromDevice(): NvalOperationResponseMsg");
 			    // Do something here?
 			} else if (bytes[2] == eMessageType.StatusChangeEvent.msg) { // status
 																	// change
 																	// event
-			    if (Preferences.logging) Log.d(MetaWatch.TAG,
+			    if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
                         "MetaWatchService.readFromDevice(): status change");
 			    if (bytes[4] == 0x01) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"MetaWatchService.readFromDevice(): mode changed");
 					synchronized (Notification.modeChanged) {
 						Notification.modeChanged.notify();
 					}
 			    } else if (bytes[4] == 0x11) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"MetaWatchService.readFromDevice(): scroll request notification");
 
 					synchronized (Notification.scrollRequest) {
 						Notification.scrollRequest.notify();
 					}
 				} else if (bytes[4] == 0x10) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"MetaWatchService.readFromDevice(): scroll complete.");
 				} else if (bytes[4] == 0x02) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"MetaWatchService.readFromDevice(): mode timeout.");
 					// The watch switches back to idle mode (showing the initial page) after 10 minutes
 					// Activate the last used idle page in this case
@@ -1039,7 +1038,7 @@ public class MetaWatchService extends Service {
 
 			else if (bytes[2] == eMessageType.ButtonEventMsg.msg) { // button
 																	// press
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchService.readFromDevice(): button event");
 				pressedButton(bytes[3]&0xFF); // 
 			}
@@ -1049,7 +1048,7 @@ public class MetaWatchService extends Service {
 				if (bytes[4] == 1 || bytes[4] == 4) {
 					watchType = WatchType.ANALOG;
 					watchGen = WatchGen.GEN1;
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"MetaWatchService.readFromDevice(): device type response; analog watch (gen1)");
 
 					if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
@@ -1070,12 +1069,12 @@ public class MetaWatchService extends Service {
 					
 					if (bytes[4] == 5 || bytes[4] == 6) {
 						watchGen = WatchGen.GEN2; 
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"MetaWatchService.readFromDevice(): device type response; Strata/Frame (gen2)");
 					}
 					else {
 						watchGen = WatchGen.GEN1;
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"MetaWatchService.readFromDevice(): device type response; digital watch (gen1)");
 					}
 					
@@ -1110,7 +1109,7 @@ public class MetaWatchService extends Service {
 				
 				/* Notify watch on connection if requested. */
 				boolean notifyOnConnect = sharedPreferences.getBoolean("NotifyWatchOnConnect", false);
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "MetaWatchService.connect(): notifyOnConnect=" + notifyOnConnect);
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MetaWatchService.connect(): notifyOnConnect=" + notifyOnConnect);
 				if (notifyOnConnect) {
 					NotificationBuilder.createOtherNotification(context, null, "MetaWatch", getResources().getString(R.string.connection_connected), 1);
 				}
@@ -1122,7 +1121,7 @@ public class MetaWatchService extends Service {
 				boolean batteryCharging = bytes[5] > 0;
 				float batterySense = (((int) bytes[7] << 8) + (int) bytes[6]) / 1000.0f;
 				float batteryAverage = (((int) bytes[9] << 8) + (int) bytes[8]) / 1000.0f;
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchService.readFromDevice(): received battery voltage response."
 								+ " power_good=" + powerGood
 								+ " battery_charging=" + batteryCharging
@@ -1147,7 +1146,7 @@ public class MetaWatchService extends Service {
 			} else if (bytes[2] == eMessageType.ReadLightSensorResponse.msg) {
 				float lightSense = (((int) bytes[1] << 8) + (int) bytes[0]) / 1000.0f;
 				float lightAverage = (((int) bytes[3] << 8) + (int) bytes[2]) / 1000.0f;
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchService.readFromDevice(): received light sensor response."
 								+ " light_sense=" + lightSense
 								+ " light_average=" + lightAverage);
@@ -1155,7 +1154,7 @@ public class MetaWatchService extends Service {
 				long timeNow = System.currentTimeMillis();
 				long roundTrip = timeNow - Monitors.getRTCTimestamp;
 				
-				if (Preferences.logging) Log.d(MetaWatch.TAG, 
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, 
 						"MetaWatchService.readFromDevice(): received rtc response."
 								+ " round trip= "+roundTrip );
 				
@@ -1164,15 +1163,15 @@ public class MetaWatchService extends Service {
 				Protocol.setRealTimeClock(context);
 				
 			} else {
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchService.readFromDevice(): Unknown message : 0x"+Integer.toString((bytes[2] & 0xff) + 0x100, 16).substring(1) + ", ");
 			}
 
 		} catch (IOException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 			resetConnection();
 		} catch(ArrayIndexOutOfBoundsException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, e.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, e.toString());
 			resetConnection();
 		} finally {
 			if(wakeLock != null && wakeLock.isHeld()) {
@@ -1184,7 +1183,7 @@ public class MetaWatchService extends Service {
 	}
 	
 	private void resetConnection() {
-		Log.d(MetaWatch.TAG, "MetaWatchService.resetConnection()");
+		Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
 		
 		wakeLock.acquire();
 		
@@ -1208,7 +1207,7 @@ public class MetaWatchService extends Service {
 			intent.putExtra("state", connected);
 			sendBroadcast(intent);
 			notifyClients();
-			if (Preferences.logging) Log.d(MetaWatch.TAG,
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 					"MetaWatchService.broadcastConnection(): Broadcast connection change: state='"
 							+ connected + "'");
 			Protocol.resetLCDDiffBuffer();
@@ -1217,7 +1216,7 @@ public class MetaWatchService extends Service {
 
 	static long lastOledCrownPress = 0;
 	void pressedButton(int button) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "button code: " + Integer.toString(button));
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "button code: " + Integer.toString(button));
 		
 		wakeLock.acquire();
 		
@@ -1226,7 +1225,7 @@ public class MetaWatchService extends Service {
 			if(button>0 && Preferences.hapticFeedback)
 				Protocol.vibrate(5, 5, 2);
 	
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "MetaWatchService.pressedButton(): watchState="
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MetaWatchService.pressedButton(): watchState="
 					+ watchState);
 			switch (watchState) {
 			case WatchStates.IDLE: {
@@ -1326,7 +1325,7 @@ public class MetaWatchService extends Service {
 		activityManager.getMemoryInfo(mi);
 		long availableMegs = mi.availMem / 1048576L;
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"MetaWatchService.onLowMemory(): " + availableMegs + "Mb free");	
 		
 		super.onLowMemory();

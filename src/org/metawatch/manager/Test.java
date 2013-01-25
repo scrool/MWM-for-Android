@@ -36,7 +36,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Monitors.LocationData;
@@ -47,14 +46,18 @@ import android.content.Context;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.util.Log;
 
-public class Test extends PreferenceActivity {
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.MenuItem;
+
+public class Test extends SherlockPreferenceActivity {
 	
 	Context context;
 	PreferenceScreen preferenceScreen;
+	ActionBar mActionBar;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,16 @@ public class Test extends PreferenceActivity {
 		addPreferencesFromResource(R.layout.test);
 		
 		preferenceScreen = getPreferenceScreen();
+		
+		processActionBar();
+		
+	}
+	
+	private void processActionBar() {
+		mActionBar = getSupportActionBar();
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setDisplayShowTitleEnabled(true);
+		this.invalidateOptionsMenu();
 	}
 	
 	@Override
@@ -88,7 +101,7 @@ public class Test extends PreferenceActivity {
 									"Display A, line 2"), Protocol
 							.createOled2lines(context, "Display B, line 1",
 									"Display B, line 2"), null, 0, null, "notification");
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "Notification timeout is: " + Notification.getDefaultNotificationTimeout(context));
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Notification timeout is: " + Notification.getDefaultNotificationTimeout(context));
 					
 				}
 				return true;
@@ -314,7 +327,7 @@ public class Test extends PreferenceActivity {
 		    	//Protocol.enableMediaButtons();
 		    	//Protocol.queryNvalTime();
 		    	/*
-		    	if (Preferences.logging) Log.d(MetaWatch.TAG, "sending notif test");
+		    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "sending notif test");
 				Protocol.loadTemplate(2);
 				Protocol.sendLcdBitmap(Protocol.createTextBitmap(context, "abc"), true);
 				Protocol.updateDisplay(2);
@@ -460,5 +473,14 @@ public class Test extends PreferenceActivity {
 			MetaWatchService.testSmsLoop.stop();
 	}
 	
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case android.R.id.home:
+    		finish();
+    		return true;
+    	default:
+    		return false;
+    	}
+	}
 }

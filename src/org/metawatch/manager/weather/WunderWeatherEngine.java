@@ -15,10 +15,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.metawatch.manager.Idle;
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.Utils;
 
@@ -60,11 +60,11 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 			if (isUpdateRequired(weatherData)) {
 
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG,
+					Log.d(MetaWatchStatus.TAG,
 							"Monitors.updateWeatherDataWunderground(): start");
 
 				if (Preferences.wundergroundKey.equals("")) {
-					Log.e(MetaWatch.TAG,
+					Log.e(MetaWatchStatus.TAG,
 							"Weather Wunderground requires a personal key to be configured!");
 					return weatherData;
 				}
@@ -120,13 +120,13 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 				break;	
 				
 				default:
-					Log.e(MetaWatch.TAG, "Unknown geolocation mode");
+					Log.e(MetaWatchStatus.TAG, "Unknown geolocation mode");
 					return weatherData;
 				}
 				
 
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, "Request: " + requestUrl);
+					Log.d(MetaWatchStatus.TAG, "Request: " + requestUrl);
 
 				JSONObject json = getJSONfromURL(requestUrl);
 
@@ -228,10 +228,10 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 				weatherData.error = true;
 			
 			if (Preferences.logging)
-				Log.e(MetaWatch.TAG, "Exception while retreiving weather", e);
+				Log.e(MetaWatchStatus.TAG, "Exception while retreiving weather", e);
 		} finally {
 			if (Preferences.logging)
-				Log.d(MetaWatch.TAG, "Monitors.updateWeatherData(): finish");
+				Log.d(MetaWatchStatus.TAG, "Monitors.updateWeatherData(): finish");
 		}
 
 		return weatherData;
@@ -255,7 +255,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 
 		} catch (Exception e) {
 			if (Preferences.logging)
-				Log.e(MetaWatch.TAG, "Error in http connection " + e.toString());
+				Log.e(MetaWatchStatus.TAG, "Error in http connection " + e.toString());
 			throw Utils.createCompatibleIOException(e);
 		}
 
@@ -273,7 +273,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 				result = sb.toString();
 			} catch (Exception e) {
 				if (Preferences.logging)
-					Log.e(MetaWatch.TAG,
+					Log.e(MetaWatchStatus.TAG,
 							"Error converting result " + e.toString());
 			}
 
@@ -299,7 +299,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 				jArray = new JSONObject(result);
 			} catch (JSONException e) {
 				if (Preferences.logging)
-					Log.e(MetaWatch.TAG, "Error parsing data " + e.toString());
+					Log.e(MetaWatchStatus.TAG, "Error parsing data " + e.toString());
 				throw Utils.createCompatibleIOException(e);
 			}
 		}

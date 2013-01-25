@@ -9,10 +9,10 @@ import java.util.Map;
 import org.metawatch.manager.FontCache;
 import org.metawatch.manager.FontCache.FontSize;
 import org.metawatch.manager.Idle;
-import org.metawatch.manager.MetaWatch;
+import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
-import org.metawatch.manager.MetaWatchService;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Monitors;
 import org.metawatch.manager.Protocol;
 import org.metawatch.manager.Utils;
@@ -138,7 +138,7 @@ public class CalendarApp extends ApplicationBase {
 				}
 				
 				if (readCalendar) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarApp.refresh() start");
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "CalendarApp.refresh() start");
 					
 					Calendar cal = (Calendar)displayDate.clone();
 					cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -150,7 +150,7 @@ public class CalendarApp extends ApplicationBase {
 					
 					Idle.updateIdle(context, false);
 										
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "CalendarApp.refresh() stop - "+ (calendarEntries == null ? "0" : calendarEntries.size()) + " entries found");   
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "CalendarApp.refresh() stop - "+ (calendarEntries == null ? "0" : calendarEntries.size()) + " entries found");   
 				}
 				
 			}

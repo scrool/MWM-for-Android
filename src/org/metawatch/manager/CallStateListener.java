@@ -55,7 +55,7 @@ class CallStateListener extends PhoneStateListener {
 	public void onCallStateChanged(int state, String incomingNumber) {
 		super.onCallStateChanged(state, incomingNumber);
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "onCallStateChanged "+state+" "+incomingNumber);
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "onCallStateChanged "+state+" "+incomingNumber);
 		
 		if (!MetaWatchService.Preferences.notifyCall)
 			return;
@@ -104,7 +104,7 @@ class CallStateListener extends PhoneStateListener {
 	public void onMessageWaitingIndicatorChanged(boolean messageWaiting) {
 		Call.voicemailWaiting = messageWaiting;
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "onMessageWaitingIndicatorChanged "+messageWaiting);
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "onMessageWaitingIndicatorChanged "+messageWaiting);
 		
 		if (Preferences.notifyNewVoicemail) {
 			

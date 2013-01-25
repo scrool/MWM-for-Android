@@ -39,10 +39,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -65,14 +63,20 @@ import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-public class DeviceSelection extends Activity {
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 
+public class DeviceSelection extends SherlockFragmentActivity {
+
+	private ActionBar mActionBar;
+	
 	class Receiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			
 			if (intent.getAction().equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "discovery finished");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "discovery finished");
 				
 				ProgressBar progress = (ProgressBar) findViewById(R.id.progressScanning);
 				progress.setVisibility(ProgressBar.INVISIBLE);
@@ -88,7 +92,7 @@ public class DeviceSelection extends Activity {
 			}
 			
 			if (intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "device found");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "device found");
 				
 				BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 				
@@ -101,6 +105,14 @@ public class DeviceSelection extends Activity {
 				addToList(deviceMac, deviceName);
 			}
 		}
+		
+	}
+	
+	private void processActionBar() {
+		mActionBar = getSupportActionBar();
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setDisplayShowTitleEnabled(true);
+		this.invalidateOptionsMenu();
 	}
 	
 	static Context context;
@@ -109,7 +121,7 @@ public class DeviceSelection extends Activity {
 	Set<String> foundMacs = new TreeSet<String>();
 	private Receiver receiver;
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		context = this;
 		
@@ -132,12 +144,12 @@ public class DeviceSelection extends Activity {
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "device selected: " + arg2);
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "device selected: " + arg2);
 				
 				Map<String, String> map = list.get(arg2);
 				String mac = map.get("mac");
 				
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "mac selected: " + mac);
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "mac selected: " + mac);
 				
 				MetaWatchService.Preferences.watchMacAddress = mac;
 				MetaWatchService.saveMac(context, mac);
@@ -184,7 +196,9 @@ public class DeviceSelection extends Activity {
 		
 		if( MetaWatchService.bluetoothAdapter != null )
 			startDiscovery();
-	
+		
+		processActionBar();
+		
 	}
 	
 	void startDiscovery() {
@@ -248,5 +262,16 @@ public class DeviceSelection extends Activity {
 		super.onDestroy();
 		if (receiver!=null)
 			unregisterReceiver(receiver);
+	}
+	
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case android.R.id.home:
+    		finish();
+    		return true;
+    	default:
+    		return false;
+    	}
 	}
 }

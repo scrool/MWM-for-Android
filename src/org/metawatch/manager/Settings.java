@@ -35,7 +35,6 @@ package org.metawatch.manager;
 import java.util.List;
 import java.util.Map;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.actions.Action;
 import org.metawatch.manager.actions.ActionManager;
@@ -56,16 +55,19 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.util.Log;
 import android.webkit.WebView;
 
-public class Settings extends PreferenceActivity {
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockPreferenceActivity;
+import com.actionbarsherlock.view.MenuItem;
+
+public class Settings extends SherlockPreferenceActivity {
 
 	static CharSequence[] entriesArray;
 	static CharSequence[] entryValuesArray;
-
+	private ActionBar mActionBar;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +82,7 @@ public class Settings extends PreferenceActivity {
 		discovery.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			public boolean onPreferenceClick(Preference arg0) {
 				
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "discovery click");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "discovery click");
 				
 				startActivity(new Intent(Settings.this, DeviceSelection.class));
 				
@@ -92,7 +94,7 @@ public class Settings extends PreferenceActivity {
 		theme.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			public boolean onPreferenceClick(Preference arg0) {
 				
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "theme click");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "theme click");
 				
 				startActivity(new Intent(Settings.this, ThemeContainer.class));
 				
@@ -135,7 +137,7 @@ public class Settings extends PreferenceActivity {
 							System.currentTimeMillis() + 1000,
 							PendingIntent.getActivity(Settings.this,
 									0,
-									new Intent(Settings.this, MetaWatch.class),
+									new Intent(Settings.this, MetaWatchStatus.class),
 									0));					
 					android.os.Process.sendSignal(android.os.Process.myPid(), android.os.Process.SIGNAL_KILL);
 				}
@@ -165,7 +167,14 @@ public class Settings extends PreferenceActivity {
 			findPreference("InsecureBtSocket").setEnabled(false);	
 		}
 		
-		super.onStart();
+		processActionBar();
+	}
+	
+	private void processActionBar() {
+		mActionBar = getSupportActionBar();
+		mActionBar.setDisplayHomeAsUpEnabled(true);
+		mActionBar.setDisplayShowTitleEnabled(true);
+		this.invalidateOptionsMenu();
 	}
 	
 	@Override
@@ -179,7 +188,7 @@ public class Settings extends PreferenceActivity {
 		AppData[] data = AppManager.getAppInfos();	
 		for (AppData appEntry : data) {
 			
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Adding setting for "+appEntry.id);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Adding setting for "+appEntry.id);
 		
 			CheckBoxPreference test = new CheckBoxPreference(this);
 			test.setKey(appEntry.getPageSettingName());
@@ -278,4 +287,14 @@ public class Settings extends PreferenceActivity {
 		System.exit(0);
 	}
 	
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case android.R.id.home:
+    		finish();
+    		return true;
+    	default:
+    		return false;
+    	}
+	}
 }

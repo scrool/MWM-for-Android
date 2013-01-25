@@ -103,7 +103,7 @@ public class Notification {
 					MetaWatchService.watchState = MetaWatchService.WatchStates.NOTIFICATION;
 					MetaWatchService.WatchModes.NOTIFICATION = true;
 					
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"Notification:" + notification.description + " @ " + Utils.ticksToText(context, notification.timestamp) );
 
 					if (MetaWatchService.watchType == WatchType.DIGITAL) {
@@ -113,7 +113,7 @@ public class Notification {
 									MetaWatchService.WatchBuffers.NOTIFICATION);
 							currentNotificationPage = 0;
 							
-							if (Preferences.logging) Log.d(MetaWatch.TAG,
+							if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 									"Notification contains " + notification.bitmaps.length + " bitmaps.");
 														
 						}
@@ -146,7 +146,7 @@ public class Notification {
 						if (Preferences.notifyLight)
 							Protocol.ledChange(true);
 
-						if (Preferences.logging) Log.d(MetaWatch.TAG, "notif bitmap sent from thread");
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "notif bitmap sent from thread");
 
 					} else {
 
@@ -162,7 +162,7 @@ public class Notification {
 
 						if (notification.oledScroll != null) {
 
-							if (Preferences.logging) Log.d(MetaWatch.TAG, "notification.scrollLength = "
+							if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "notification.scrollLength = "
 									+ notification.scrollLength);
 
 							/*
@@ -173,7 +173,7 @@ public class Notification {
 							SharedPreferences sharedPreferences = PreferenceManager
 									.getDefaultSharedPreferences(context);							
 							if (sharedPreferences.getBoolean("pauseBeforeScrolling", false)) {
-								if (Preferences.logging) Log.d(MetaWatch.TAG,
+								if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 										"Pausing before scrolling.");
 								Thread.sleep(3000);
 							}
@@ -236,7 +236,7 @@ public class Notification {
 					/* Do the timeout and button handling. */
 					if (notification.timeout < 0) {
 						long startTicks = System.currentTimeMillis(); 
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"NotificationSender.run(): Notification sent, waiting for dismiss " );
 						
 						int timeout = getStickyNotificationTimeout(context);
@@ -247,7 +247,7 @@ public class Notification {
 									buttonPressed.wait(timeout);	
 								}
 							} catch (InterruptedException e) {
-								if (Preferences.logging) Log.d(MetaWatch.TAG, "Button wait interrupted - " + e.getMessage());
+								if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Button wait interrupted - " + e.getMessage());
 								e.printStackTrace();
 							}
 							
@@ -266,7 +266,7 @@ public class Notification {
 								notifyButtonPress = NOTIFICATION_DISMISS;
 							}
 							
-							if (Preferences.logging) Log.d(MetaWatch.TAG,
+							if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 									"Displaying page " + currentNotificationPage +" / "+ notification.bitmaps.length );
 							
 							Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
@@ -277,17 +277,17 @@ public class Notification {
 						Protocol.disableButton(1, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right middle
 						Protocol.disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right bottom
 					
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"NotificationSender.run(): Done sleeping.");
 						
 					}
 					else {
 						
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"NotificationSender.run(): Notification sent, sleeping for "
 										+ notification.timeout + "ms");
 						Thread.sleep(notification.timeout);
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"NotificationSender.run(): Done sleeping.");
 					}
 					
@@ -303,13 +303,13 @@ public class Notification {
 
 				} catch (InterruptedException ie) {
 					/* If we've been interrupted, exit gracefully. */
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"NotificationSender was interrupted waiting for next notification, exiting.");
 					break;
 				}
 				catch (Exception e)
 				{
-					if (Preferences.logging) Log.e(MetaWatch.TAG, "Exception in NotificationSender: "+e.toString());
+					if (Preferences.logging) Log.e(MetaWatchStatus.TAG, "Exception in NotificationSender: "+e.toString());
 				}
 			}
 		}
@@ -443,7 +443,7 @@ public class Notification {
 			VibratePattern vibratePattern, int timeout, String description) {
 		
 		if (bitmaps!=null) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Notification comprised of "+bitmaps.length+" bitmaps - "+description);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Notification comprised of "+bitmaps.length+" bitmaps - "+description);
 		}
 		
 		NotificationType notification = new NotificationType();
@@ -508,7 +508,7 @@ public class Notification {
 	}
 
 	private static void exitNotification(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Notification.exitNotification()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Notification.exitNotification()");
 		// disable notification mode
 		MetaWatchService.WatchModes.NOTIFICATION = false;
 
@@ -525,7 +525,7 @@ public class Notification {
 	}
 	
 	public static void replay(Context context, NotificationType notification) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Notification.replay()");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Notification.replay()");
 		if (notification != null) {
 			notification.vibratePattern.vibrate = false;
 			notification.isNew = false;
@@ -534,7 +534,7 @@ public class Notification {
 	}
 	
 	public static void buttonPressed(int button) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG,
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 				"Notification:Button pressed "+button );
 
 		notifyButtonPress = button;

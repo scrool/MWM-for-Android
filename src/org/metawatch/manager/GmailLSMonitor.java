@@ -88,7 +88,7 @@ public class GmailLSMonitor implements GmailMonitor {
 				context.getContentResolver().registerContentObserver(uri, true, contentObserver);
 			} catch (Exception x) {
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, x.toString());
+					Log.d(MetaWatchStatus.TAG, x.toString());
 			}
 		}
 	}
@@ -155,12 +155,12 @@ public class GmailLSMonitor implements GmailMonitor {
 				}
 			} catch (Exception x) {
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG, "GmailLSMonitor.getUnreadCount(): caught exception: " + x.toString());
+					Log.d(MetaWatchStatus.TAG, "GmailLSMonitor.getUnreadCount(): caught exception: " + x.toString());
 			} finally {
 				ch.closeAll();
 			}
 		}
-		// if (Preferences.logging) Log.d(MetaWatch.TAG, "GmailLSMonitor.getUnreadCount(): couldn't find count, returning 0.");
+		// if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "GmailLSMonitor.getUnreadCount(): couldn't find count, returning 0.");
 		return intUnread;
 	}
 	

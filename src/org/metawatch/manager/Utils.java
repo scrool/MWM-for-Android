@@ -266,7 +266,7 @@ public class Utils {
 			}
 		}
 		catch (java.lang.IllegalStateException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Failed to query SMS content provider");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Failed to query SMS content provider");
 		}
 		
 		//MMS
@@ -288,7 +288,7 @@ public class Utils {
 			}
 		}
 		catch (java.lang.IllegalStateException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Failed to query MMS content provider");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Failed to query MMS content provider");
 		}
 		
 		return count;
@@ -348,7 +348,7 @@ public class Utils {
 		
 		CursorHandler ch = new CursorHandler();
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Calendars to display: "+ ((Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars ) );
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Calendars to display: "+ ((Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars ) );
 		
 		try {
 			ContentResolver cr = context.getContentResolver();
@@ -386,7 +386,7 @@ public class Utils {
 			}   
 		}
 		catch(Exception x) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Utils.readCalendar(): caught exception: " + x.toString());
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Utils.readCalendar(): caught exception: " + x.toString());
 			return null;
 		}
 		finally {
@@ -416,7 +416,7 @@ public class Utils {
 		try {
 			Cursor cur = ch.add(context.getContentResolver().query(Uri.parse(k9UnreadUri+"/"+accountNumber+"/"), null, null, null, null));
 		    if (cur!=null) {
-		    	if (Preferences.logging) Log.d(MetaWatch.TAG, "k9: "+cur.getCount()+ " unread rows returned");
+		    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "k9: "+cur.getCount()+ " unread rows returned");
 		    			    	
 		    	if (cur.getCount()>0) {
 			    	cur.moveToFirst();
@@ -426,7 +426,7 @@ public class Utils {
 			    	do {
 			    		String acct = cur.getString(nameIndex);
 			    		int unreadForAcct = cur.getInt(unreadIndex);
-			    		if (Preferences.logging) Log.d(MetaWatch.TAG, "k9: "+acct+" - "+unreadForAcct+" unread");
+			    		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "k9: "+acct+" - "+unreadForAcct+" unread");
 			    		unread += unreadForAcct;
 			    	} while (cur.moveToNext());
 				    cur.close();
@@ -434,11 +434,11 @@ public class Utils {
 		    	}
 		    }
 		    else {
-		    	if (Preferences.logging) Log.d(MetaWatch.TAG, "Failed to query k9 unread contentprovider.");
+		    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Failed to query k9 unread contentprovider.");
 		    }
 		}
 		catch (IllegalStateException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "k-9 unread uri unknown.");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "k-9 unread uri unknown.");
 		}
 		return 0;
 	}
@@ -460,21 +460,21 @@ public class Utils {
 		try {
 			Cursor cur = ch.add( context.getContentResolver().query(k9AccountsUri, null, null, null, null) );
 		    if (cur!=null) {
-		    	if (Preferences.logging) Log.d(MetaWatch.TAG, "k9: "+cur.getCount()+ " account rows returned");
+		    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "k9: "+cur.getCount()+ " account rows returned");
 
 		    	int count = cur.getCount();
 		    	
 		    	return count;
 		    }
 		    else {
-		    	if (Preferences.logging) Log.d(MetaWatch.TAG, "Failed to query k9 unread contentprovider.");
+		    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Failed to query k9 unread contentprovider.");
 		    }
 		}
 		catch (IllegalStateException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "k-9 accounts uri unknown.");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "k-9 accounts uri unknown.");
 		}
 		catch (java.lang.SecurityException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "Permissions failure accessing k-9 databases");
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Permissions failure accessing k-9 databases");
 		}
 		finally {
 			ch.closeAll();
@@ -1015,7 +1015,7 @@ public class Utils {
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + ms, sender);
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Refreshing App screen in "+ms+"ms");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Refreshing App screen in "+ms+"ms");
     }
     
     public static boolean isSameDate(Calendar cal1, Calendar cal2) {

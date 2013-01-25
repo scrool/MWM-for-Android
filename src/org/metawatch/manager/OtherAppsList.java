@@ -5,10 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -32,7 +30,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class OtherAppsList extends Activity {
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+public class OtherAppsList extends SherlockFragmentActivity {
 
 	public static final String DEFAULT_BLACKLIST = 
 			"com.android.mms," +
@@ -201,7 +201,7 @@ public class OtherAppsList extends Activity {
 	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.other_apps_list);
@@ -235,7 +235,7 @@ public class OtherAppsList extends Activity {
 			String blacklist = sb.toString();
 			editor.putString("appBlacklist", blacklist);
 			editor.commit();		
-			if (Preferences.logging) Log.d(MetaWatch.TAG, "OtherAppsList: " + blacklist);
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "OtherAppsList: " + blacklist);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

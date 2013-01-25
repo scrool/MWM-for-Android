@@ -38,7 +38,6 @@ import java.io.InputStream;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.Notification.VibratePattern;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -46,10 +45,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-public class ImageViewer extends Activity {
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+public class ImageViewer extends SherlockFragmentActivity {
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
         Intent i = getIntent();
@@ -57,7 +58,7 @@ public class ImageViewer extends Activity {
         Uri u = null;
         
         if (action==null) {
-        	if (Preferences.logging) Log.e(MetaWatch.TAG, "ImageViewer.onCreate() null action");
+        	if (Preferences.logging) Log.e(MetaWatchStatus.TAG, "ImageViewer.onCreate() null action");
         	finish();
         	return;
         }
@@ -67,14 +68,14 @@ public class ImageViewer extends Activity {
         } else if (action.equals(Intent.ACTION_SEND)) {
         	u = i.getParcelableExtra(Intent.EXTRA_STREAM);
         } else {
-        	if (Preferences.logging) Log.e(MetaWatch.TAG, "ImageViewer.onCreate() Unknown intent: " + action);
+        	if (Preferences.logging) Log.e(MetaWatchStatus.TAG, "ImageViewer.onCreate() Unknown intent: " + action);
         	finish();
         	return;
         }
         
         if (Preferences.logging) {
-        	Log.d(MetaWatch.TAG, "action: " + i.getAction());
-        	Log.d(MetaWatch.TAG, "data: "+ u.getPath() );
+        	Log.d(MetaWatchStatus.TAG, "action: " + i.getAction());
+        	Log.d(MetaWatchStatus.TAG, "data: "+ u.getPath() );
         }
         
         InputStream is;

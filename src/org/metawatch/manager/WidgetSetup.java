@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.widgets.InternalWidget.WidgetData;
 import org.metawatch.manager.widgets.WidgetManager;
@@ -29,7 +28,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class WidgetSetup extends Activity {
+import com.actionbarsherlock.app.SherlockFragment;
+
+public class WidgetSetup extends SherlockFragment {
+	
+	private Context mContext;
+	private LinearLayout ll;
+	
+	public static WidgetSetup newInstance() {
+		return new WidgetSetup();
+	}
+
 	
 	private class WidgetListAdaptor extends BaseExpandableListAdapter {
 		
@@ -235,31 +244,35 @@ public class WidgetSetup extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        setContentView(R.layout.widget_setup);  
+        mContext = getActivity();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    	View view = inflater.inflate(R.layout.widget_setup, null);
+		widgetList = (ExpandableListView) view.findViewById(R.id.widgetList);		
+		ll = (LinearLayout) view.findViewById(R.id.idlePreviews);
+		return view;
     }
     
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        
-        setContentView(R.layout.widget_setup);
         adapter = null;
         onStart();
     }
     
 	@Override
-	protected void onStart() {
+	public void onStart() {
 		super.onStart();
 		
 		if(adapter!=null)
 			return;
 			
-		widgetList = (ExpandableListView) findViewById(R.id.widgetList);		
 		widgetList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 			
 			public boolean onChildClick(ExpandableListView parent, View v,
 					int groupPosition, int childPosition, long id) {
-				Intent i = new Intent(getApplicationContext(), WidgetPicker.class);
+				Intent i = new Intent(mContext, WidgetPicker.class);
 				i.putExtra("groupPosition", groupPosition);
 				i.putExtra("childPosition", childPosition);
 				startActivityForResult(i,  1);
@@ -268,7 +281,7 @@ public class WidgetSetup extends Activity {
 		});
 				
 		adapter = new WidgetListAdaptor();
-		adapter.init(this);
+		adapter.init(mContext);
 		
 	    widgetList.setAdapter(adapter);
 		
@@ -291,9 +304,9 @@ public class WidgetSetup extends Activity {
         		adapter.notifyDataSetChanged();
             	storeWidgetLayout();
             	refreshPreview();
-            	Idle.updateIdle(this, true);
+            	Idle.updateIdle(mContext, true);
     	        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-    	        	Idle.sendOledIdle(this);
+    	        	Idle.sendOledIdle(mContext);
     	        }
         	
         	}
@@ -301,17 +314,16 @@ public class WidgetSetup extends Activity {
     }
     
     private void refreshPreview() {
-    	if (Preferences.logging) Log.d(MetaWatch.TAG, "WidgetSetup.refreshPreview() start");
+    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() start");
     	if (!Idle.isBusy())
-    		Idle.updateIdlePages(this, true);
+    		Idle.updateIdlePages(mContext, true);
     	
-    	LinearLayout ll = (LinearLayout) findViewById(R.id.idlePreviews);
     	
     	ll.removeAllViews();
     	  	
     	int pages = Idle.numPages();
     	for(int i=0; i<pages; ++i) {
-    		Bitmap bmp = Idle.createIdle(this, true, i);;
+    		Bitmap bmp = Idle.createIdle(mContext, true, i);;
 
     		if (bmp!=null) {
     			
@@ -327,9 +339,8 @@ public class WidgetSetup extends Activity {
         		
         		bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth()*2, bmp.getHeight()*2, false);
         		    			
-	    		LayoutInflater factory = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	    		LayoutInflater factory = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	
-	    		final Context context = this;
 	    		View v = factory.inflate(viewId, null);
 	    		ImageView iv = (ImageView)v.findViewById(R.id.image);
 	    		iv.setImageBitmap(bmp);
@@ -340,7 +351,7 @@ public class WidgetSetup extends Activity {
 	    		    //@Override
 	    		    public void onClick(View v) {
 	    		    	Integer page = (Integer)v.getTag();
-	    		        Idle.toPage(context, page);
+	    		        Idle.toPage(mContext, page);
 	    		        Idle.updateIdle(v.getContext(), true);
 	    		        
 	    		        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
@@ -351,10 +362,10 @@ public class WidgetSetup extends Activity {
 	    		ll.addView(v);
     		}
     	}
-    	if (Preferences.logging) Log.d(MetaWatch.TAG, "WidgetSetup.refreshPreview() end");
+    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() end");
     }
     
     private void storeWidgetLayout() {
-    	MetaWatchService.saveWidgets(this, adapter.get());
+    	MetaWatchService.saveWidgets(mContext, adapter.get());
     }
 }

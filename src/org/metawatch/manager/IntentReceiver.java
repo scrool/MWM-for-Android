@@ -60,7 +60,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		
 		MetaWatchService.autoStartService(context);
 		
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "IntentReceiver.onReceive(): received intent, action='"+action+"'");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): received intent, action='"+action+"'");
 		
 		try {
 			
@@ -68,17 +68,17 @@ public class IntentReceiver extends BroadcastReceiver {
 			if (Preferences.logging && b != null) {
 				try {
 					for (String key : b.keySet()) {
-							Log.d(MetaWatch.TAG, "extra: " + key + " = '" + b.get(key) + "'");
+							Log.d(MetaWatchStatus.TAG, "extra: " + key + " = '" + b.get(key) + "'");
 					}
 					
 					String dataString = intent.getDataString();
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "dataString: "
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "dataString: "
 							+ (dataString == null ? "null" : "'" + dataString + "'"));
 					
 				} catch ( android.os.BadParcelableException e ) {
-					Log.d(MetaWatch.TAG, "BadParcelableException listing extras");
+					Log.d(MetaWatchStatus.TAG, "BadParcelableException listing extras");
 				} catch ( java.lang.RuntimeException e ) {
-					Log.d(MetaWatch.TAG, "RuntimeException listing extras");
+					Log.d(MetaWatchStatus.TAG, "RuntimeException listing extras");
 				}
 			}
 			
@@ -104,29 +104,29 @@ public class IntentReceiver extends BroadcastReceiver {
 						if (count > 0) {
 							NotificationBuilder.createGmailBlank(context,
 									recipient, count);
-							if (Preferences.logging) Log.d(MetaWatch.TAG,
+							if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 									"Received Gmail new message notification; "
 											+ count + " new message(s).");
 						} else {
-							if (Preferences.logging) Log.d(MetaWatch.TAG,
+							if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 									"Ignored Gmail new message notification; no new messages.");
 						}
 	
 					} else if (tagLabel.equals("^^unseen-^iim")) {
 	
 						/* This is a total unread count notification. */
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"IntentReceiver.onReceive(): Received Gmail notification: total unread count for '"
 										+ recipient + "' is " + count + ".");
 	
 					} else {
 						/* I have no idea what this is. */
-						if (Preferences.logging) Log.d(MetaWatch.TAG,
+						if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 								"Unknown Gmail notification: tagLabel is '"+tagLabel+"'");
 					}
 	
 					Monitors.updateGmailUnreadCount(recipient, count);
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"IntentReceiver.onReceive(): Cached Gmail unread count for account '"
 									+ recipient + "' is "
 									+ Monitors.getGmailUnreadCount(recipient));
@@ -176,7 +176,7 @@ public class IntentReceiver extends BroadcastReceiver {
 				 *  and adapted for MWM.
 				 */
 				if (!intent.getType().equals("application/vnd.wap.mms-message")) {
-					if (Preferences.logging) Log.e(MetaWatch.TAG, "IntentReceiver.onReceive(): Got wrong data type for MMS: " + intent.getType());
+					if (Preferences.logging) Log.e(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Got wrong data type for MMS: " + intent.getType());
 					return;
 				}
 	
@@ -184,12 +184,12 @@ public class IntentReceiver extends BroadcastReceiver {
 				PduParser parser = new PduParser();
 				PduHeaders headers = parser.parseHeaders(intent.getByteArrayExtra("data"));
 				if (headers == null) {
-					if (Preferences.logging) Log.e(MetaWatch.TAG, "IntentReceiver.onReceive(): Couldn't parse headers for WAP PUSH.");
+					if (Preferences.logging) Log.e(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Couldn't parse headers for WAP PUSH.");
 					return;
 				}
 	
 				int messageType = headers.getMessageType();
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "IntentReceiver.onReceive(): WAP PUSH message type: 0x" + Integer.toHexString(messageType));
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): WAP PUSH message type: 0x" + Integer.toHexString(messageType));
 	
 				// Check if it's a MMS notification
 				if (messageType == PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND) {
@@ -206,7 +206,7 @@ public class IntentReceiver extends BroadcastReceiver {
 				}
 			}
 			else if (action.equals("android.intent.action.NEW_OUTGOING_CALL")) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "Detected outgoing call");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Detected outgoing call");
 				Call.inCall = true;
 				if(intent.hasExtra("android.intent.extra.PHONE_NUMBER"))
 					Call.phoneNumber = intent.getStringExtra("android.intent.extra.PHONE_NUMBER");
@@ -275,7 +275,7 @@ public class IntentReceiver extends BroadcastReceiver {
 			}
 			else if (action.equals("android.intent.action.TIME_SET") ) {
 				
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "IntentReceiver.onReceive(): Received time set intent.");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Received time set intent.");
 				
 				/* The time has changed, so trigger a time update */
 				Protocol.getRealTimeClock();
@@ -283,7 +283,7 @@ public class IntentReceiver extends BroadcastReceiver {
 			}		
 			else if (action.equals("android.intent.action.TIMEZONE_CHANGED") ) {
 				
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "IntentReceiver.onReceive(): Received timezone changed intent.");
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Received timezone changed intent.");
 				
 				/*
 				 * If we're in a new time zone, then the time has probably changed.
@@ -378,10 +378,10 @@ public class IntentReceiver extends BroadcastReceiver {
 				boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
 				
 				if (noConnectivity) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "IntentReceiver.onReceive(): No data connectivity.");
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): No data connectivity.");
 				}
 				else {
-					if (Preferences.logging) Log.d(MetaWatch.TAG, "IntentReceiver.onReceive(): Data connectivity available.");
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Data connectivity available.");
 					
 					Monitors.updateWeatherData(context);
 				}		
@@ -401,7 +401,7 @@ public class IntentReceiver extends BroadcastReceiver {
 			}	
 		} catch (android.os.BadParcelableException e){
 			e.printStackTrace();
-			//if (Preferences.logging) Log.d(MetaWatch.TAG, "BadParcelableException - "+e.getMessage());
+			//if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "BadParcelableException - "+e.getMessage());
 		}
 	}
 }

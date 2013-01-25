@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 
 import android.app.Activity;
@@ -156,14 +155,14 @@ public class ThemePicker extends ListActivity {
 	        File[] themeFiles = searchDir.listFiles();
 			for (File file : themeFiles) {
 				String themeName = file.getName().replace(".zip", "");		
-				if (Preferences.logging) Log.d(MetaWatch.TAG, "Found theme "+themeName);
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Found theme "+themeName);
 				addTheme(BitmapCache.loadTheme(this, themeName));
 			}
         }
         
         Collections.sort(themeList, COMPARATOR);
         
-        if (Preferences.logging) Log.d(MetaWatch.TAG, "Showing " +themeList.size() + " themes");
+        if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Showing " +themeList.size() + " themes");
         
         setListAdapter(new EfficientAdapter(this, themeList));
     }
@@ -197,7 +196,7 @@ public class ThemePicker extends ListActivity {
     	Preferences.themeName = themeList.get(position).name;   	
     	MetaWatchService.saveTheme(this, Preferences.themeName);
     	
-    	if (Preferences.logging) Log.d(MetaWatch.TAG, "Selected theme '"+Preferences.themeName+"'");
+    	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Selected theme '"+Preferences.themeName+"'");
     	
     	setResult(Activity.RESULT_OK, result);
 

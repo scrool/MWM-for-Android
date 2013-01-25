@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import org.metawatch.communityedition.R;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.widgets.InternalWidget.WidgetData;
 import org.metawatch.manager.widgets.WidgetManager;
@@ -167,7 +166,7 @@ public class WidgetPicker extends ListActivity {
         
         Collections.sort(widgetList, COMPARATOR);
         
-        if (Preferences.logging) Log.d(MetaWatch.TAG, "Showing " +widgetList.size() + " widgets");
+        if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Showing " +widgetList.size() + " widgets");
         
     	groupPosition = getIntent().getIntExtra("groupPosition", -1);
     	childPosition = getIntent().getIntExtra("childPosition", -1);

@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.metawatch.manager.FontCache;
 import org.metawatch.manager.MediaControl;
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Protocol;
 import org.metawatch.manager.Utils;
 import org.metawatch.manager.actions.Action;
@@ -49,7 +49,7 @@ public class MediaPlayerApp extends ApplicationBase {
 	}
 
 	public void activate(final Context context, int watchType) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Entering media mode");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Entering media mode");
 		
 		if (watchType == WatchType.DIGITAL) {
 			Protocol.enableButton(1, 0, TOGGLE, MetaWatchService.WatchBuffers.APPLICATION); // right middle - immediate
@@ -87,7 +87,7 @@ public class MediaPlayerApp extends ApplicationBase {
 	}
 	
 	public void deactivate(final Context context, int watchType) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Leaving media mode");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Leaving media mode");
 		
 		if (watchType == WatchType.DIGITAL) {
 			Protocol.disableButton(1, 0, MetaWatchService.WatchBuffers.APPLICATION);

@@ -60,25 +60,25 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 			packageName = event.getPackageName().toString();
 			className = event.getClassName().toString();
 		} catch (java.lang.NullPointerException e) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG,
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 					"MetaWatchAccessibilityService.onAccessibilityEvent(): null package or class name");
 			return;
 		}
 				
 		if (eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
-			if (Preferences.logging) Log.d(MetaWatch.TAG,
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 					"MetaWatchAccessibilityService.onAccessibilityEvent(): Received event, packageName = '"
 							+ packageName + "' className = '" + className + "'");
 	
 			Parcelable p = event.getParcelableData();
 			if (p instanceof android.app.Notification == false) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchAccessibilityService.onAccessibilityEvent(): Not a real notification, ignoring.");
 				return;
 			}
 	
 			android.app.Notification notification = (android.app.Notification) p;
-			if (Preferences.logging) Log.d(MetaWatch.TAG,
+			if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 					"MetaWatchAccessibilityService.onAccessibilityEvent(): notification text = '"
 							+ notification.tickerText + "' flags = "
 							+ notification.flags + " ("
@@ -86,7 +86,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 	
 			if (notification.tickerText == null
 					|| notification.tickerText.toString().trim().length() == 0) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchAccessibilityService.onAccessibilityEvent(): Empty text, ignoring.");
 				return;
 			}
@@ -95,7 +95,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 			
 			if (lastNotificationPackage.equals(packageName) && lastNotificationText.equals(tickerText) &&
 					lastNotificationWhen == notification.when) {
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchAccessibilityService.onAccessibilityEvent(): Duplicate notification, ignoring.");
 				return;
 			}
@@ -110,7 +110,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 			/* Forward calendar event */
 			if (packageName.equals("com.android.calendar")) {
 				if (sharedPreferences.getBoolean("NotifyCalendar", true)) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"onAccessibilityEvent(): Sending calendar event: '"	+ tickerText + "'.");
 					NotificationBuilder.createCalendar(this, tickerText);
 					return;
@@ -120,7 +120,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 			/* Forward google chat or voice event */
 			if (packageName.equals("com.google.android.gsf") || packageName.equals("com.google.android.apps.googlevoice")) {
 				if (sharedPreferences.getBoolean("notifySMS", true)) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"onAccessibilityEvent(): Sending SMS event: '"
 									+ tickerText + "'.");
 					NotificationBuilder.createSMS(this,"Google Message", tickerText);
@@ -150,7 +150,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 			
 			if ((notification.flags & android.app.Notification.FLAG_ONGOING_EVENT) > 0) {
 				/* Ignore updates to ongoing events. */
-				if (Preferences.logging) Log.d(MetaWatch.TAG,
+				if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 						"MetaWatchAccessibilityService.onAccessibilityEvent(): Ongoing event, ignoring.");
 				return;
 			}
@@ -164,7 +164,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 	
 				/* Ignore if on blacklist */
 				if (Arrays.binarySearch(appBlacklist, packageName) >= 0) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"onAccessibilityEvent(): App is blacklisted, ignoring.");
 					return;
 				}
@@ -187,13 +187,13 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 				int buzzes = sharedPreferences.getInt("appVibrate_" + packageName, -1);
 	
 				if (appName == null) {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"onAccessibilityEvent(): Unknown app -- sending notification: '"
 									+ tickerText + "'.");
 					NotificationBuilder.createOtherNotification(this, icon,
 							"Notification", tickerText, buzzes);
 				} else {
-					if (Preferences.logging) Log.d(MetaWatch.TAG,
+					if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
 							"onAccessibilityEvent(): Sending notification: app='"
 									+ appName + "' notification='"
 									+ tickerText + "'.");

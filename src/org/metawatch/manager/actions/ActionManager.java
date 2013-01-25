@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.metawatch.manager.Call;
 import org.metawatch.manager.MediaControl;
-import org.metawatch.manager.Notification;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
+import org.metawatch.manager.Notification;
 import org.metawatch.manager.actions.InternalActions.PhoneCallAction;
 import org.metawatch.manager.actions.InternalActions.PhoneSettingsAction;
 import org.metawatch.manager.apps.ActionsApp;

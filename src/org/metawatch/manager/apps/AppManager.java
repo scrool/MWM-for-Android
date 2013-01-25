@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchStatus;
 
 import android.content.Context;
 import android.content.Intent;
@@ -61,7 +61,7 @@ public class AppManager {
 	}
 	
 	public static void sendDiscoveryBroadcast(Context context) {
-		if (Preferences.logging) Log.d(MetaWatch.TAG, "Broadcasting APPLICATION_DISCOVERY");
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Broadcasting APPLICATION_DISCOVERY");
 		Intent intent = new Intent("org.metawatch.manager.APPLICATION_DISCOVERY");		
 		context.sendBroadcast(intent);
 	}

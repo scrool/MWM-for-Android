@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class ThemeGallery extends Activity {
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+public class ThemeGallery extends SherlockFragmentActivity {
 	WebView mWebView;
 	Activity activity; 
 	

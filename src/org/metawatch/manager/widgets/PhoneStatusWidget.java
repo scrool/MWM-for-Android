@@ -11,8 +11,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.Paint.Align;
+import android.graphics.Point;
 import android.text.TextPaint;
 
 public class PhoneStatusWidget implements InternalWidget {

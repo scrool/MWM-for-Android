@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import org.metawatch.manager.MetaWatch;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Monitors.LocationData;
 
 import android.content.Context;
@@ -33,7 +33,7 @@ public abstract class AbstractWeatherEngine implements WeatherEngine {
 
 			if (diff < TIME_FIVE_MINUTES) {
 				if (Preferences.logging)
-					Log.d(MetaWatch.TAG,
+					Log.d(MetaWatchStatus.TAG,
 							"Skipping weather update - updated less than 5m ago");
 
 				return false;
