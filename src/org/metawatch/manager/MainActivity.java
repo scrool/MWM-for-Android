@@ -6,6 +6,7 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 
 public class MainActivity extends SherlockFragmentActivity {
@@ -14,6 +15,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+	    requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main_activity);
 	}
 		

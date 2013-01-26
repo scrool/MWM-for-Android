@@ -146,20 +146,19 @@ public class MetaWatchStatus extends SherlockFragment {
     @Override
 	public void onResume() {
     	super.onResume();
-    	context.bindService(new Intent(context, MetaWatchService.class), mConnection, 0);
-		context.startService(new Intent(context, MetaWatchService.class));
+    	startService();
 		displayStatus();
     }
     
     @Override
     public void onPause() {
     	super.onPause();
-    	try {
-        	if (mConnection != null)
-        		context.unbindService(mConnection);
-    	} catch(Throwable e) {
-    		//Service not running
-    	}
+    	if (mConnection != null)
+    		try {
+    			context.unbindService(mConnection);
+    		} catch(IllegalArgumentException e) {
+    			
+    		}
     }
     
     static void displayStatus() {
@@ -187,6 +186,7 @@ public class MetaWatchStatus extends SherlockFragment {
     	TextView textView = new TextView(context);
     	textView.setGravity(Gravity.CENTER);
     	Resources res = context.getResources();
+    	textView.append("\n");
     	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
     		if (Monitors.weatherData.error) {
     			Utils.appendColoredText(textView, "ERROR: " , Color.RED);

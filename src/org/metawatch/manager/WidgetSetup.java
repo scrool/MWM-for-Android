@@ -2,6 +2,7 @@ package org.metawatch.manager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,11 +13,12 @@ import org.metawatch.manager.widgets.WidgetManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,36 +33,32 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.SherlockFragment;
 
 public class WidgetSetup extends SherlockFragment {
-	
-	private Context mContext;
 	private LinearLayout ll;
-	
-	public static WidgetSetup newInstance() {
-		return new WidgetSetup();
-	}
+	private ExpandableListView widgetList;
+	private WidgetListAdaptor adapter;
+	private Handler mHandler = new Handler(Looper.getMainLooper());
 
-	
 	private class WidgetListAdaptor extends BaseExpandableListAdapter {
 		
-		private Map<String,WidgetData> widgetMap;
-		private List<List<String>> groups;
-		private LayoutInflater mInflater;
+		private Map<String,WidgetData> widgetMap = new HashMap<String, WidgetData>();
+		private List<List<String>> groups = new ArrayList<List<String>>();
+		private LayoutInflater mInflater = LayoutInflater.from(getActivity());
 		
 		public void init(Context context) {
-			
-			mInflater = LayoutInflater.from(context);
 			
 			widgetMap = WidgetManager.getCachedWidgets(context, null);
 					
 			ArrayList<String> rows = new ArrayList<String>(Arrays.asList(MetaWatchService.getWidgets(context).split("\\|")));
-			groups = new ArrayList<List<String>>();
+			ArrayList<List<String>> pGroups = new ArrayList<List<String>>();
 			
 			for(String line : rows) {
 				String[] widgets = (line).split(",");
 				List<String> list = new ArrayList<String>(Arrays.asList(widgets));
-				groups.add(list);
+				pGroups.add(list);
 			}
-			
+
+			groups = pGroups;
+			notifyDataSetChanged();
 		}
 		
 		public void set(int groupPosition, int childPosition, String value) {
@@ -237,16 +235,6 @@ public class WidgetSetup extends SherlockFragment {
 		}
 		
 	}
-	
-	private ExpandableListView widgetList;
-	private WidgetListAdaptor adapter;
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mContext = getActivity();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     	View view = inflater.inflate(R.layout.widget_setup, null);
@@ -255,24 +243,12 @@ public class WidgetSetup extends SherlockFragment {
 		return view;
     }
     
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        adapter = null;
-        onStart();
-    }
-    
 	@Override
 	public void onStart() {
 		super.onStart();
-		
-		if(adapter!=null)
-			return;
-			
 		widgetList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-			
-			public boolean onChildClick(ExpandableListView parent, View v,
-					int groupPosition, int childPosition, long id) {
-				Intent i = new Intent(mContext, WidgetPicker.class);
+			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+				Intent i = new Intent(getActivity(), WidgetPicker.class);
 				i.putExtra("groupPosition", groupPosition);
 				i.putExtra("childPosition", childPosition);
 				startActivityForResult(i,  1);
@@ -281,11 +257,24 @@ public class WidgetSetup extends SherlockFragment {
 		});
 				
 		adapter = new WidgetListAdaptor();
-		adapter.init(mContext);
-		
 	    widgetList.setAdapter(adapter);
-		
-		refreshPreview();
+	    mHandler.post(mPreviewUpdate);
+	}
+	
+	private Runnable mPreviewUpdate = new Runnable() {
+
+		@Override
+		public void run() {
+			refreshPreview();
+			adapter.init(getActivity());
+		    mHandler.postDelayed(mPreviewUpdate, 3000);
+		}
+	};
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		mHandler.removeCallbacks(mPreviewUpdate);
 	}
 	
     @Override
@@ -304,9 +293,9 @@ public class WidgetSetup extends SherlockFragment {
         		adapter.notifyDataSetChanged();
             	storeWidgetLayout();
             	refreshPreview();
-            	Idle.updateIdle(mContext, true);
+            	Idle.updateIdle(getActivity(), true);
     	        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-    	        	Idle.sendOledIdle(mContext);
+    	        	Idle.sendOledIdle(getActivity());
     	        }
         	
         	}
@@ -316,21 +305,16 @@ public class WidgetSetup extends SherlockFragment {
     private void refreshPreview() {
     	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() start");
     	if (!Idle.isBusy())
-    		Idle.updateIdlePages(mContext, true);
-    	
-    	
+    		Idle.updateIdlePages(getActivity(), true);
     	ll.removeAllViews();
-    	  	
     	int pages = Idle.numPages();
     	for(int i=0; i<pages; ++i) {
-    		Bitmap bmp = Idle.createIdle(mContext, true, i);;
+    		Bitmap bmp = Idle.createIdle(getActivity(), true, i);;
 
     		if (bmp!=null) {
     			
     			int backCol = Color.LTGRAY;
-    			int viewId = (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) 
-    					? R.layout.idle_screen_preview_oled
-    				    : R.layout.idle_screen_preview;
+    			int viewId = (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) ? R.layout.idle_screen_preview_oled : R.layout.idle_screen_preview;
     			
         		if(Preferences.invertLCD || MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
         			bmp = Utils.invertBitmap(bmp);
@@ -339,7 +323,7 @@ public class WidgetSetup extends SherlockFragment {
         		
         		bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth()*2, bmp.getHeight()*2, false);
         		    			
-	    		LayoutInflater factory = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	    		LayoutInflater factory = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	
 	    		View v = factory.inflate(viewId, null);
 	    		ImageView iv = (ImageView)v.findViewById(R.id.image);
@@ -351,7 +335,7 @@ public class WidgetSetup extends SherlockFragment {
 	    		    //@Override
 	    		    public void onClick(View v) {
 	    		    	Integer page = (Integer)v.getTag();
-	    		        Idle.toPage(mContext, page);
+	    		        Idle.toPage(getActivity(), page);
 	    		        Idle.updateIdle(v.getContext(), true);
 	    		        
 	    		        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
@@ -366,6 +350,6 @@ public class WidgetSetup extends SherlockFragment {
     }
     
     private void storeWidgetLayout() {
-    	MetaWatchService.saveWidgets(mContext, adapter.get());
+    	MetaWatchService.saveWidgets(getActivity(), adapter.get());
     }
 }
