@@ -41,6 +41,7 @@ import org.metawatch.manager.MetaWatchService.WeatherProvider;
 import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.apps.AppManager;
 
+import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
 import android.content.Context;
@@ -77,8 +78,9 @@ public class MetaWatchStatus extends SherlockFragment {
 	private static SherlockFragmentActivity context = null;
     public static Messenger mService = null;
     public static long startupTime = 0;
-    final static IncomingHandler mIncomingHandler = new IncomingHandler();
-    final static Messenger mMessenger = new Messenger(new IncomingHandler());
+    private TextView mStatisticsText;
+    private AlertDialog mStatisticsDialog;
+    private final Messenger mMessenger = new Messenger(new IncomingHandler());
 	
 	public static MetaWatchStatus newInstance() {
 		return new MetaWatchStatus();
@@ -87,7 +89,14 @@ public class MetaWatchStatus extends SherlockFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = (SherlockFragmentActivity) getActivity();    
+        context = (SherlockFragmentActivity) getActivity();  
+        mStatisticsText = new TextView(context);
+        Builder builder = new Builder(context);
+		builder.setIcon(R.drawable.icon);
+		builder.setTitle(R.string.statistics);
+		builder.setView(mStatisticsText);
+		builder.setPositiveButton(android.R.string.ok, null);
+		mStatisticsDialog = builder.create();
         configureBugSense();
 		MetaWatchService.loadPreferences(context);
 		AppManager.initApps(context);
@@ -123,12 +132,7 @@ public class MetaWatchStatus extends SherlockFragment {
     	mStatistics.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Builder builder = new Builder(context);
-				builder.setIcon(R.drawable.icon);
-				builder.setTitle(R.string.statistics);
-				builder.setView(getStatistics());
-				builder.setPositiveButton(android.R.string.ok, null);
-				builder.show();
+				mStatisticsDialog.show();
 			}
     	});
 		toggleButton = (ToggleButton) view.findViewById(R.id.toggleButton);
@@ -161,8 +165,9 @@ public class MetaWatchStatus extends SherlockFragment {
     		}
     }
     
-    static void displayStatus() {
+    private void displayStatus() {
     	setButtonState(context);
+    	getStatistics();
     	ActionBar actionBar = context.getSupportActionBar();
     	if (actionBar == null)
     		return;
@@ -182,75 +187,74 @@ public class MetaWatchStatus extends SherlockFragment {
     	}
     }
     
-    public TextView getStatistics() {
-    	TextView textView = new TextView(context);
-    	textView.setGravity(Gravity.CENTER);
+    private void getStatistics() {
+    	mStatisticsText.setGravity(Gravity.CENTER);
     	Resources res = context.getResources();
-    	textView.append("\n");
+    	mStatisticsText.setText("");
+    	mStatisticsText.append("\n");
     	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
     		if (Monitors.weatherData.error) {
-    			Utils.appendColoredText(textView, "ERROR: " , Color.RED);
-    			Utils.appendColoredText(textView, Monitors.weatherData.errorString, Color.RED);
-    			textView.append("\n\n");
+    			Utils.appendColoredText(mStatisticsText, "ERROR: " , Color.RED);
+    			Utils.appendColoredText(mStatisticsText, Monitors.weatherData.errorString, Color.RED);
+    			mStatisticsText.append("\n\n");
     		}
     		if (Monitors.weatherData.received) {
-    			textView.append(res.getString(R.string.status_weather_last_updated));
-    			textView.append("\n");
-    			textView.append(res.getString(R.string.status_weather_forecast));
-    			textView.append("\n");
-    			printDate(textView, Monitors.weatherData.forecastTimeStamp);
-    			textView.append("  ");
-    			textView.append(res.getString(R.string.status_weather_observation));
-    			textView.append("\n");
-    			printDate(textView, Monitors.weatherData.timeStamp);
+    			mStatisticsText.append(res.getString(R.string.status_weather_last_updated));
+    			mStatisticsText.append("\n");
+    			mStatisticsText.append(res.getString(R.string.status_weather_forecast));
+    			mStatisticsText.append("\n");
+    			printDate(mStatisticsText, Monitors.weatherData.forecastTimeStamp);
+    			mStatisticsText.append("  ");
+    			mStatisticsText.append(res.getString(R.string.status_weather_observation));
+    			mStatisticsText.append("\n");
+    			printDate(mStatisticsText, Monitors.weatherData.timeStamp);
     		}
     		else {
-    			textView.append(res.getString(R.string.status_weather_waiting));
+    			mStatisticsText.append(res.getString(R.string.status_weather_waiting));
     		}
     	}
     	
     	if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
-    		textView.append("\n");
+    		mStatisticsText.append("\n");
     		if (LocationData.received) {
-    			textView.append(res.getString(R.string.status_location_updated));
-    			textView.append("\n");
-    			printDate(textView, LocationData.timeStamp);
+    			mStatisticsText.append(res.getString(R.string.status_location_updated));
+    			mStatisticsText.append("\n");
+    			printDate(mStatisticsText, LocationData.timeStamp);
     		}
     		else {
-    			textView.append(res.getString(R.string.status_location_waiting));
-    			textView.append("\n");
+    			mStatisticsText.append(res.getString(R.string.status_location_waiting));
+    			mStatisticsText.append("\n");
     		}
     	}
     	
-    	textView.append("\n");
+    	mStatisticsText.append("\n");
     	if (Utils.isAccessibilityEnabled(context)) {    		
 	    	if (MetaWatchAccessibilityService.accessibilityReceived) {
-	    		Utils.appendColoredText(textView, res.getString(R.string.status_accessibility_working), Color.GREEN);
+	    		Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_working), Color.GREEN);
 	    	}
 	    	else {
 	    		if(startupTime==0 || System.currentTimeMillis()-startupTime<60*1000) {
-	    			textView.append(res.getString(R.string.status_accessibility_waiting));
+	    			mStatisticsText.append(res.getString(R.string.status_accessibility_waiting));
 	    		}
 	    		else {
-	    			Utils.appendColoredText(textView, res.getString(R.string.status_accessibility_failed), Color.RED);
+	    			Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_failed), Color.RED);
 	    		}
 	    	}
 	    }
     	else {
-    		textView.append(res.getString(R.string.status_accessibility_disabled));
+    		mStatisticsText.append(res.getString(R.string.status_accessibility_disabled));
     	}
-    	textView.append("\n");
+    	mStatisticsText.append("\n");
     
-    	textView.append("\n"+res.getString(R.string.status_message_queue)+" " + Protocol.getQueueLength());
-    	textView.append("\n"+res.getString(R.string.status_notification_queue)+" " + Notification.getQueueLength() + "\n");
+    	mStatisticsText.append("\n"+res.getString(R.string.status_message_queue)+" " + Protocol.getQueueLength());
+    	mStatisticsText.append("\n"+res.getString(R.string.status_notification_queue)+" " + Notification.getQueueLength() + "\n");
     	
     	if(Preferences.showNotificationQueue) {
-    		textView.append(Notification.dumpQueue());
+    		mStatisticsText.append(Notification.dumpQueue());
     	}
     	
-    	textView.append("\nStatus updated at ");
-		printDate(textView, System.currentTimeMillis());
-		return textView;
+    	mStatisticsText.append("\nStatus updated at ");
+		printDate(mStatisticsText, System.currentTimeMillis());
     }
     
     private static void printDate(TextView textView, long ticks) {
@@ -291,7 +295,7 @@ public class MetaWatchStatus extends SherlockFragment {
     /**
      * Handler of incoming messages from service.
      */
-    static class IncomingHandler extends Handler {
+    private class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -304,7 +308,7 @@ public class MetaWatchStatus extends SherlockFragment {
         }
     }
 
-    public static ServiceConnection mConnection = new ServiceConnection() {
+    private ServiceConnection mConnection = new ServiceConnection() {
     	   	
         public void onServiceConnected(ComponentName className, IBinder service) {
             mService = new Messenger(service);

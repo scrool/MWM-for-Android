@@ -520,8 +520,7 @@ public class MetaWatchService extends Service {
 	}
 
 	private PendingIntent createNotificationPendingIntent() {
-		return PendingIntent.getActivity(this, 0, new Intent(this,
-				MetaWatchStatus.class), 0);
+		return PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
 	}
 
 	public void updateNotification() {
