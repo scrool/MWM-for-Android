@@ -338,7 +338,7 @@
 			android:title="@string/settings_sticky_notifications"
 			android:key="stickyNotifications"
 			android:summary="@string/settings_sticky_notifications_desc"
-			android:defaultValue="true"
+			android:defaultValue="false"
 			/>
 			
 		<EditTextPreference
@@ -659,7 +659,7 @@
             android:title="@string/settings_display_splash"
             android:key="DisplaySplashScreen"
             android:summary="@string/settings_display_splash_desc"
-            android:defaultValue="true"
+            android:defaultValue="false"
             />
         <CheckBoxPreference
 			android:title="@string/settings_restart_if_stalled"

@@ -284,7 +284,10 @@ public class Settings extends SherlockPreferenceActivity {
 	void exit() {
 		stopService(new Intent(this, MetaWatchService.class));
 		MetaWatchService.setPreviousConnectionState(this, false);
-		System.exit(0);
+		Intent intent = new Intent(this, MainActivity.class);
+		intent.putExtra("shutdown", true);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		startActivity(intent);
 	}
 	
     @Override

@@ -10,11 +10,6 @@
 	        android:id="@+id/idlePreviews"
 	        android:layout_width="152sp"
 	        android:layout_height="wrap_content">
-	        <ImageView
-		        android:id="@+id/imageView1"
-		        android:layout_width="150sp"
-		        android:layout_height="150sp"
-		        android:src="@drawable/icon" />  
     	</LinearLayout>
     </HorizontalScrollView>
     <ExpandableListView

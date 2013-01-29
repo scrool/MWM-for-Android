@@ -1,5 +1,6 @@
 package org.metawatch.manager;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,7 +16,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.BlurMaskFilter;
+import android.graphics.BlurMaskFilter.Blur;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,11 +38,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
+import com.actionbarsherlock.internal.nineoldandroids.animation.Animator.AnimatorListener;
+import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 
 public class WidgetSetup extends SherlockFragment {
-	private LinearLayout ll;
+	private LinearLayout mIdlePreviews;
 	private ExpandableListView widgetList;
 	private WidgetListAdaptor adapter;
+	private SherlockFragmentActivity mActivity;
 	private Handler mHandler = new Handler(Looper.getMainLooper());
 
 	private class WidgetListAdaptor extends BaseExpandableListAdapter {
@@ -235,11 +247,17 @@ public class WidgetSetup extends SherlockFragment {
 		}
 		
 	}
+	
+	@Override
+	public void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
+		mActivity = (SherlockFragmentActivity) getActivity();
+	}
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     	View view = inflater.inflate(R.layout.widget_setup, null);
 		widgetList = (ExpandableListView) view.findViewById(R.id.widgetList);		
-		ll = (LinearLayout) view.findViewById(R.id.idlePreviews);
+		mIdlePreviews = (LinearLayout) view.findViewById(R.id.idlePreviews);
 		return view;
     }
     
@@ -248,7 +266,7 @@ public class WidgetSetup extends SherlockFragment {
 		super.onStart();
 		widgetList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-				Intent i = new Intent(getActivity(), WidgetPicker.class);
+				Intent i = new Intent(mActivity, WidgetPicker.class);
 				i.putExtra("groupPosition", groupPosition);
 				i.putExtra("childPosition", childPosition);
 				startActivityForResult(i,  1);
@@ -266,7 +284,7 @@ public class WidgetSetup extends SherlockFragment {
 		@Override
 		public void run() {
 			refreshPreview();
-			adapter.init(getActivity());
+			adapter.init(mActivity);
 		    mHandler.postDelayed(mPreviewUpdate, 1000);
 		}
 	};
@@ -293,9 +311,9 @@ public class WidgetSetup extends SherlockFragment {
         		adapter.notifyDataSetChanged();
             	storeWidgetLayout();
             	refreshPreview();
-            	Idle.updateIdle(getActivity(), true);
+            	Idle.updateIdle(mActivity, true);
     	        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-    	        	Idle.sendOledIdle(getActivity());
+    	        	Idle.sendOledIdle(mActivity);
     	        }
         	
         	}
@@ -305,11 +323,10 @@ public class WidgetSetup extends SherlockFragment {
     private void refreshPreview() {
     	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() start");
     	if (!Idle.isBusy())
-    		Idle.updateIdlePages(getActivity(), true);
-    	ll.removeAllViews();
+    		Idle.updateIdlePages(mActivity, true);
     	int pages = Idle.numPages();
     	for(int i=0; i<pages; ++i) {
-    		Bitmap bmp = Idle.createIdle(getActivity(), true, i);;
+    		Bitmap bmp = Idle.createIdle(mActivity, true, i);;
     		if (bmp!=null) {
     			int backCol = Color.LTGRAY;
     			int viewId = (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) ? R.layout.idle_screen_preview_oled : R.layout.idle_screen_preview;
@@ -318,36 +335,124 @@ public class WidgetSetup extends SherlockFragment {
         			bmp = Utils.invertBitmap(bmp);
         			backCol = 0xff111111;
         		}
-        		
         		bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth()*2, bmp.getHeight()*2, false);
-        		    			
-	    		LayoutInflater factory = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	    		LayoutInflater factory = (LayoutInflater)mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	
-	    		View v = factory.inflate(viewId, null);
-	    		ImageView iv = (ImageView)v.findViewById(R.id.image);
-	    		iv.setImageBitmap(bmp);
-	    		iv.setClickable(true);
-	    		iv.setBackgroundColor(backCol);
-	    		iv.setTag(i);
-	    		iv.setOnClickListener(new OnClickListener() {
-	    		    //@Override
-	    		    public void onClick(View v) {
-	    		    	Integer page = (Integer)v.getTag();
-	    		        Idle.toPage(getActivity(), page);
-	    		        Idle.updateIdle(v.getContext(), true);
-	    		        
-	    		        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-	    		        	Idle.sendOledIdle(v.getContext());
-	    		        }
-	    		    }
-	    		});
-	    		ll.addView(v);
+	    		ImageView imageView;
+	    		View view = mIdlePreviews.findViewWithTag(i);
+	    		if (view == null) {
+	    			view = factory.inflate(viewId, null);
+		    		imageView = (ImageView)view.findViewById(R.id.image);
+		    		imageView.setClickable(true);
+		    		imageView.setBackgroundColor(backCol);
+		    		view.setTag(i);
+		    		imageView.setTag(i);
+		    		imageView.setOnClickListener(new OnClickListener() {
+		    		    //@Override
+		    		    public void onClick(View v) {
+		    		    	Integer page = (Integer)v.getTag();
+		    		        Idle.toPage(mActivity, page);
+		    		        Idle.updateIdle(v.getContext(), true);
+		    		        if(MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
+		    		        	Idle.sendOledIdle(v.getContext());
+		    		        }
+		    		    }
+		    		});
+	    			mIdlePreviews.addView(view);
+	    		} else {
+		    		imageView = (ImageView)view.findViewById(R.id.image);
+	    		}
+	    		
+	    		//Add glow effect
+	    		bmp = createGlow(bmp);
+	    		
+	    		Drawable tmpDrawable = imageView.getDrawable();
+	    		Bitmap currentBitmap = null;
+	    		if (tmpDrawable != null)
+		    		currentBitmap = ((BitmapDrawable) tmpDrawable).getBitmap();
+	    		if (currentBitmap != null && !bitmapCompare(currentBitmap, bmp)) {
+	    			ObjectAnimator fadeOut = ObjectAnimator.ofFloat(imageView, "alpha", 1, 0);
+	    			fadeOut.setDuration(500);
+	    			fadeOut.addListener(new MyAnimatorListener(imageView, bmp));
+	    			fadeOut.start();
+	    		} else {
+	    			imageView.setImageBitmap(bmp);
+	    		}
     		}
     	}
     	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() end");
     }
     
+    private Bitmap createGlow(Bitmap src) {
+        int margin = 24;
+        int halfMargin = margin / 2;
+
+        // the glow radius
+        int glowRadius = 16;
+
+        // the glow color
+        int glowColor = Color.rgb(0, 192, 255);
+
+        // extract the alpha from the source image
+        Bitmap alpha = src.extractAlpha();
+
+        // The output bitmap (with the icon + glow)
+        Bitmap bmp = Bitmap.createBitmap(src.getWidth() + margin,
+                src.getHeight() + margin, Bitmap.Config.ARGB_8888);
+
+        // The canvas to paint on the image
+        Canvas canvas = new Canvas(bmp);
+
+        Paint paint = new Paint();
+        paint.setColor(glowColor);
+
+        // outer glow
+        paint.setMaskFilter(new BlurMaskFilter(glowRadius, Blur.OUTER));
+        canvas.drawBitmap(alpha, halfMargin, halfMargin, paint);
+
+        // original icon
+        canvas.drawBitmap(src, halfMargin, halfMargin, null);
+
+        return bmp;
+    }
+    
+    private class MyAnimatorListener implements AnimatorListener {
+
+    	private ImageView iv;
+    	private Bitmap bmp;
+    	public MyAnimatorListener(ImageView iv, Bitmap bmp) {
+    		this.iv = iv;
+    		this.bmp = bmp;
+    	}
+		@Override
+		public void onAnimationStart(Animator animation) {
+		}
+		@Override
+		public void onAnimationEnd(Animator animation) {
+			iv.setImageBitmap(bmp);
+			ObjectAnimator fadeIn = ObjectAnimator.ofFloat(iv, "alpha", 0, 1);
+			fadeIn.setDuration(500);
+			fadeIn.start();
+		}
+		@Override
+		public void onAnimationCancel(Animator animation) {
+		}
+		@Override
+		public void onAnimationRepeat(Animator animation) {
+		}
+    }
+    
     private void storeWidgetLayout() {
-    	MetaWatchService.saveWidgets(getActivity(), adapter.get());
+    	MetaWatchService.saveWidgets(mActivity, adapter.get());
+    }
+    
+    public boolean bitmapCompare(Bitmap bitmap1, Bitmap bitmap2) {
+        ByteBuffer buffer1 = ByteBuffer.allocate(bitmap1.getHeight() * bitmap1.getRowBytes());
+        bitmap1.copyPixelsToBuffer(buffer1);
+
+        ByteBuffer buffer2 = ByteBuffer.allocate(bitmap2.getHeight() * bitmap2.getRowBytes());
+        bitmap2.copyPixelsToBuffer(buffer2);
+
+        return Arrays.equals(buffer1.array(), buffer2.array());
     }
 }

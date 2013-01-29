@@ -17,6 +17,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onCreate(bundle);
 	    requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.main_activity);
+		Intent intent = getIntent();
+		if (intent != null && intent.getBooleanExtra("shutdown", false))
+			finish();
 	}
 		
     @Override
