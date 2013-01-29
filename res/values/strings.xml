@@ -355,6 +355,7 @@
 	<string name="settings_exit">Disconnect and Exit</string>
 	
     <string name="main_service_toggle_on">Service running.  Click to stop.</string>
+    <string name="main_service_toggle_starting">Service starting.  Please wait.</string>
     <string name="main_service_toggle_off">Service stopped.  Click to start.</string>
 
   
