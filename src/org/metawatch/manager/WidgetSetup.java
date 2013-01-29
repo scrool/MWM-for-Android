@@ -267,7 +267,7 @@ public class WidgetSetup extends SherlockFragment {
 		public void run() {
 			refreshPreview();
 			adapter.init(getActivity());
-		    mHandler.postDelayed(mPreviewUpdate, 3000);
+		    mHandler.postDelayed(mPreviewUpdate, 1000);
 		}
 	};
 
@@ -310,9 +310,7 @@ public class WidgetSetup extends SherlockFragment {
     	int pages = Idle.numPages();
     	for(int i=0; i<pages; ++i) {
     		Bitmap bmp = Idle.createIdle(getActivity(), true, i);;
-
     		if (bmp!=null) {
-    			
     			int backCol = Color.LTGRAY;
     			int viewId = (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) ? R.layout.idle_screen_preview_oled : R.layout.idle_screen_preview;
     			
