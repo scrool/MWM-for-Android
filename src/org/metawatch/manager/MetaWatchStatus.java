@@ -41,7 +41,6 @@ import org.metawatch.manager.MetaWatchService.WeatherProvider;
 import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.apps.AppManager;
 
-import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
@@ -56,13 +55,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import org.metawatch.manager.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.DecelerateInterpolator;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -73,6 +71,7 @@ import android.widget.ToggleButton;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bugsense.trace.BugSenseHandler;
 
 public class MetaWatchStatus extends SherlockFragment {
@@ -158,7 +157,7 @@ public class MetaWatchStatus extends SherlockFragment {
 	@Override
 	public void onActivityCreated(Bundle bundle) {
 		super.onActivityCreated(bundle);
-    	ObjectAnimator slideInFromRight = ObjectAnimator.ofFloat(mMainView, "translationY", -3000, 0);
+    	ObjectAnimator slideInFromRight = ObjectAnimator.ofFloat(mMainView, "translationY", -1000, 0);
     	slideInFromRight.setDuration(1000);
     	slideInFromRight.setInterpolator(new DecelerateInterpolator());
     	slideInFromRight.start();

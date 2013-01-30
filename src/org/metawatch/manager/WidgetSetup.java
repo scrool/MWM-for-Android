@@ -361,7 +361,7 @@ public class WidgetSetup extends SherlockFragment {
 		    		    }
 		    		});
 	    			mIdlePreviews.addView(view);
-	    	    	ObjectAnimator slideInFromLeft = ObjectAnimator.ofFloat(view, "translationX", -3000, 0);
+	    	    	ObjectAnimator slideInFromLeft = ObjectAnimator.ofFloat(view, "translationX", -1000, 0);
 	    	    	slideInFromLeft.setDuration(1000);
 	    	    	slideInFromLeft.setInterpolator(new DecelerateInterpolator());
 	    	    	slideInFromLeft.start();
