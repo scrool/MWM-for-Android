@@ -414,5 +414,6 @@
 	<string name="connectivity_failure">Connectivity Failure</string>
 	<string name="would_you_like_to_retry">Would you like to retry?</string>
 	
+	<string name="please_wait">Please Wait...</string>
 	
 </resources>

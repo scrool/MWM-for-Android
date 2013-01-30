@@ -60,7 +60,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -187,72 +186,76 @@ public class MetaWatchStatus extends SherlockFragment {
 	case MetaWatchService.ConnectionState.DISCONNECTING:
 	    mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnecting));
 	    break;
-	}
+	}	
     }
 
     private void getStatistics() {
 	mStatisticsText.setGravity(Gravity.CENTER);
-	Resources res = context.getResources();
-	mStatisticsText.setText("");
-	mStatisticsText.append("\n");
-	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
-	    if (Monitors.weatherData.error) {
-		Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
-		Utils.appendColoredText(mStatisticsText, Monitors.weatherData.errorString, Color.RED);
-		mStatisticsText.append("\n\n");
-	    }
-	    if (Monitors.weatherData.received) {
-		mStatisticsText.append(res.getString(R.string.status_weather_last_updated));
-		mStatisticsText.append("\n");
-		mStatisticsText.append(res.getString(R.string.status_weather_forecast));
-		mStatisticsText.append("\n");
-		printDate(mStatisticsText, Monitors.weatherData.forecastTimeStamp);
-		mStatisticsText.append("  ");
-		mStatisticsText.append(res.getString(R.string.status_weather_observation));
-		mStatisticsText.append("\n");
-		printDate(mStatisticsText, Monitors.weatherData.timeStamp);
-	    } else {
-		mStatisticsText.append(res.getString(R.string.status_weather_waiting));
-	    }
-	}
-
-	if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
+	if (mStatisticsDialog != null && mStatisticsDialog.isShowing()) {
+	    Resources res = context.getResources();
+	    mStatisticsText.setText("");
 	    mStatisticsText.append("\n");
-	    if (LocationData.received) {
-		mStatisticsText.append(res.getString(R.string.status_location_updated));
-		mStatisticsText.append("\n");
-		printDate(mStatisticsText, LocationData.timeStamp);
-	    } else {
-		mStatisticsText.append(res.getString(R.string.status_location_waiting));
-		mStatisticsText.append("\n");
-	    }
-	}
-
-	mStatisticsText.append("\n");
-	if (Utils.isAccessibilityEnabled(context)) {
-	    if (MetaWatchAccessibilityService.accessibilityReceived) {
-		Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_working), Color.GREEN);
-	    } else {
-		if (startupTime == 0 || System.currentTimeMillis() - startupTime < 60 * 1000) {
-		    mStatisticsText.append(res.getString(R.string.status_accessibility_waiting));
+	    if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
+		if (Monitors.weatherData.error) {
+		    Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
+		    Utils.appendColoredText(mStatisticsText, Monitors.weatherData.errorString, Color.RED);
+		    mStatisticsText.append("\n\n");
+		}
+		if (Monitors.weatherData.received) {
+		    mStatisticsText.append(res.getString(R.string.status_weather_last_updated));
+		    mStatisticsText.append("\n");
+		    mStatisticsText.append(res.getString(R.string.status_weather_forecast));
+		    mStatisticsText.append("\n");
+		    printDate(mStatisticsText, Monitors.weatherData.forecastTimeStamp);
+		    mStatisticsText.append("  ");
+		    mStatisticsText.append(res.getString(R.string.status_weather_observation));
+		    mStatisticsText.append("\n");
+		    printDate(mStatisticsText, Monitors.weatherData.timeStamp);
 		} else {
-		    Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_failed), Color.RED);
+		    mStatisticsText.append(res.getString(R.string.status_weather_waiting));
 		}
 	    }
+	    
+	    if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
+		mStatisticsText.append("\n");
+		if (LocationData.received) {
+		    mStatisticsText.append(res.getString(R.string.status_location_updated));
+		    mStatisticsText.append("\n");
+		    printDate(mStatisticsText, LocationData.timeStamp);
+		} else {
+		    mStatisticsText.append(res.getString(R.string.status_location_waiting));
+		    mStatisticsText.append("\n");
+		}
+	    }
+	    
+	    mStatisticsText.append("\n");
+	    if (Utils.isAccessibilityEnabled(context)) {
+		if (MetaWatchAccessibilityService.accessibilityReceived) {
+		    Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_working), Color.GREEN);
+		} else {
+		    if (startupTime == 0 || System.currentTimeMillis() - startupTime < 60 * 1000) {
+			mStatisticsText.append(res.getString(R.string.status_accessibility_waiting));
+		    } else {
+			Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_failed), Color.RED);
+		    }
+		}
+	    } else {
+		mStatisticsText.append(res.getString(R.string.status_accessibility_disabled));
+	    }
+	    mStatisticsText.append("\n");
+	    
+	    mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getQueueLength());
+	    mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getQueueLength() + "\n");
+	    
+	    if (Preferences.showNotificationQueue) {
+		mStatisticsText.append(Notification.dumpQueue());
+	    }
+	    
+	    mStatisticsText.append("\nStatus updated at ");
+	    printDate(mStatisticsText, System.currentTimeMillis());
 	} else {
-	    mStatisticsText.append(res.getString(R.string.status_accessibility_disabled));
+	    mStatisticsText.setText(R.string.please_wait);
 	}
-	mStatisticsText.append("\n");
-
-	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getQueueLength());
-	mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getQueueLength() + "\n");
-
-	if (Preferences.showNotificationQueue) {
-	    mStatisticsText.append(Notification.dumpQueue());
-	}
-
-	mStatisticsText.append("\nStatus updated at ");
-	printDate(mStatisticsText, System.currentTimeMillis());
     }
 
     private static void printDate(TextView textView, long ticks) {
@@ -266,11 +269,14 @@ public class MetaWatchStatus extends SherlockFragment {
 
     void startService() {
 	if (!MetaWatchService.isRunning()) {
-	    context.bindService(new Intent(context, MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
-	    context.startService(new Intent(context, MetaWatchService.class));
-	    Toast.makeText(context, R.string.main_service_toggle_starting, Toast.LENGTH_LONG).show();
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    context.bindService(new Intent(context, MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
+		    context.startService(new Intent(context, MetaWatchService.class));
+		}
+	    }).start();
 	}
-	setButtonState(context);
     }
 
     void stopService() {
