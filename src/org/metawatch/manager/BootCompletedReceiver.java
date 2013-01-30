@@ -6,10 +6,9 @@ import android.content.Intent;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
 
-	@Override
-	public void onReceive(Context context, Intent intent)
-	{
-		MetaWatchService.autoStartService(context);
-	}
+    @Override
+    public void onReceive(Context context, Intent intent) {
+	MetaWatchService.autoStartService(context);
+    }
 
 }
