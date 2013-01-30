@@ -38,7 +38,7 @@ import org.metawatch.manager.apps.ApplicationBase;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class Application {
 	//FIXME This class has next to NO support for analog watches...

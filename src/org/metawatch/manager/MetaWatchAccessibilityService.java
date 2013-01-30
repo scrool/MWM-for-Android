@@ -13,7 +13,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 public class MetaWatchAccessibilityService extends AccessibilityService {

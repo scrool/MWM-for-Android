@@ -11,7 +11,7 @@
         android:layout_height="48sp"
         android:layout_margin="2sp"
         android:padding="2sp"/>
-
+
     <TextView
         android:id="@+id/text"
         android:layout_width="0dip"

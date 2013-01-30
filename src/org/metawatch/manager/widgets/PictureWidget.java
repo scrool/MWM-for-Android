@@ -15,7 +15,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.FileObserver;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class PictureWidget implements InternalWidget {
 

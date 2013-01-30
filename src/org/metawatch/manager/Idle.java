@@ -57,7 +57,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class Idle {
 	

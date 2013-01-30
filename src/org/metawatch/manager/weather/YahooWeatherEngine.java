@@ -28,7 +28,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.content.Context;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class YahooWeatherEngine extends AbstractWeatherEngine {
 

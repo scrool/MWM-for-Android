@@ -46,7 +46,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class GmailLSMonitor implements GmailMonitor {
 	public static boolean isSupported(Context context) {

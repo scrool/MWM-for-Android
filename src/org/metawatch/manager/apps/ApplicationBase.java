@@ -28,7 +28,7 @@ import android.graphics.Rect;
 import android.preference.PreferenceManager;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public abstract class ApplicationBase {
 	

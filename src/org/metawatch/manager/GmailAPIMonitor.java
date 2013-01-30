@@ -41,7 +41,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 import com.google.android.gm.contentprovider.GmailContract;
 

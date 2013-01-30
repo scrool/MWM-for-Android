@@ -364,7 +364,7 @@
   	<string name="ui_tab_widgets">Widgets</string>
   	<string name="ui_tab_tests">Tests</string>
   	
-  	<string name="ui_tab_downloaded_themes">Downloaded</string>
+  	<string name="ui_tab_downloaded_themes">Download</string>
   	<string name="ui_tab_theme_gallery">Gallery</string>
   	  
     
@@ -407,5 +407,8 @@
 	<string name="status_notification_queue">Benachrichtigungsqueue:</string>
 	
 	<string name="widget_picker_title">Select a widget</string>
+	
+	<string name="theme_applied">Theme Applied</string>
+	<string name="downloaded_and_applied">Downloaded and Applied</string>
 	
 </resources>

@@ -23,7 +23,7 @@ import android.provider.MediaStore;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class MediaPlayerApp extends ApplicationBase {
 

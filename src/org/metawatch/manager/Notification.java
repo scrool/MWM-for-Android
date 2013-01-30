@@ -40,7 +40,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class Notification {
 

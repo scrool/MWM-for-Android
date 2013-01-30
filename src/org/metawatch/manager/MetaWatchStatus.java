@@ -41,6 +41,7 @@ import org.metawatch.manager.MetaWatchService.WeatherProvider;
 import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.apps.AppManager;
 
+import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
@@ -55,11 +56,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.DecelerateInterpolator;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -81,8 +83,10 @@ public class MetaWatchStatus extends SherlockFragment {
 	private static SherlockFragmentActivity context = null;
     public static Messenger mService = null;
     public static long startupTime = 0;
-    private TextView mStatisticsText;
-    private AlertDialog mStatisticsDialog;
+    private TextView mStatisticsText = null;
+    private AlertDialog mStatisticsDialog = null;
+	private ActionBar mActionBar = null;
+	private View mMainView = null;
     private final Messenger mMessenger = new Messenger(new IncomingHandler());
 	
 	public static MetaWatchStatus newInstance() {
@@ -93,6 +97,7 @@ public class MetaWatchStatus extends SherlockFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = (SherlockFragmentActivity) getActivity();  
+        mActionBar = context.getSupportActionBar();
         mStatisticsText = new TextView(context);
         Builder builder = new Builder(context);
 		builder.setIcon(R.drawable.icon);
@@ -128,15 +133,15 @@ public class MetaWatchStatus extends SherlockFragment {
 
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    	View view = inflater.inflate(R.layout.main, null);
-    	mStatistics = (Button) view.findViewById(R.id.statistics);
+    	mMainView = inflater.inflate(R.layout.main, null);
+    	mStatistics = (Button) mMainView.findViewById(R.id.statistics);
     	mStatistics.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				mStatisticsDialog.show();
 			}
     	});
-		toggleButton = (ToggleButton) view.findViewById(R.id.toggleButton);
+		toggleButton = (ToggleButton) mMainView.findViewById(R.id.toggleButton);
 		toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -147,8 +152,17 @@ public class MetaWatchStatus extends SherlockFragment {
 			}
 			
 		});
-    	return view;
+    	return mMainView;
     }
+	
+	@Override
+	public void onActivityCreated(Bundle bundle) {
+		super.onActivityCreated(bundle);
+    	ObjectAnimator slideInFromRight = ObjectAnimator.ofFloat(mMainView, "translationY", -3000, 0);
+    	slideInFromRight.setDuration(1000);
+    	slideInFromRight.setInterpolator(new DecelerateInterpolator());
+    	slideInFromRight.start();
+	}
     
     @Override
 	public void onResume() {
@@ -164,28 +178,28 @@ public class MetaWatchStatus extends SherlockFragment {
     		try {
     			context.unbindService(mConnection);
     		} catch(IllegalArgumentException e) {
-    			
+    			e.printStackTrace();
+    			//Service not registered
     		}
     }
     
     private void displayStatus() {
     	setButtonState(context);
     	getStatistics();
-    	ActionBar actionBar = context.getSupportActionBar();
-    	if (actionBar == null)
+    	if (mActionBar == null)
     		return;
     	switch (MetaWatchService.connectionState) {
 	    	case MetaWatchService.ConnectionState.DISCONNECTED:
-	    		actionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnected));
+	    		mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnected));
 	    		break;
 	    	case MetaWatchService.ConnectionState.CONNECTING:
-	    		actionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_connecting));
+	    		mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_connecting));
 	    		break;
 	    	case MetaWatchService.ConnectionState.CONNECTED:
-	    		actionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_connected));
+	    		mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_connected));
 	    		break;
 	    	case MetaWatchService.ConnectionState.DISCONNECTING:
-	    		actionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnecting));
+	    		mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnecting));
 	    		break;
     	}
     }

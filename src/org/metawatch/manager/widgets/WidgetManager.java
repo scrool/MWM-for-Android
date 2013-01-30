@@ -19,7 +19,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.widget.Toast;
 
 public class WidgetManager {

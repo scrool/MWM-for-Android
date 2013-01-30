@@ -4,7 +4,7 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 

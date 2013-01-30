@@ -408,4 +408,7 @@
 	
 	<string name="widget_picker_title">Seleziona un widget</string>
 	
+	<string name="theme_applied">Theme Applied</string>
+	<string name="downloaded_and_applied">Downloaded and Applied</string>
+	
 </resources>

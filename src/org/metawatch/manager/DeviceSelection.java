@@ -52,7 +52,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;

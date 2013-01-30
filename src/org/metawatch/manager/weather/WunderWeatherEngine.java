@@ -23,7 +23,7 @@ import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.Utils;
 
 import android.content.Context;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class WunderWeatherEngine extends AbstractWeatherEngine {
 

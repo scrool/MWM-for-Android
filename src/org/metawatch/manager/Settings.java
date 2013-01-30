@@ -56,7 +56,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceCategory;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.webkit.WebView;
 
 import com.actionbarsherlock.app.ActionBar;

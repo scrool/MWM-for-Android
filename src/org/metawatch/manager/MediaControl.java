@@ -43,7 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.view.KeyEvent;
 
 public class MediaControl {

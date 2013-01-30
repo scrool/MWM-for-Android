@@ -28,7 +28,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -53,6 +53,7 @@ public class WidgetSetup extends SherlockFragment {
 	private WidgetListAdaptor adapter;
 	private SherlockFragmentActivity mActivity;
 	private int mCurrentNumberOfPages = 0;
+	private View mMainView = null;
 	private Handler mHandler = new Handler(Looper.getMainLooper());
 
 	private class WidgetListAdaptor extends BaseExpandableListAdapter {
@@ -251,11 +252,11 @@ public class WidgetSetup extends SherlockFragment {
 	}
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    	View view = inflater.inflate(R.layout.widget_setup, null);
-		widgetList = (ExpandableListView) view.findViewById(R.id.widgetList);	
+    	mMainView = inflater.inflate(R.layout.widget_setup, null);
+		widgetList = (ExpandableListView) mMainView.findViewById(R.id.widgetList);	
 		widgetList.setGroupIndicator(null);
-		mIdlePreviews = (LinearLayout) view.findViewById(R.id.idlePreviews);
-		return view;
+		mIdlePreviews = (LinearLayout) mMainView.findViewById(R.id.idlePreviews);
+		return mMainView;
     }
     
 	@Override
@@ -360,10 +361,10 @@ public class WidgetSetup extends SherlockFragment {
 		    		    }
 		    		});
 	    			mIdlePreviews.addView(view);
-	    			ObjectAnimator fromRight = ObjectAnimator.ofFloat(view, "translationX", -2000, 0);
-	    			fromRight.setDuration(750);
-	    			fromRight.setInterpolator(new DecelerateInterpolator());
-	    			fromRight.start();
+	    	    	ObjectAnimator slideInFromLeft = ObjectAnimator.ofFloat(view, "translationX", -3000, 0);
+	    	    	slideInFromLeft.setDuration(1000);
+	    	    	slideInFromLeft.setInterpolator(new DecelerateInterpolator());
+	    	    	slideInFromLeft.start();
 
 	    		} else {
 		    		imageView = (ImageView)view.findViewById(R.id.image);

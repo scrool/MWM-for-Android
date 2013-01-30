@@ -48,7 +48,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class IntentReceiver extends BroadcastReceiver {
 		

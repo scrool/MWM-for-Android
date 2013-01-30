@@ -407,5 +407,8 @@
 	<string name="status_notification_queue">通知待ちの数：</string>
 	
 	<string name="widget_picker_title">ウィジェット選択</string>
-	
+
+	<string name="theme_applied">Theme Applied</string>
+	<string name="downloaded_and_applied">Downloaded and Applied</string>
+		
 </resources>

@@ -97,7 +97,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 

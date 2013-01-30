@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 /**
  * Encoded-string-value = Text-string | Value-length Char-set Text-string

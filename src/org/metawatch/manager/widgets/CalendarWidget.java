@@ -24,7 +24,7 @@ import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.format.DateUtils;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class CalendarWidget implements InternalWidget {
 

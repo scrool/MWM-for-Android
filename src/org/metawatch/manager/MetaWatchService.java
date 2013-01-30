@@ -69,7 +69,7 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.widget.Toast;
 
 public class MetaWatchService extends Service {

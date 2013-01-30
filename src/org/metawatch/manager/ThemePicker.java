@@ -10,22 +10,29 @@ import java.util.Properties;
 import org.metawatch.manager.MetaWatchService.Preferences;
 
 import android.app.Activity;
-import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
+import org.metawatch.manager.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class ThemePicker extends ListActivity {
+import com.actionbarsherlock.app.SherlockFragment;
+
+public class ThemePicker extends SherlockFragment implements OnItemClickListener {
+	
+	public static ThemePicker newInstance() {
+		return new ThemePicker();
+	}
 	
 	public class ThemeDescription {
 		public String name = "";
@@ -143,28 +150,26 @@ public class ThemePicker extends ListActivity {
     };
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-            
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    	View view = inflater.inflate(R.layout.theme_picker, null);
         themeList = new ArrayList<ThemeDescription>();
-        
-        addTheme(BitmapCache.getInternalTheme(this));
-        
-        File searchDir = Utils.getExternalFilesDir(this, "Themes"); 
+        addTheme(BitmapCache.getInternalTheme(getActivity()));
+        File searchDir = Utils.getExternalFilesDir(getActivity(), "Themes"); 
         if (searchDir != null) {
 	        File[] themeFiles = searchDir.listFiles();
 			for (File file : themeFiles) {
 				String themeName = file.getName().replace(".zip", "");		
 				if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Found theme "+themeName);
-				addTheme(BitmapCache.loadTheme(this, themeName));
+				addTheme(BitmapCache.loadTheme(getActivity(), themeName));
 			}
         }
         
         Collections.sort(themeList, COMPARATOR);
-        
         if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Showing " +themeList.size() + " themes");
-        
-        setListAdapter(new EfficientAdapter(this, themeList));
+        ListView listView = (ListView) view.findViewById(R.id.theme_picker_list);
+        listView.setAdapter(new EfficientAdapter(getActivity(), themeList));
+        listView.setOnItemClickListener(this);
+        return view;
     }
     
     private String getProperty(Properties properties, String key, String defaultVal) {
@@ -189,25 +194,18 @@ public class ThemePicker extends ListActivity {
 		themeList.add(theme);
 	}
     
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
     	Intent result = new Intent();
     	
     	Preferences.themeName = themeList.get(position).name;   	
-    	MetaWatchService.saveTheme(this, Preferences.themeName);
+    	MetaWatchService.saveTheme(getActivity(), Preferences.themeName);
     	
     	if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "Selected theme '"+Preferences.themeName+"'");
     	
-    	setResult(Activity.RESULT_OK, result);
+    	getActivity().setResult(Activity.RESULT_OK, result);
 
-    	super.onListItemClick(l, v, position, id);
-    	
-    	ProgressDialog dialog = ProgressDialog.show(this, "", 
-                "Applying Theme. Please wait...", true);
-    	Idle.updateIdle(this, true);
-    	dialog.dismiss();
-    	
-    	finish();
-    }
-
+    	Toast.makeText(getActivity(), R.string.theme_applied, Toast.LENGTH_SHORT).show();
+    	Idle.updateIdle(getActivity(), true);
+	}
 }

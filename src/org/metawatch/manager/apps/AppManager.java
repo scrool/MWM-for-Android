@@ -10,7 +10,7 @@ import org.metawatch.manager.MetaWatchStatus;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class AppManager {
 

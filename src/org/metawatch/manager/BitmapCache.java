@@ -20,12 +20,14 @@ import java.util.zip.ZipInputStream;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
+import org.metawatch.manager.Log;
+import android.widget.Toast;
 
 public class BitmapCache {
 	
@@ -280,7 +282,7 @@ public class BitmapCache {
 	}
 	
 	static ProgressDialog dialog = null;
-	public static void downloadAndInstallTheme(final Activity callingActivity, final String uri) {
+	public static void downloadAndInstallTheme(final ThemeContainer themeContainer, final String uri) {
 		
 		Thread thread = new Thread("ThemeInstaller") {
 
@@ -290,25 +292,26 @@ public class BitmapCache {
 				
 				OutputStream fOut = null;
 				try {
-		
-					final Context context = callingActivity;
-					
 				
-					callingActivity.runOnUiThread(new Runnable(){
-						
+					themeContainer.runOnUiThread(new Runnable(){
 						public void run() {
-							dialog = ProgressDialog.show(context, "", 
-									"Downloading Theme", true);
+							dialog = ProgressDialog.show(themeContainer, "", "Downloading Theme", true);
+							dialog.setCanceledOnTouchOutside(false);
+							dialog.setOnCancelListener(new OnCancelListener() {
+								@Override
+								public void onCancel(DialogInterface dialog) {
+									Toast.makeText(themeContainer, "Canceled", Toast.LENGTH_SHORT).show();
+								}
+							});
 							dialog.show();
 						}
-					} );
-					
+					});
 			    	
 				    // Create a URL for the desired page
 				    URL url = new URL(uri);
 				    
 				    String themeName = getThemeName(uri);
-				    File themeFile = getThemeFile(context, themeName);
+				    File themeFile = getThemeFile(themeContainer, themeName);
 				    			
 				    URLConnection uc = url.openConnection();
 				    int contentLength = uc.getContentLength();
@@ -323,7 +326,6 @@ public class BitmapCache {
 				    	bytesRead = in.read(data, offset, data.length-offset);
 				    	if (bytesRead==-1)
 				    		break;
-				    	
 				    	offset += bytesRead;
 				    }
 				    
@@ -339,26 +341,23 @@ public class BitmapCache {
 		            fOut = null;
 		            
 		        	Preferences.themeName = themeName;   	
-		        	MetaWatchService.saveTheme(context, Preferences.themeName);
+		        	MetaWatchService.saveTheme(themeContainer, Preferences.themeName);
 		            
-		        	Idle.updateIdle(context, true);
-		        	
-		        	callingActivity.finish();
-		        	
-		            return;
-				} catch (MalformedURLException e) {
-				} catch (IOException e) {
-				}
+		        	Idle.updateIdle(themeContainer, true);
+				} catch (MalformedURLException e) {} catch (IOException e) {}
 				finally {
-					if (fOut!=null)
-						try {
-							fOut.close();
-						} catch (IOException e) {
-						}
-					
-					if (dialog!=null)
-						dialog.dismiss();
-					dialog = null;
+					try {
+						themeContainer.runOnUiThread(new Runnable(){
+							public void run() {
+								dialog.dismiss();
+								themeContainer.setDownloadedTabSelected();
+								Toast.makeText(themeContainer, R.string.downloaded_and_applied, Toast.LENGTH_SHORT).show();
+							}
+						});
+						fOut.close();
+					} catch(Exception e) {
+						//This will catch illegal argument exception, and potential null pointers
+					}
 				}
 			}
 		};

@@ -12,7 +12,7 @@ import org.metawatch.manager.Monitors.LocationData;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public abstract class AbstractWeatherEngine implements WeatherEngine {
 

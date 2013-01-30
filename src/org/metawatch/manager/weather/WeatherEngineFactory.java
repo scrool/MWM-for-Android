@@ -4,7 +4,7 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
 import org.metawatch.manager.MetaWatchStatus;
 
-import android.util.Log;
+import org.metawatch.manager.Log;
 
 public class WeatherEngineFactory {
 
