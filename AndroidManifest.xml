@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="org.metawatch.manager"
-      android:versionCode="4"
-      android:installLocation="internalOnly" android:versionName="1.0.0.125">
+      android:versionCode="5"
+      android:installLocation="internalOnly" android:versionName="1.0.0.126">
       
     <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="17"/>
     <supports-screens android:resizeable="true" android:normalScreens="true" android:anyDensity="true" 
@@ -49,7 +49,7 @@
 	<uses-feature android:name="android.hardware.location.gps" android:required="false" />
 	<uses-feature android:name="android.hardware.wifi" android:required="false" />
 
-    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@style/Theme.Sherlock">
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@style/Theme.Sherlock.Light">
         <activity android:name="org.metawatch.manager.MainActivity"
                   android:configChanges="keyboardHidden|orientation"
                   android:launchMode="singleTask">

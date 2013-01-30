@@ -109,11 +109,9 @@ public class MetaWatchStatus extends SherlockFragment {
 		if (Preferences.watchMacAddress == "") {
 			// Show the watch discovery screen on first start
 			startActivity(new Intent(context, DeviceSelection.class));
+			context.finish();
 		}
-		
 		Protocol.configureMode();
-		
-		MetaWatchService.autoStartService(context);
     }
 
     private void configureBugSense() {
@@ -155,6 +153,7 @@ public class MetaWatchStatus extends SherlockFragment {
     @Override
 	public void onResume() {
     	super.onResume();
+    	startService();
 		displayStatus();
     }
     

@@ -155,6 +155,7 @@ public class DeviceSelection extends SherlockFragmentActivity {
 				MetaWatchService.saveMac(context, mac);
 				
 				sendToast("Selected watch set");
+				startActivity(new Intent(context, MainActivity.class));
 				finish();
 			} 
 			

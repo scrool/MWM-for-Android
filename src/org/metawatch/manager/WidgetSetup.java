@@ -11,6 +11,7 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.widgets.InternalWidget.WidgetData;
 import org.metawatch.manager.widgets.WidgetManager;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -43,11 +46,13 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.Animator;
 import com.actionbarsherlock.internal.nineoldandroids.animation.Animator.AnimatorListener;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class WidgetSetup extends SherlockFragment {
 	private LinearLayout mIdlePreviews;
 	private ExpandableListView widgetList;
 	private WidgetListAdaptor adapter;
 	private SherlockFragmentActivity mActivity;
+	private int mCurrentNumberOfPages = 0;
 	private Handler mHandler = new Handler(Looper.getMainLooper());
 
 	private class WidgetListAdaptor extends BaseExpandableListAdapter {
@@ -61,14 +66,13 @@ public class WidgetSetup extends SherlockFragment {
 			widgetMap = WidgetManager.getCachedWidgets(context, null);
 					
 			ArrayList<String> rows = new ArrayList<String>(Arrays.asList(MetaWatchService.getWidgets(context).split("\\|")));
-			ArrayList<List<String>> pGroups = new ArrayList<List<String>>();
+			final ArrayList<List<String>> pGroups = new ArrayList<List<String>>();
 			
 			for(String line : rows) {
 				String[] widgets = (line).split(",");
 				List<String> list = new ArrayList<String>(Arrays.asList(widgets));
 				pGroups.add(list);
 			}
-
 			groups = pGroups;
 			notifyDataSetChanged();
 		}
@@ -223,18 +227,10 @@ public class WidgetSetup extends SherlockFragment {
 	        return nameSb.toString();
 		}
 
-		public View getGroupView(int groupPosition, boolean isExpanded,
-				View convertView, ViewGroup parent) {
-			if (convertView == null) {
-                convertView = mInflater.inflate(android.R.layout.simple_expandable_list_item_2, null);
-			}
-			
-			TextView line1 = (TextView) convertView.findViewById(android.R.id.text1);
-			TextView line2 = (TextView) convertView.findViewById(android.R.id.text2);
-			
-			line1.setText(getGroupName(groupPosition));
-			line2.setText(getGroupLabel(groupPosition));
-			
+		public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+			if (convertView == null)
+                convertView = mInflater.inflate(R.layout.expandable_text_item, null);
+			((TextView)convertView).setText(getGroupName(groupPosition) + " - " + getGroupLabel(groupPosition));
 			return convertView;
 		}
 
@@ -256,7 +252,8 @@ public class WidgetSetup extends SherlockFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     	View view = inflater.inflate(R.layout.widget_setup, null);
-		widgetList = (ExpandableListView) view.findViewById(R.id.widgetList);		
+		widgetList = (ExpandableListView) view.findViewById(R.id.widgetList);	
+		widgetList.setGroupIndicator(null);
 		mIdlePreviews = (LinearLayout) view.findViewById(R.id.idlePreviews);
 		return view;
     }
@@ -325,6 +322,10 @@ public class WidgetSetup extends SherlockFragment {
     	if (!Idle.isBusy())
     		Idle.updateIdlePages(mActivity, true);
     	int pages = Idle.numPages();
+    	if (mCurrentNumberOfPages != pages) {
+    		mIdlePreviews.removeAllViews();
+    		mCurrentNumberOfPages = pages;
+    	}
     	for(int i=0; i<pages; ++i) {
     		Bitmap bmp = Idle.createIdle(mActivity, true, i);;
     		if (bmp!=null) {
@@ -359,6 +360,11 @@ public class WidgetSetup extends SherlockFragment {
 		    		    }
 		    		});
 	    			mIdlePreviews.addView(view);
+	    			ObjectAnimator fromRight = ObjectAnimator.ofFloat(view, "translationX", -2000, 0);
+	    			fromRight.setDuration(750);
+	    			fromRight.setInterpolator(new DecelerateInterpolator());
+	    			fromRight.start();
+
 	    		} else {
 		    		imageView = (ImageView)view.findViewById(R.id.image);
 	    		}
@@ -384,7 +390,7 @@ public class WidgetSetup extends SherlockFragment {
     }
     
     private Bitmap createGlow(Bitmap src) {
-        int margin = 24;
+        int margin = 12;
         int halfMargin = margin / 2;
 
         // the glow radius
@@ -397,8 +403,7 @@ public class WidgetSetup extends SherlockFragment {
         Bitmap alpha = src.extractAlpha();
 
         // The output bitmap (with the icon + glow)
-        Bitmap bmp = Bitmap.createBitmap(src.getWidth() + margin,
-                src.getHeight() + margin, Bitmap.Config.ARGB_8888);
+        Bitmap bmp = Bitmap.createBitmap(src.getWidth() + margin, src.getHeight() + margin, Bitmap.Config.ARGB_8888);
 
         // The canvas to paint on the image
         Canvas canvas = new Canvas(bmp);
