@@ -260,8 +260,10 @@ public class Settings extends SherlockPreferenceActivity {
 	    	
 		WebView webView = new WebView(this);
 		String html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>About</title></head><body><center>" + 
-					  "<img src=\"banner.jpg\" width=\"100%\">" +
+					  "<img src=\"icon.png\" >" +
 					  "<p>Version " + Utils.getVersion(this) + ".</p>" +
+					  "<b>MetaWatch Manager - Noah Edition</b><br>" +
+					  "Noah Seidman<br><br>" +
 					  "<b>MetaWatch Community Team</b><br>" +
 					  "Joakim Andersson<br>Chris Boyle<br>Garth Bushell<br>Prash D<br>Matthias Gruenewald<br>"+
 					  "Richard Munn<br>Diogo Neves<br>Craig Oliver<br>Didi Pfeifle<br>Thierry Schork<br>"+
