@@ -28,12 +28,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import org.metawatch.manager.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -283,7 +281,7 @@ public class WidgetSetup extends SherlockFragment {
 		public void run() {
 			refreshPreview();
 			adapter.init(mActivity);
-		    mHandler.postDelayed(mPreviewUpdate, 1000);
+		    mHandler.postDelayed(mPreviewUpdate, 2500);
 		}
 	};
 
@@ -323,10 +321,9 @@ public class WidgetSetup extends SherlockFragment {
     	if (!Idle.isBusy())
     		Idle.updateIdlePages(mActivity, true);
     	int pages = Idle.numPages();
-    	if (mCurrentNumberOfPages != pages) {
+    	if (mCurrentNumberOfPages > pages)
     		mIdlePreviews.removeAllViews();
-    		mCurrentNumberOfPages = pages;
-    	}
+		mCurrentNumberOfPages = pages;
     	for(int i=0; i<pages; ++i) {
     		Bitmap bmp = Idle.createIdle(mActivity, true, i);;
     		if (bmp!=null) {
@@ -361,11 +358,6 @@ public class WidgetSetup extends SherlockFragment {
 		    		    }
 		    		});
 	    			mIdlePreviews.addView(view);
-	    	    	ObjectAnimator slideInFromLeft = ObjectAnimator.ofFloat(view, "translationX", -1000, 0);
-	    	    	slideInFromLeft.setDuration(1000);
-	    	    	slideInFromLeft.setInterpolator(new DecelerateInterpolator());
-	    	    	slideInFromLeft.start();
-
 	    		} else {
 		    		imageView = (ImageView)view.findViewById(R.id.image);
 	    		}

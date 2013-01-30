@@ -1,5 +1,9 @@
 package org.metawatch.manager;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -48,6 +52,28 @@ public class ThemeGallery extends SherlockFragment {
         	@Override
         	public void onPageFinished(WebView view, String url) {
         		activity.setProgressBarIndeterminateVisibility(Boolean.FALSE);
+        	}
+        	@Override
+        	public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+        		AlertDialog.Builder builder = new Builder(activity);
+        		builder.setIcon(R.drawable.icon);
+        		builder.setTitle(R.string.connectivity_failure);
+        		builder.setMessage(R.string.would_you_like_to_retry);
+        		builder.setPositiveButton(android.R.string.yes, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+				        activity.setProgressBarIndeterminateVisibility(Boolean.TRUE);
+				        mWebView.loadUrl("http://grapefruitopia.com/mwthm/");
+					}
+        		});
+        		builder.setNegativeButton(android.R.string.no, new OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						activity.setDownloadedTabSelected();						
+					}
+        		});
+        		builder.show();
         	}
         });
         return mWebView;

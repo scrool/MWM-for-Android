@@ -60,7 +60,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -71,7 +70,6 @@ import android.widget.ToggleButton;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bugsense.trace.BugSenseHandler;
 
 public class MetaWatchStatus extends SherlockFragment {
@@ -153,16 +151,7 @@ public class MetaWatchStatus extends SherlockFragment {
 		});
     	return mMainView;
     }
-	
-	@Override
-	public void onActivityCreated(Bundle bundle) {
-		super.onActivityCreated(bundle);
-    	ObjectAnimator slideInFromRight = ObjectAnimator.ofFloat(mMainView, "translationY", -1000, 0);
-    	slideInFromRight.setDuration(1000);
-    	slideInFromRight.setInterpolator(new DecelerateInterpolator());
-    	slideInFromRight.start();
-	}
-    
+	    
     @Override
 	public void onResume() {
     	super.onResume();

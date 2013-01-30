@@ -16,6 +16,7 @@
     </ScrollView>
     <ExpandableListView
         android:id="@+id/widgetList"
+        android:divider="@drawable/list_divider" android:dividerHeight="2px" android:childDivider="@drawable/list_divider_child"
         android:layout_width="0dip"
         android:layout_height="match_parent"
         android:layout_weight="1"/>
