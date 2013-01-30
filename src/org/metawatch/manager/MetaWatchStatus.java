@@ -191,71 +191,67 @@ public class MetaWatchStatus extends SherlockFragment {
 
     private void getStatistics() {
 	mStatisticsText.setGravity(Gravity.CENTER);
-	if (mStatisticsDialog != null && mStatisticsDialog.isShowing()) {
-	    Resources res = context.getResources();
-	    mStatisticsText.setText("");
-	    mStatisticsText.append("\n");
-	    if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
-		if (Monitors.weatherData.error) {
-		    Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
-		    Utils.appendColoredText(mStatisticsText, Monitors.weatherData.errorString, Color.RED);
-		    mStatisticsText.append("\n\n");
-		}
-		if (Monitors.weatherData.received) {
-		    mStatisticsText.append(res.getString(R.string.status_weather_last_updated));
-		    mStatisticsText.append("\n");
-		    mStatisticsText.append(res.getString(R.string.status_weather_forecast));
-		    mStatisticsText.append("\n");
-		    printDate(mStatisticsText, Monitors.weatherData.forecastTimeStamp);
-		    mStatisticsText.append("  ");
-		    mStatisticsText.append(res.getString(R.string.status_weather_observation));
-		    mStatisticsText.append("\n");
-		    printDate(mStatisticsText, Monitors.weatherData.timeStamp);
-		} else {
-		    mStatisticsText.append(res.getString(R.string.status_weather_waiting));
-		}
+	Resources res = context.getResources();
+	mStatisticsText.setText("");
+	mStatisticsText.append("\n");
+	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
+	    if (Monitors.weatherData.error) {
+		Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
+		Utils.appendColoredText(mStatisticsText, Monitors.weatherData.errorString, Color.RED);
+		mStatisticsText.append("\n\n");
 	    }
-	    
-	    if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
+	    if (Monitors.weatherData.received) {
+		mStatisticsText.append(res.getString(R.string.status_weather_last_updated));
 		mStatisticsText.append("\n");
-		if (LocationData.received) {
-		    mStatisticsText.append(res.getString(R.string.status_location_updated));
-		    mStatisticsText.append("\n");
-		    printDate(mStatisticsText, LocationData.timeStamp);
-		} else {
-		    mStatisticsText.append(res.getString(R.string.status_location_waiting));
-		    mStatisticsText.append("\n");
-		}
-	    }
-	    
-	    mStatisticsText.append("\n");
-	    if (Utils.isAccessibilityEnabled(context)) {
-		if (MetaWatchAccessibilityService.accessibilityReceived) {
-		    Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_working), Color.GREEN);
-		} else {
-		    if (startupTime == 0 || System.currentTimeMillis() - startupTime < 60 * 1000) {
-			mStatisticsText.append(res.getString(R.string.status_accessibility_waiting));
-		    } else {
-			Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_failed), Color.RED);
-		    }
-		}
+		mStatisticsText.append(res.getString(R.string.status_weather_forecast));
+		mStatisticsText.append("\n");
+		printDate(mStatisticsText, Monitors.weatherData.forecastTimeStamp);
+		mStatisticsText.append("  ");
+		mStatisticsText.append(res.getString(R.string.status_weather_observation));
+		mStatisticsText.append("\n");
+		printDate(mStatisticsText, Monitors.weatherData.timeStamp);
 	    } else {
-		mStatisticsText.append(res.getString(R.string.status_accessibility_disabled));
+		mStatisticsText.append(res.getString(R.string.status_weather_waiting));
 	    }
-	    mStatisticsText.append("\n");
-	    
-	    mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getQueueLength());
-	    mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getQueueLength() + "\n");
-	    
-	    if (Preferences.showNotificationQueue) {
-		mStatisticsText.append(Notification.dumpQueue());
-	    }
-	    
-	    mStatisticsText.append("\nStatus updated at ");
-	    printDate(mStatisticsText, System.currentTimeMillis());
-	} else {
-	    mStatisticsText.setText(R.string.please_wait);
 	}
+	
+	if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
+	    mStatisticsText.append("\n");
+	    if (LocationData.received) {
+		mStatisticsText.append(res.getString(R.string.status_location_updated));
+		mStatisticsText.append("\n");
+		printDate(mStatisticsText, LocationData.timeStamp);
+	    } else {
+		mStatisticsText.append(res.getString(R.string.status_location_waiting));
+		mStatisticsText.append("\n");
+	    }
+	}
+	
+	mStatisticsText.append("\n");
+	if (Utils.isAccessibilityEnabled(context)) {
+	    if (MetaWatchAccessibilityService.accessibilityReceived) {
+		Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_working), Color.GREEN);
+	    } else {
+		if (startupTime == 0 || System.currentTimeMillis() - startupTime < 60 * 1000) {
+		    mStatisticsText.append(res.getString(R.string.status_accessibility_waiting));
+		} else {
+		    Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_failed), Color.RED);
+		}
+	    }
+	} else {
+	    mStatisticsText.append(res.getString(R.string.status_accessibility_disabled));
+	}
+	mStatisticsText.append("\n");
+	
+	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getQueueLength());
+	mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getQueueLength() + "\n");
+	
+	if (Preferences.showNotificationQueue) {
+	    mStatisticsText.append(Notification.dumpQueue());
+	}
+	    
+	mStatisticsText.append("\nStatus updated at ");
+	printDate(mStatisticsText, System.currentTimeMillis());
     }
 
     private static void printDate(TextView textView, long ticks) {

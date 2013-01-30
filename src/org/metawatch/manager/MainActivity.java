@@ -30,6 +30,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	    widget_setup.setVisibility(View.INVISIBLE);
 	    status.setVisibility(View.INVISIBLE);
 	    AnimatorSet set = new AnimatorSet();
+	    set.setStartDelay(500);
 	    set.play(fadeIn(widget_setup)).after(fadeIn(status));
 	    set.addListener(new AnimatorListener() {
 		@Override
