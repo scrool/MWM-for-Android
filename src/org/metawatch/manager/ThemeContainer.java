@@ -8,6 +8,7 @@ import android.view.Window;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 
 public class ThemeContainer extends SherlockFragmentActivity {
 	ActionBar mActionBar;
@@ -78,4 +79,15 @@ public class ThemeContainer extends SherlockFragmentActivity {
     public void setDownloadedTabSelected() {
     	mActionBar.selectTab(mDownloadedTab);
     }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case android.R.id.home:
+    		finish();
+    		return true;
+    	default:
+    		return false;
+    	}
+	}
 }

@@ -69,7 +69,7 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import org.metawatch.manager.Log;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 public class MetaWatchService extends Service {
@@ -86,7 +86,6 @@ public class MetaWatchService extends Service {
 
 	//TelephonyManager telephonyManager;
 	NotificationManager notificationManager;
-	android.app.Notification notification;
 
 	public static PowerManager powerManager;
 	public static PowerManager.WakeLock wakeLock;
@@ -501,22 +500,36 @@ public class MetaWatchService extends Service {
 	}
 	
 	public void createNotification() {
-		SharedPreferences sharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		boolean hideNotificationIcon = sharedPreferences.getBoolean(
-				"HideNotificationIcon", false);
-		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
-				"MetaWatchService.createNotification(): hideNotificationIcon="
-						+ hideNotificationIcon);
-		int notificationIcon = (hideNotificationIcon ? R.drawable.transparent_square
-				: R.drawable.disabled);
-		notification = new android.app.Notification(notificationIcon, getResources().getString(R.string.app_name),
-				System.currentTimeMillis());
-		notification.flags |= android.app.Notification.FLAG_ONGOING_EVENT;
-
-		notification.setLatestEventInfo(this, "MetaWatch Manager", "Idle", createNotificationPendingIntent());
-
-		startForeground(1, notification);
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean hideNotificationIcon = sharedPreferences.getBoolean("HideNotificationIcon", false);
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MetaWatchService.createNotification(): hideNotificationIcon=" + hideNotificationIcon);
+		
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		builder.setTicker(getResources().getString(R.string.app_name));
+		builder.setContentTitle(getResources().getString(R.string.app_name));
+		builder.setContentIntent(createNotificationPendingIntent());
+		builder.setOngoing(true);
+		builder.setOnlyAlertOnce(true);
+		switch (connectionState) {
+		case ConnectionState.CONNECTING:
+			builder.setContentText(getResources().getString(R.string.connection_connecting));
+			builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disabled));
+			builder.setProgress(0, 0, true);
+			broadcastConnection(false);
+			break;
+		case ConnectionState.CONNECTED:
+			builder.setContentText(getResources().getString(R.string.connection_connected));
+			builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.enabled));
+			broadcastConnection(true);
+			break;
+		default:
+			builder.setContentText(getResources().getString(R.string.connection_disconnected));
+			builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disabled));
+			broadcastConnection(false);
+			break;
+		}
+		
+		startForeground(1, builder.build());
 	}
 
 	private PendingIntent createNotificationPendingIntent() {
@@ -525,35 +538,10 @@ public class MetaWatchService extends Service {
 	}
 
 	public void updateNotification() {
-		SharedPreferences sharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		boolean hideNotificationIcon = sharedPreferences.getBoolean(
-				"HideNotificationIcon", false);
-		if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
-				"MetaWatchService.updateNotification(): hideNotificationIcon="
-						+ hideNotificationIcon);
-		switch (connectionState) {
-		case ConnectionState.CONNECTING:
-			notification.icon = (hideNotificationIcon ? R.drawable.transparent_square
-					: R.drawable.disabled);
-			notification.setLatestEventInfo(this, "MetaWatch Manager", "Connecting", createNotificationPendingIntent());
-			broadcastConnection(false);
-			break;
-		case ConnectionState.CONNECTED:
-			notification.icon = (hideNotificationIcon ? R.drawable.transparent_square
-					: R.drawable.enabled);
-			notification.setLatestEventInfo(this, getResources().getString(R.string.app_name), getResources().getString(R.string.connection_connected), createNotificationPendingIntent());
-			broadcastConnection(true);
-			break;
-		default:
-			notification.icon = (hideNotificationIcon ? R.drawable.transparent_square
-					: R.drawable.disabled);
-			notification.setLatestEventInfo(this, getResources().getString(R.string.app_name), getResources().getString(R.string.connection_disconnected), createNotificationPendingIntent());
-			broadcastConnection(false);
-			break;
-		}
-		
-		startForeground(1, notification);
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean hideNotificationIcon = sharedPreferences.getBoolean("HideNotificationIcon", false);
+		if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "MetaWatchService.updateNotification(): hideNotificationIcon=" + hideNotificationIcon);
+		createNotification();
 		notifyClients();
 	}
 
