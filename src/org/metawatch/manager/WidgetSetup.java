@@ -174,9 +174,9 @@ public class WidgetSetup extends SherlockFragment {
 		icon.setImageBitmap(Bitmap.createScaledBitmap(bmp, bmp.getWidth() * 2, bmp.getHeight() * 2, false));
 	    }
 	    if (convertView.getTag() == null || !((Boolean)convertView.getTag())) {
-		ObjectAnimator slideDown = ObjectAnimator.ofFloat(convertView, "translationX", 1000, 0);
-		slideDown.setDuration(750);
-		slideDown.start();
+		ObjectAnimator fadeIn = ObjectAnimator.ofFloat(convertView, "alpha", 0, 1);
+		fadeIn.setDuration(750);
+		fadeIn.start();
 		convertView.setTag(true);
 	    }
 	    return convertView;
