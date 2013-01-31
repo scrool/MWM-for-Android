@@ -20,13 +20,9 @@ import java.util.zip.ZipInputStream;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import org.metawatch.manager.Log;
 import android.widget.Toast;
 
 public class BitmapCache {
@@ -287,7 +283,6 @@ public class BitmapCache {
 	return filename.substring(0, filename.lastIndexOf('.'));
     }
 
-    static ProgressDialog dialog = null;
 
     public static void downloadAndInstallTheme(final ThemeContainer themeContainer, final String uri) {
 
@@ -298,18 +293,10 @@ public class BitmapCache {
 
 		OutputStream fOut = null;
 		try {
-
 		    themeContainer.runOnUiThread(new Runnable() {
 			public void run() {
-			    dialog = ProgressDialog.show(themeContainer, "", "Downloading Theme", true);
-			    dialog.setCanceledOnTouchOutside(false);
-			    dialog.setOnCancelListener(new OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface dialog) {
-				    Toast.makeText(themeContainer, "Canceled", Toast.LENGTH_SHORT).show();
-				}
-			    });
-			    dialog.show();
+			    Toast.makeText(themeContainer, themeContainer.getString(R.string.downloading_theme), Toast.LENGTH_SHORT).show();
+			    themeContainer.setProgressBarIndeterminateVisibility(Boolean.TRUE);
 			}
 		    });
 
@@ -344,7 +331,6 @@ public class BitmapCache {
 		    fOut.write(data);
 		    fOut.flush();
 		    fOut.close();
-		    fOut = null;
 
 		    Preferences.themeName = themeName;
 		    MetaWatchService.saveTheme(themeContainer, Preferences.themeName);
@@ -353,24 +339,16 @@ public class BitmapCache {
 		} catch (MalformedURLException e) {
 		} catch (IOException e) {
 		} finally {
-		    try {
-			themeContainer.runOnUiThread(new Runnable() {
-			    public void run() {
-				dialog.dismiss();
-				themeContainer.setDownloadedTabSelected();
-				Toast.makeText(themeContainer, R.string.downloaded_and_applied, Toast.LENGTH_SHORT).show();
-			    }
-			});
-			fOut.close();
-		    } catch (Exception e) {
-			// This will catch illegal argument exception, and
-			// potential null pointers
-		    }
+		    themeContainer.runOnUiThread(new Runnable() {
+			public void run() {
+			    themeContainer.setProgressBarIndeterminateVisibility(Boolean.FALSE);
+			    Toast.makeText(themeContainer, R.string.downloaded_and_applied, Toast.LENGTH_SHORT).show();
+			    themeContainer.setDownloadedTabSelected();
+			}
+		    });
 		}
 	    }
 	};
-
 	thread.start();
     }
-
 }

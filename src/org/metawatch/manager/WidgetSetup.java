@@ -175,8 +175,8 @@ public class WidgetSetup extends SherlockFragment {
 		icon.setImageBitmap(Bitmap.createScaledBitmap(bmp, bmp.getWidth() * 2, bmp.getHeight() * 2, false));
 	    }
 	    if (convertView.getTag() == null || !((Boolean)convertView.getTag())) {
-		ObjectAnimator slideDown = ObjectAnimator.ofFloat(convertView, "translationX", 1000, 0);
-		slideDown.setDuration(1000);
+		ObjectAnimator slideDown = ObjectAnimator.ofFloat(convertView, "translationX", (childPosition + 1) * 1000, 0);
+		slideDown.setDuration(1250);
 		slideDown.setInterpolator(new DecelerateInterpolator());
 		slideDown.start();
 		convertView.setTag(true);
@@ -366,6 +366,8 @@ public class WidgetSetup extends SherlockFragment {
 			}
 		    });
 		    mIdlePreviews.addView(view);
+		    if (MetaWatchService.isRunning())
+			downFromTop(view).start();
 		} else {
 		    imageView = (ImageView) view.findViewById(R.id.image);
 		}
@@ -390,6 +392,13 @@ public class WidgetSetup extends SherlockFragment {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() end");
     }
+    
+    private ObjectAnimator downFromTop(final View view) {
+ 	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "translationY", -1000, 0);
+ 	downFromTop.setDuration(1250);
+ 	downFromTop.setInterpolator(new DecelerateInterpolator());
+ 	return downFromTop;
+     }
 
     private Bitmap createGlow(Bitmap src) {
 	int margin = 12;
