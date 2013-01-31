@@ -32,7 +32,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -175,9 +174,8 @@ public class WidgetSetup extends SherlockFragment {
 		icon.setImageBitmap(Bitmap.createScaledBitmap(bmp, bmp.getWidth() * 2, bmp.getHeight() * 2, false));
 	    }
 	    if (convertView.getTag() == null || !((Boolean)convertView.getTag())) {
-		ObjectAnimator slideDown = ObjectAnimator.ofFloat(convertView, "translationX", (childPosition + 1) * 1000, 0);
-		slideDown.setDuration(1250);
-		slideDown.setInterpolator(new DecelerateInterpolator());
+		ObjectAnimator slideDown = ObjectAnimator.ofFloat(convertView, "translationX", 1000, 0);
+		slideDown.setDuration(750);
 		slideDown.start();
 		convertView.setTag(true);
 	    }
@@ -380,10 +378,10 @@ public class WidgetSetup extends SherlockFragment {
 		if (tmpDrawable != null)
 		    currentBitmap = ((BitmapDrawable) tmpDrawable).getBitmap();
 		if (currentBitmap != null && !bitmapCompare(currentBitmap, bmp)) {
-		    ObjectAnimator fadeOut = ObjectAnimator.ofFloat(imageView, "alpha", 1, 0);
-		    fadeOut.setDuration(500);
-		    fadeOut.addListener(new MyAnimatorListener(imageView, bmp));
-		    fadeOut.start();
+		    ObjectAnimator upToTop = ObjectAnimator.ofFloat(imageView, "translationY", 0, -1000);
+		    upToTop.setDuration(750);
+		    upToTop.addListener(new MyAnimatorListener(imageView, bmp));
+		    upToTop.start();
 		} else {
 		    imageView.setImageBitmap(bmp);
 		}
@@ -395,8 +393,7 @@ public class WidgetSetup extends SherlockFragment {
     
     private ObjectAnimator downFromTop(final View view) {
  	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "translationY", -1000, 0);
- 	downFromTop.setDuration(1250);
- 	downFromTop.setInterpolator(new DecelerateInterpolator());
+ 	downFromTop.setDuration(750);
  	return downFromTop;
      }
 
@@ -449,9 +446,9 @@ public class WidgetSetup extends SherlockFragment {
 	@Override
 	public void onAnimationEnd(Animator animation) {
 	    iv.setImageBitmap(bmp);
-	    ObjectAnimator fadeIn = ObjectAnimator.ofFloat(iv, "alpha", 0, 1);
-	    fadeIn.setDuration(500);
-	    fadeIn.start();
+	    iv.requestLayout();
+	    iv.invalidate();
+	    downFromTop(iv).start();
 	}
 
 	@Override

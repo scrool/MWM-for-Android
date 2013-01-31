@@ -6,6 +6,6 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="lib" path="libs/bugsense3.0.6.jar"/>
 	<classpathentry kind="src" path="lib-src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ActionBarSherlock4.1.0"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ActionBarSherlock4.2.0"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
