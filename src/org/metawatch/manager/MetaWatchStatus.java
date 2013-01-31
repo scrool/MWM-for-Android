@@ -174,7 +174,7 @@ public class MetaWatchStatus extends SherlockFragment {
     @Override
     public void onResume() {
 	super.onResume();
-	displayStatus();
+	startService();
     }
 
     @Override
@@ -285,17 +285,16 @@ public class MetaWatchStatus extends SherlockFragment {
     }
 
     void startService() {
-	if (!MetaWatchService.isRunning()) {
-	    displayStatus();
+	displayStatus();
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		context.bindService(new Intent(context, MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
+		context.startService(new Intent(context, MetaWatchService.class));
+	    }
+	}).start();
+	if (!MetaWatchService.isRunning())
 	    Toast.makeText(context, context.getString(R.string.main_service_toggle_starting), Toast.LENGTH_SHORT).show();
-	    new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    context.bindService(new Intent(context, MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
-		    context.startService(new Intent(context, MetaWatchService.class));
-		}
-	    }).start();
-	}
     }
 
     void stopService() {

@@ -200,7 +200,12 @@ public class Monitors {
 	if (locationFinder == null)
 	    return;
 
-	Location location = locationFinder.getLastBestKnownLocation();
+	Location location = null;
+	try {
+	    location = locationFinder.getLastBestKnownLocation();
+	} catch(NullPointerException e) {
+	    e.printStackTrace();
+	}
 	if (location != null) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Updated location");

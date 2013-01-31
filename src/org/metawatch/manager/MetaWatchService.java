@@ -35,9 +35,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
+import java.util.Vector;
 
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.actions.ActionManager;
@@ -450,18 +450,18 @@ public class MetaWatchService extends Service {
 	switch (connectionState) {
 	case ConnectionState.CONNECTING:
 	    builder.setContentText(getResources().getString(R.string.connection_connecting));
-	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disabled));
+	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
 	    builder.setProgress(0, 0, true);
 	    broadcastConnection(false);
 	    break;
 	case ConnectionState.CONNECTED:
 	    builder.setContentText(getResources().getString(R.string.connection_connected));
-	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.enabled));
+	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.connected));
 	    broadcastConnection(true);
 	    break;
 	default:
 	    builder.setContentText(getResources().getString(R.string.connection_disconnected));
-	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disabled));
+	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
 	    broadcastConnection(false);
 	    break;
 	}
@@ -677,7 +677,7 @@ public class MetaWatchService extends Service {
     }
 
     /** Keeps track of all current registered clients. */
-    static ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+    static Vector<Messenger> mClients = new Vector<Messenger>();
 
     private static Handler messageHandler = new Handler() {
 
@@ -708,16 +708,18 @@ public class MetaWatchService extends Service {
     final static Messenger mMessenger = new Messenger(messageHandler);
 
     public static void notifyClients() {
-	for (int i = mClients.size() - 1; i >= 0; i--) {
-	    try {
-		mClients.get(i).send(Message.obtain(null, Msg.UPDATE_STATUS, 0, 0));
-	    } catch (RemoteException e) {
-		// The client is dead. Remove it from the list;
-		// we are going through the list from back to front
-		// so this is safe to do inside the loop.
-		mClients.remove(i);
-	    } catch (NullPointerException e) {
-		mClients.remove(i);
+	synchronized(mClients) {
+	    for (int i = mClients.size() - 1; i >= 0; i--) {
+		try {
+		    mClients.get(i).send(Message.obtain(null, Msg.UPDATE_STATUS, 0, 0));
+		} catch (RemoteException e) {
+		    // The client is dead. Remove it from the list;
+		    // we are going through the list from back to front
+		    // so this is safe to do inside the loop.
+		    mClients.remove(i);
+		} catch (NullPointerException e) {
+		    mClients.remove(i);
+		}
 	    }
 	}
     }

@@ -119,7 +119,7 @@ public class LocationFinder {
      * 
      * @return best known location
      */
-    public Location getLastBestKnownLocation() {
+    public Location getLastBestKnownLocation() throws NullPointerException {
 	assert (locationManager != null);
 
 	Location bestResult = null;
