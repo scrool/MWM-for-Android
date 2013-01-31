@@ -154,17 +154,17 @@ public class MetaWatchStatus extends SherlockFragment {
 	    }
 
 	    private void wiggleButton() {
-		ObjectAnimator right = ObjectAnimator.ofFloat(toggleButton, "translationX", 0, 10);
+		ObjectAnimator right = ObjectAnimator.ofFloat(toggleButton, "translationX", 0, 5);
 		right.setDuration(45);
-		ObjectAnimator left = ObjectAnimator.ofFloat(toggleButton, "translationX", 10, -10);
+		ObjectAnimator left = ObjectAnimator.ofFloat(toggleButton, "translationX", 5, -5);
 		left.setDuration(45);
-		ObjectAnimator centerHorizontal = ObjectAnimator.ofFloat(toggleButton, "translationX", -10, 0);
+		ObjectAnimator centerHorizontal = ObjectAnimator.ofFloat(toggleButton, "translationX", -5, 0);
 		centerHorizontal.setDuration(45);
-		ObjectAnimator up = ObjectAnimator.ofFloat(toggleButton, "translationY", 0, -10);
+		ObjectAnimator up = ObjectAnimator.ofFloat(toggleButton, "translationY", 0, -5);
 		up.setDuration(45);
-		ObjectAnimator down = ObjectAnimator.ofFloat(toggleButton, "translationY", -10, 10);
+		ObjectAnimator down = ObjectAnimator.ofFloat(toggleButton, "translationY", -5, 5);
 		down.setDuration(45);
-		ObjectAnimator centerVertical = ObjectAnimator.ofFloat(toggleButton, "translationY", 10, 0);
+		ObjectAnimator centerVertical = ObjectAnimator.ofFloat(toggleButton, "translationY", 5, 0);
 		centerVertical.setDuration(45);
 		AnimatorSet set = new AnimatorSet();
 		set.playSequentially(right, left, centerHorizontal, up, down, centerVertical);
