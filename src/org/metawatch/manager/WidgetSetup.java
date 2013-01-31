@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -173,7 +174,13 @@ public class WidgetSetup extends SherlockFragment {
 	    if (bmp != null) {
 		icon.setImageBitmap(Bitmap.createScaledBitmap(bmp, bmp.getWidth() * 2, bmp.getHeight() * 2, false));
 	    }
-
+	    if (convertView.getTag() == null || !((Boolean)convertView.getTag())) {
+		ObjectAnimator slideDown = ObjectAnimator.ofFloat(convertView, "translationX", 1000, 0);
+		slideDown.setDuration(1000);
+		slideDown.setInterpolator(new DecelerateInterpolator());
+		slideDown.start();
+		convertView.setTag(true);
+	    }
 	    return convertView;
 	}
 

@@ -65,6 +65,8 @@ import android.widget.ToggleButton;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorSet;
+import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bugsense.trace.BugSenseHandler;
 
 public class MetaWatchStatus extends SherlockFragment {
@@ -137,12 +139,36 @@ public class MetaWatchStatus extends SherlockFragment {
 	});
 	toggleButton = (ToggleButton) mMainView.findViewById(R.id.toggleButton);
 	toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+	    private boolean inited = false;
 	    @Override
 	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		if (!inited) {
+		    inited = true;
+		    return;
+		}
+		wiggleButton();
 		if (isChecked)
 		    startService();
 		else
 		    stopService();
+	    }
+
+	    private void wiggleButton() {
+		ObjectAnimator right = ObjectAnimator.ofFloat(toggleButton, "translationX", 0, 10);
+		right.setDuration(45);
+		ObjectAnimator left = ObjectAnimator.ofFloat(toggleButton, "translationX", 10, -10);
+		left.setDuration(45);
+		ObjectAnimator centerHorizontal = ObjectAnimator.ofFloat(toggleButton, "translationX", -10, 0);
+		centerHorizontal.setDuration(45);
+		ObjectAnimator up = ObjectAnimator.ofFloat(toggleButton, "translationY", 0, -10);
+		up.setDuration(45);
+		ObjectAnimator down = ObjectAnimator.ofFloat(toggleButton, "translationY", -10, 10);
+		down.setDuration(45);
+		ObjectAnimator centerVertical = ObjectAnimator.ofFloat(toggleButton, "translationY", 10, 0);
+		centerVertical.setDuration(45);
+		AnimatorSet set = new AnimatorSet();
+		set.playSequentially(right, left, centerHorizontal, up, down, centerVertical);
+		set.start();
 	    }
 
 	});
@@ -265,6 +291,7 @@ public class MetaWatchStatus extends SherlockFragment {
 
     void startService() {
 	if (!MetaWatchService.isRunning()) {
+	    displayStatus();
 	    new Thread(new Runnable() {
 		@Override
 		public void run() {
@@ -284,7 +311,7 @@ public class MetaWatchStatus extends SherlockFragment {
 	    if (Preferences.logging)
 		Log.d(TAG, e.getMessage());
 	}
-	setButtonState(context);
+	displayStatus();
     }
 
     private static void setButtonState(Context context) {
