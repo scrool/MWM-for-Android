@@ -78,7 +78,7 @@ public class MetaWatchService extends Service {
     private OutputStream outputStream;
     private ServiceThread serviceThread;
 
-    private static PowerManager powerManager;
+    private PowerManager powerManager;
 
     public static volatile int connectionState;
     public static int watchType = WatchType.UNKNOWN;
@@ -723,7 +723,7 @@ public class MetaWatchService extends Service {
      */
     final Messenger mMessenger = new Messenger(messageHandler);
 
-    public void notifyClients() {
+    private void notifyClients() {
 	synchronized (mClients) {
 	    for (int i = mClients.size() - 1; i >= 0; i--) {
 		try {
