@@ -35,9 +35,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
-import java.util.Vector;
 
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.actions.ActionManager;
@@ -119,7 +119,7 @@ public class MetaWatchService extends Service {
 	editor.commit();
     }
     
-    public static synchronized void sendNotifyClientsRequest(Context context) {
+    public static void sendNotifyClientsRequest(Context context) {
 	Intent intent = new Intent(context, MetaWatchService.class);
 	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
 	context.startService(intent);
@@ -692,7 +692,7 @@ public class MetaWatchService extends Service {
     }
 
     /** Keeps track of all current registered clients. */
-    static Vector<Messenger> mClients = new Vector<Messenger>();
+    static ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
     private Handler messageHandler = new Handler() {
 
