@@ -119,7 +119,7 @@ public class MetaWatchService extends Service {
 	editor.commit();
     }
     
-    public static void sendNotifyClientsRequest(Context context) {
+    public static synchronized void sendNotifyClientsRequest(Context context) {
 	Intent intent = new Intent(context, MetaWatchService.class);
 	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
 	context.startService(intent);
@@ -520,32 +520,31 @@ public class MetaWatchService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-	// handleCommand(intent);
-	// We want this service to continue running until it is explicitly
-	// stopped, so return sticky.
-	switch (intent.getIntExtra(COMMAND_KEY, 0)) {
-	case SILENT_MODE_ENABLE:
-	    setSilentMode(false);
-	    break;
-	case SILENT_MODE_DISABLE:
-	    setSilentMode(false);
-	    break;
-	case INVERT_SILENT_MODE:
-	    setSilentMode(!silentMode);
-	    break;
-	case SEND_BYTE_ARRAY:
-	    try {
-		outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
-		outputStream.flush();
-	    } catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+    public synchronized int onStartCommand(Intent intent, int flags, int startId) {
+	if (intent != null) {
+	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
+	    case SILENT_MODE_ENABLE:
+		setSilentMode(false);
+		break;
+	    case SILENT_MODE_DISABLE:
+		setSilentMode(false);
+		break;
+	    case INVERT_SILENT_MODE:
+		setSilentMode(!silentMode);
+		break;
+	    case SEND_BYTE_ARRAY:
+		try {
+		    outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
+		    outputStream.flush();
+		} catch (Exception e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
+		    break;
+	    case NOTIFY_CLIENTS:
+		notifyClients();
+		break;
 	    }
-	    break;
-	case NOTIFY_CLIENTS:
-	    notifyClients();
-	    break;
 	}
 
 	if (Preferences.logging)

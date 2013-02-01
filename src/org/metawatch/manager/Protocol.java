@@ -258,7 +258,7 @@ public class Protocol {
 
     }
 
-    public void enqueue(byte[] bytes) {
+    public synchronized void enqueue(byte[] bytes) {
 
 	if (MetaWatchService.fakeWatch)
 	    return;
