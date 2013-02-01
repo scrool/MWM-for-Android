@@ -649,7 +649,7 @@
 			android:summary="@string/settings_auto_connect_desc"
 			android:defaultValue="false"
 			/>					
-        <CheckBoxPreference
+        <!--<CheckBoxPreference
             android:title="@string/settings_notify_on_connect"
             android:key="NotifyWatchOnConnect"
             android:summary="@string/settings_notify_on_connect_desc"
@@ -660,7 +660,7 @@
             android:key="DisplaySplashScreen"
             android:summary="@string/settings_display_splash_desc"
             android:defaultValue="false"
-            />
+            />-->
         <CheckBoxPreference
 			android:title="@string/settings_restart_if_stalled"
 			android:key="AutoRestart"
