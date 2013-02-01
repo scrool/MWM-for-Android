@@ -150,7 +150,7 @@ public class Idle {
 		canvas.drawBitmap(Utils.getBitmap(context, "dummy_clock.png"), 0, 0, null);
 	    }
 
-	    if (MetaWatchService.SilentMode()) {
+	    if (MetaWatchService.silentMode()) {
 		if (MetaWatchService.watchType == WatchType.DIGITAL) {
 
 		    Paint paint = new Paint();
@@ -504,7 +504,7 @@ public class Idle {
 	boolean showClock = false;
 
 	if (mode == MetaWatchService.WatchBuffers.IDLE || idlePages.get(currentPage) instanceof WidgetPage) {
-	    if (MetaWatchService.SilentMode()) {
+	    if (MetaWatchService.silentMode()) {
 		showClock = true;
 	    } else {
 		// Update widgets.

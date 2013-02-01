@@ -60,13 +60,13 @@ public class Notification {
     private static ArrayList<NotificationType> notificationHistory = new ArrayList<NotificationType>();
     final static byte NOTIFICATION_HISTORY_SIZE = 15;
 
-    private static void addToNotificationQueue(NotificationType notification, boolean forceShow) {
+    private static void addToNotificationQueue(Context context, NotificationType notification, boolean forceShow) {
 	if (MetaWatchService.connectionState == MetaWatchService.ConnectionState.CONNECTED) {
-	    if (!forceShow && MetaWatchService.SilentMode()) {
+	    if (!forceShow && MetaWatchService.silentMode()) {
 		addToHistory(notification);
 	    } else {
 		notificationQueue.add(notification);
-		MetaWatchService.notifyClients();
+		MetaWatchService.sendNotifyClientsRequest(context);
 	    }
 	}
     }
@@ -96,7 +96,7 @@ public class Notification {
 			notification = currentNotification;
 		    } else {
 			if (Preferences.showNotificationQueue)
-			    MetaWatchService.notifyClients();
+			    MetaWatchService.sendNotifyClientsRequest(context);
 			notification = notificationQueue.take();
 			currentNotification = notification;
 		    }
@@ -407,7 +407,7 @@ public class Notification {
 	    notification.vibratePattern = VibratePattern.NO_VIBRATE;
 	else
 	    notification.vibratePattern = vibratePattern;
-	addToNotificationQueue(notification, false);
+	addToNotificationQueue(context, notification, false);
     }
 
     public static void addBitmapNotification(Context context, Bitmap bitmap, VibratePattern vibratePattern, int timeout, String description) {
@@ -429,7 +429,7 @@ public class Notification {
 	else
 	    notification.vibratePattern = vibratePattern;
 	notification.description = description;
-	addToNotificationQueue(notification, false);
+	addToNotificationQueue(context, notification, false);
     }
 
     public static void addArrayNotification(Context context, int[] array, VibratePattern vibratePattern, String description) {
@@ -443,7 +443,7 @@ public class Notification {
 	else
 	    notification.vibratePattern = vibratePattern;
 	notification.description = description;
-	addToNotificationQueue(notification, false);
+	addToNotificationQueue(context, notification, false);
 
     }
 
@@ -457,7 +457,7 @@ public class Notification {
 	else
 	    notification.vibratePattern = vibratePattern;
 	notification.description = description;
-	addToNotificationQueue(notification, false);
+	addToNotificationQueue(context, notification, false);
 
     }
 
@@ -474,7 +474,7 @@ public class Notification {
 	else
 	    notification.vibratePattern = vibratePattern;
 	notification.description = description;
-	addToNotificationQueue(notification, false);
+	addToNotificationQueue(context, notification, false);
 
     }
 
@@ -502,7 +502,7 @@ public class Notification {
 	if (notification != null) {
 	    notification.vibratePattern.vibrate = false;
 	    notification.isNew = false;
-	    addToNotificationQueue(notification, true);
+	    addToNotificationQueue(context, notification, true);
 	}
     }
 

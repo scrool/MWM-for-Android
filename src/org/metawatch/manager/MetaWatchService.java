@@ -48,7 +48,6 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -73,17 +72,13 @@ import android.widget.Toast;
 
 public class MetaWatchService extends Service {
 
-    public static BluetoothAdapter bluetoothAdapter;
-    BluetoothSocket bluetoothSocket;
-    static InputStream inputStream;
-    static OutputStream outputStream;
-    static ServiceThread serviceThread;
-    static Service instance = null;
+    private BluetoothAdapter bluetoothAdapter;
+    private BluetoothSocket bluetoothSocket;
+    private InputStream inputStream;
+    private OutputStream outputStream;
+    private ServiceThread serviceThread;
 
-    // TelephonyManager telephonyManager;
-    NotificationManager notificationManager;
-
-    public static PowerManager powerManager;
+    private static PowerManager powerManager;
 
     public static volatile int connectionState;
     public static int watchType = WatchType.UNKNOWN;
@@ -105,20 +100,29 @@ public class MetaWatchService extends Service {
     public static final int SILENT_MODE_DISABLE = 0;
     public static final int SILENT_MODE_ENABLE = 1;
     public static final int INVERT_SILENT_MODE = 2;
-
-    public static boolean SilentMode() {
+    public static final int SEND_BYTE_ARRAY = 3;
+    public static final String BYTE_ARRAY = "BYTE_ARRAY";
+    public static final int NOTIFY_CLIENTS = 4;
+    
+    private static boolean mIsRunning = false;
+    
+    public static boolean silentMode() {
 	return silentMode;
     }
 
-    public void setSilentMode(boolean enabled) {
+    private void setSilentMode(boolean enabled) {
 	silentMode = enabled;
 	Idle.updateIdle(MetaWatchService.this, true);
-
 	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this);
 	Editor editor = sharedPreferences.edit();
 	editor.putBoolean("SilentMode", silentMode);
 	editor.commit();
-
+    }
+    
+    public static void sendNotifyClientsRequest(Context context) {
+	Intent intent = new Intent(context, MetaWatchService.class);
+	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
+	context.startService(intent);
     }
 
     final static class ConnectionState {
@@ -428,10 +432,6 @@ public class MetaWatchService extends Service {
 	}
     }
 
-    public static boolean isRunning() {
-	return instance != null;
-    }
-
     public void createNotification() {
 	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 	boolean hideNotificationIcon = sharedPreferences.getBoolean("HideNotificationIcon", false);
@@ -487,8 +487,8 @@ public class MetaWatchService extends Service {
 	super.onCreate();
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onCreate()");
-	instance = this;
 	initialize();
+	mIsRunning = true;
     }
 
     private void initialize() {
@@ -534,6 +534,18 @@ public class MetaWatchService extends Service {
 	case INVERT_SILENT_MODE:
 	    setSilentMode(!silentMode);
 	    break;
+	case SEND_BYTE_ARRAY:
+	    try {
+		outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
+		outputStream.flush();
+	    } catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	    break;
+	case NOTIFY_CLIENTS:
+	    notifyClients();
+	    break;
 	}
 
 	if (Preferences.logging)
@@ -544,13 +556,16 @@ public class MetaWatchService extends Service {
 
 	return START_STICKY;
     }
+    
+    public static boolean isRunning() {
+	return mIsRunning;
+    }
 
     @Override
     public void onDestroy() {
 	disconnectExit();
 	super.onDestroy();
 	serviceThread.quit();
-	instance = null;
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onDestroy()");
@@ -561,6 +576,7 @@ public class MetaWatchService extends Service {
 	notifyClients();
 	mClients.clear();
 	Protocol.getInstance(this).destroy();
+	mIsRunning = false;
     }
 
     @TargetApi(10)
@@ -706,7 +722,7 @@ public class MetaWatchService extends Service {
      */
     final Messenger mMessenger = new Messenger(messageHandler);
 
-    public static void notifyClients() {
+    public void notifyClients() {
 	synchronized (mClients) {
 	    for (int i = mClients.size() - 1; i >= 0; i--) {
 		try {
@@ -790,9 +806,7 @@ public class MetaWatchService extends Service {
 	    } finally {
 		connectionState = ConnectionState.DISCONNECTED;
 		updateNotification();
-		if (instance != null) {
-		    instance.stopSelf();
-		}
+		stopSelf();
 	    }
 	}
 

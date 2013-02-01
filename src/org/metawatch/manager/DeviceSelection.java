@@ -66,6 +66,7 @@ import com.actionbarsherlock.view.MenuItem;
 public class DeviceSelection extends SherlockFragmentActivity {
 
     private ActionBar mActionBar;
+    private BluetoothAdapter bluetoothAdapter;
 
     class Receiver extends BroadcastReceiver {
 	@Override
@@ -171,15 +172,15 @@ public class DeviceSelection extends SherlockFragmentActivity {
 
 	});
 
-	if (MetaWatchService.bluetoothAdapter == null)
-	    MetaWatchService.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-	if (MetaWatchService.bluetoothAdapter == null && !showFakeWatches) {
+	if (bluetoothAdapter == null)
+	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	if (bluetoothAdapter == null && !showFakeWatches) {
 	    sendToast("Bluetooth not supported");
 	    return;
 	}
 
-	if (MetaWatchService.bluetoothAdapter != null) {
-	    Set<BluetoothDevice> pairedDevices = MetaWatchService.bluetoothAdapter.getBondedDevices();
+	if (bluetoothAdapter != null) {
+	    Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 	    if (pairedDevices.size() > 0) {
 		for (BluetoothDevice device : pairedDevices) {
 		    addToList(device.getAddress(), device.getName());
@@ -192,7 +193,7 @@ public class DeviceSelection extends SherlockFragmentActivity {
 	    addToList("ANALOG", "Fake Analog Watch (Use for debugging analog functionality within MWM)");
 	}
 
-	if (MetaWatchService.bluetoothAdapter != null)
+	if (bluetoothAdapter != null)
 	    startDiscovery();
 
 	processActionBar();
@@ -206,7 +207,7 @@ public class DeviceSelection extends SherlockFragmentActivity {
 
 	registerReceiver(receiver, intentFilter);
 
-	MetaWatchService.bluetoothAdapter.startDiscovery();
+	bluetoothAdapter.startDiscovery();
 
 	ProgressBar progress = (ProgressBar) findViewById(R.id.progressScanning);
 	progress.setVisibility(ProgressBar.VISIBLE);

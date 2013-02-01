@@ -239,7 +239,7 @@ public class InternalActions {
 	}
 
 	protected boolean isEnabled() {
-	    return MetaWatchService.SilentMode();
+	    return MetaWatchService.silentMode();
 	}
 
 	public int performAction(Context context) {

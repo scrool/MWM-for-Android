@@ -46,10 +46,8 @@ import android.database.ContentObserver;
 import android.location.Location;
 import android.net.Uri;
 import android.os.BatteryManager;
-import android.os.PowerManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import org.metawatch.manager.Log;
 
 public class Monitors {
 
@@ -359,7 +357,7 @@ public class Monitors {
 			    Log.d(MetaWatchStatus.TAG, "location changed " + location.toString());
 
 			LocationData.received = true;
-			MetaWatchService.notifyClients();
+			MetaWatchService.sendNotifyClientsRequest(context);
 
 			if (!weatherData.received /* && !WeatherData.updating */) {
 			    if (Preferences.logging)

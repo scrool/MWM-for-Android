@@ -42,6 +42,7 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchBuffers;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -265,7 +266,7 @@ public class Protocol {
 	sendQueue.add(bytes);
 
 	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.notifyClients();
+	    MetaWatchService.sendNotifyClientsRequest(mContext);
     }
 
     // Force the message packet to the head of the queue
@@ -281,7 +282,7 @@ public class Protocol {
 	sendQueue.addAll(temp);
 
 	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.notifyClients();
+	    MetaWatchService.sendNotifyClientsRequest(mContext);
     }
 
     public void send(byte[] bytes) throws IOException {
@@ -303,18 +304,16 @@ public class Protocol {
 		Log.d(MetaWatchStatus.TAG, str);
 	}
 
-	if (MetaWatchService.outputStream == null)
-	    throw new IOException("OutputStream is null");
-
-	MetaWatchService.outputStream.write(byteArrayOutputStream.toByteArray());
-	MetaWatchService.outputStream.flush();
-
+	Intent intent = new Intent(mContext, MetaWatchService.class);
+	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.SEND_BYTE_ARRAY);
+	intent.putExtra(MetaWatchService.BYTE_ARRAY, byteArrayOutputStream.toByteArray());
+	mContext.startService(intent);
 	sentPackets++;
 	if (sentPackets < 0)
 	    sentPackets = 1;
 
 	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.notifyClients();
+	    MetaWatchService.sendNotifyClientsRequest(mContext);
     }
 
     public void sendAdvanceHands(int hour, int minute, int second) {

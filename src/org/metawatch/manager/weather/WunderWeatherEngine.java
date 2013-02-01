@@ -184,8 +184,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		weatherData.errorString = "";
 
 		Idle.updateIdle(context, true);
-		MetaWatchService.notifyClients();
-
+		MetaWatchService.sendNotifyClientsRequest(context);
 	    }
 
 	} catch (Exception e) {
