@@ -47,8 +47,7 @@ public class GmailAPIMonitor implements GmailMonitor {
     }
 
     /**
-     * Describe a Gmail account. Used to store how many unread messages are in
-     * which account
+     * Describe a Gmail account. Used to store how many unread messages are in which account
      * 
      * @author tschork
      * 
@@ -212,8 +211,7 @@ public class GmailAPIMonitor implements GmailMonitor {
     }
 
     /**
-     * Updates unreadList to record how many unread Gmail messages are in which
-     * account(s)
+     * Updates unreadList to record how many unread Gmail messages are in which account(s)
      * 
      * @param account
      *            The account name

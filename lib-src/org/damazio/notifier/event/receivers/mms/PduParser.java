@@ -52,8 +52,7 @@ public class PduParser {
     /**
      * Parse the pdu.
      * 
-     * @return the pdu structure if parsing successfully. null if parsing error
-     *         happened or mandatory fields are not set.
+     * @return the pdu structure if parsing successfully. null if parsing error happened or mandatory fields are not set.
      */
     public PduHeaders parseHeaders(byte[] pduData) {
 	ByteArrayInputStream pduDataStream = new ByteArrayInputStream(pduData);
@@ -147,9 +146,7 @@ public class PduParser {
 	    case PduHeaders.RETRIEVE_STATUS:
 	    case PduHeaders.STORE_STATUS:
 		/**
-		 * The following field has a different value when used in the
-		 * M-Mbox-Delete.conf and M-Delete.conf PDU. For now we ignore
-		 * this fact, since we do not support these PDUs
+		 * The following field has a different value when used in the M-Mbox-Delete.conf and M-Delete.conf PDU. For now we ignore this fact, since we do not support these PDUs
 		 */
 	    case PduHeaders.RESPONSE_STATUS: {
 		int value = extractByteValue(pduDataStream);
@@ -201,16 +198,13 @@ public class PduParser {
 	    case PduHeaders.APPLIC_ID:
 	    case PduHeaders.REPLY_APPLIC_ID:
 		/**
-		 * The next three header fields are email addresses as defined
-		 * in RFC2822, not including the characters "<" and ">"
+		 * The next three header fields are email addresses as defined in RFC2822, not including the characters "<" and ">"
 		 */
 	    case PduHeaders.MESSAGE_ID:
 	    case PduHeaders.REPLACE_ID:
 	    case PduHeaders.CANCEL_ID:
 		/**
-		 * The following field has a different value when used in the
-		 * M-Mbox-Delete.conf and M-Delete.conf PDU. For now we ignore
-		 * this fact, since we do not support these PDUs
+		 * The following field has a different value when used in the M-Mbox-Delete.conf and M-Delete.conf PDU. For now we ignore this fact, since we do not support these PDUs
 		 */
 	    case PduHeaders.CONTENT_LOCATION: {
 		byte[] value = parseWapString(pduDataStream, TYPE_TEXT_STRING);
@@ -234,8 +228,7 @@ public class PduParser {
 	    case PduHeaders.STATUS_TEXT:
 	    case PduHeaders.STORE_STATUS_TEXT:
 		/*
-		 * the next one is not support M-Mbox-Delete.conf and
-		 * M-Delete.conf now
+		 * the next one is not support M-Mbox-Delete.conf and M-Delete.conf now
 		 */
 	    case PduHeaders.RESPONSE_TEXT: {
 		EncodedStringValue value = parseEncodedStringValue(pduDataStream);
@@ -286,8 +279,7 @@ public class PduParser {
 	    }
 
 	    /*
-	     * Value-length (Absolute-token Date-value | Relative-token
-	     * Delta-seconds-value)
+	     * Value-length (Absolute-token Date-value | Relative-token Delta-seconds-value)
 	     */
 	    case PduHeaders.DELIVERY_TIME:
 	    case PduHeaders.EXPIRY:
@@ -324,8 +316,7 @@ public class PduParser {
 
 	    case PduHeaders.FROM: {
 		/*
-		 * From-value = Value-length (Address-present-token
-		 * Encoded-string-value | Insert-address-token)
+		 * From-value = Value-length (Address-present-token Encoded-string-value | Insert-address-token)
 		 */
 		EncodedStringValue from = null;
 		parseValueLength(pduDataStream); /* parse value-length */
@@ -431,8 +422,7 @@ public class PduParser {
 
 	    case PduHeaders.PREVIOUSLY_SENT_BY: {
 		/*
-		 * Previously-sent-by-value = Value-length Forwarded-count-value
-		 * Encoded-string-value
+		 * Previously-sent-by-value = Value-length Forwarded-count-value Encoded-string-value
 		 */
 		/* parse value-length */
 		parseValueLength(pduDataStream);
@@ -462,8 +452,7 @@ public class PduParser {
 
 	    case PduHeaders.PREVIOUSLY_SENT_DATE: {
 		/*
-		 * Previously-sent-date-value = Value-length
-		 * Forwarded-count-value Date-value
+		 * Previously-sent-date-value = Value-length Forwarded-count-value Date-value
 		 */
 		/* parse value-length */
 		parseValueLength(pduDataStream);
@@ -489,8 +478,7 @@ public class PduParser {
 
 	    case PduHeaders.MM_FLAGS: {
 		/*
-		 * MM-flags-value = Value-length ( Add-token | Remove-token |
-		 * Filter-token ) Encoded-string-value
+		 * MM-flags-value = Value-length ( Add-token | Remove-token | Filter-token ) Encoded-string-value
 		 */
 
 		/* parse Value-length */
@@ -503,15 +491,13 @@ public class PduParser {
 		parseEncodedStringValue(pduDataStream);
 
 		/*
-		 * not store this header filed in "headers", because now
-		 * PduHeaders doesn't support it
+		 * not store this header filed in "headers", because now PduHeaders doesn't support it
 		 */
 		break;
 	    }
 
 	    /*
-	     * Value-length (Message-total-token | Size-total-token)
-	     * Integer-Value
+	     * Value-length (Message-total-token | Size-total-token) Integer-Value
 	     */
 	    case PduHeaders.MBOX_TOTALS:
 	    case PduHeaders.MBOX_QUOTAS: {
@@ -530,8 +516,7 @@ public class PduParser {
 		}
 
 		/*
-		 * not store these headers filed in "headers", because now
-		 * PduHeaders doesn't support them
+		 * not store these headers filed in "headers", because now PduHeaders doesn't support them
 		 */
 		break;
 	    }
@@ -540,8 +525,7 @@ public class PduParser {
 		parseContentType(pduDataStream, null);
 
 		/*
-		 * not store this header filed in "headers", because now
-		 * PduHeaders doesn't support it
+		 * not store this header filed in "headers", because now PduHeaders doesn't support it
 		 */
 		break;
 	    }
@@ -596,8 +580,7 @@ public class PduParser {
      */
     protected static int parseUnsignedInt(ByteArrayInputStream pduDataStream) {
 	/**
-	 * From wap-230-wsp-20010705-a.pdf The maximum size of a uintvar is 32
-	 * bits. So it will be encoded in no more than 5 octets.
+	 * From wap-230-wsp-20010705-a.pdf The maximum size of a uintvar is 32 bits. So it will be encoded in no more than 5 octets.
 	 */
 	assert (null != pduDataStream);
 	int result = 0;
@@ -630,9 +613,7 @@ public class PduParser {
      */
     protected static int parseValueLength(ByteArrayInputStream pduDataStream) {
 	/**
-	 * From wap-230-wsp-20010705-a.pdf Value-length = Short-length |
-	 * (Length-quote Length) Short-length = <Any octet 0-30> Length-quote =
-	 * <Octet 31> Length = Uintvar-integer Uintvar-integer = 1*5 OCTET
+	 * From wap-230-wsp-20010705-a.pdf Value-length = Short-length | (Length-quote Length) Short-length = <Any octet 0-30> Length-quote = <Octet 31> Length = Uintvar-integer Uintvar-integer = 1*5 OCTET
 	 */
 	assert (null != pduDataStream);
 	int temp = pduDataStream.read();
@@ -657,8 +638,7 @@ public class PduParser {
      */
     protected static EncodedStringValue parseEncodedStringValue(ByteArrayInputStream pduDataStream) {
 	/**
-	 * From OMA-TS-MMS-ENC-V1_3-20050927-C.pdf Encoded-string-value =
-	 * Text-string | Value-length Char-set Text-string
+	 * From OMA-TS-MMS-ENC-V1_3-20050927-C.pdf Encoded-string-value = Text-string | Value-length Char-set Text-string
 	 */
 	assert (null != pduDataStream);
 	pduDataStream.mark(1);
@@ -702,11 +682,7 @@ public class PduParser {
     protected static byte[] parseWapString(ByteArrayInputStream pduDataStream, int stringType) {
 	assert (null != pduDataStream);
 	/**
-	 * From wap-230-wsp-20010705-a.pdf Text-string = [Quote] *TEXT
-	 * End-of-string If the first character in the TEXT is in the range of
-	 * 128-255, a Quote character must precede it. Otherwise the Quote
-	 * character must be omitted. The Quote is not part of the contents.
-	 * Quote = <Octet 127> End-of-string = <Octet 0>
+	 * From wap-230-wsp-20010705-a.pdf Text-string = [Quote] *TEXT End-of-string If the first character in the TEXT is in the range of 128-255, a Quote character must precede it. Otherwise the Quote character must be omitted. The Quote is not part of the contents. Quote = <Octet 127> End-of-string = <Octet 0>
 	 * 
 	 * Quoted-string = <Octet 34> *TEXT End-of-string
 	 * 
@@ -734,8 +710,7 @@ public class PduParser {
 
 	// We are now definitely at the beginning of string
 	/**
-	 * Return *TOKEN or *TEXT (Text-String without QUOTE, Quoted-String
-	 * without QUOTED_STRING_FLAG and without End-of-string)
+	 * Return *TOKEN or *TEXT (Text-String without QUOTE, Quoted-String without QUOTED_STRING_FLAG and without End-of-string)
 	 */
 	return getWapString(pduDataStream, stringType);
     }
@@ -797,10 +772,7 @@ public class PduParser {
      */
     protected static boolean isText(int ch) {
 	/**
-	 * TEXT = <any OCTET except CTLs, but including LWS> CTL = <any US-ASCII
-	 * control character (octets 0 - 31) and DEL (127)> LWS = [CRLF] 1*( SP
-	 * | HT ) CRLF = CR LF CR = <US-ASCII CR, carriage return (13)> LF =
-	 * <US-ASCII LF, linefeed (10)>
+	 * TEXT = <any OCTET except CTLs, but including LWS> CTL = <any US-ASCII control character (octets 0 - 31) and DEL (127)> LWS = [CRLF] 1*( SP | HT ) CRLF = CR LF CR = <US-ASCII CR, carriage return (13)> LF = <US-ASCII LF, linefeed (10)>
 	 */
 	if (((ch >= 32) && (ch <= 126)) || ((ch >= 128) && (ch <= 255))) {
 	    return true;
@@ -867,10 +839,7 @@ public class PduParser {
      */
     protected static int parseShortInteger(ByteArrayInputStream pduDataStream) {
 	/**
-	 * From wap-230-wsp-20010705-a.pdf Short-integer = OCTET Integers in
-	 * range 0-127 shall be encoded as a one octet value with the most
-	 * significant bit set to one (1xxx xxxx) and with the value in the
-	 * remaining least significant bits.
+	 * From wap-230-wsp-20010705-a.pdf Short-integer = OCTET Integers in range 0-127 shall be encoded as a one octet value with the most significant bit set to one (1xxx xxxx) and with the value in the remaining least significant bits.
 	 */
 	assert (null != pduDataStream);
 	int temp = pduDataStream.read();
@@ -887,13 +856,7 @@ public class PduParser {
      */
     protected static long parseLongInteger(ByteArrayInputStream pduDataStream) {
 	/**
-	 * From wap-230-wsp-20010705-a.pdf Long-integer = Short-length
-	 * Multi-octet-integer The Short-length indicates the length of the
-	 * Multi-octet-integer Multi-octet-integer = 1*30 OCTET The content
-	 * octets shall be an unsigned integer value with the most significant
-	 * octet encoded first (big-endian representation). The minimum number
-	 * of octets must be used to encode the value. Short-length = <Any octet
-	 * 0-30>
+	 * From wap-230-wsp-20010705-a.pdf Long-integer = Short-length Multi-octet-integer The Short-length indicates the length of the Multi-octet-integer Multi-octet-integer = 1*30 OCTET The content octets shall be an unsigned integer value with the most significant octet encoded first (big-endian representation). The minimum number of octets must be used to encode the value. Short-length = <Any octet 0-30>
 	 */
 	assert (null != pduDataStream);
 	int temp = pduDataStream.read();
@@ -925,8 +888,7 @@ public class PduParser {
      */
     protected static long parseIntegerValue(ByteArrayInputStream pduDataStream) {
 	/**
-	 * From wap-230-wsp-20010705-a.pdf Integer-Value = Short-integer |
-	 * Long-integer
+	 * From wap-230-wsp-20010705-a.pdf Integer-Value = Short-integer | Long-integer
 	 */
 	assert (null != pduDataStream);
 	pduDataStream.mark(1);
@@ -962,8 +924,7 @@ public class PduParser {
     }
 
     /**
-     * Parse content type parameters. For now we just support four parameters
-     * used in mms: "type", "start", "name", "charset".
+     * Parse content type parameters. For now we just support four parameters used in mms: "type", "start", "name", "charset".
      * 
      * @param pduDataStream
      *            pdu data input stream
@@ -974,19 +935,7 @@ public class PduParser {
      */
     protected static void parseContentTypeParams(ByteArrayInputStream pduDataStream, HashMap<Integer, Object> map, Integer length) {
 	/**
-	 * From wap-230-wsp-20010705-a.pdf Parameter = Typed-parameter |
-	 * Untyped-parameter Typed-parameter = Well-known-parameter-token
-	 * Typed-value the actual expected type of the value is implied by the
-	 * well-known parameter Well-known-parameter-token = Integer-value the
-	 * code values used for parameters are specified in the Assigned Numbers
-	 * appendix Typed-value = Compact-value | Text-value In addition to the
-	 * expected type, there may be no value. If the value cannot be encoded
-	 * using the expected type, it shall be encoded as text. Compact-value =
-	 * Integer-value | Date-value | Delta-seconds-value | Q-value |
-	 * Version-value | Uri-value Untyped-parameter = Token-text
-	 * Untyped-value the type of the value is unknown, but it shall be
-	 * encoded as an integer, if that is possible. Untyped-value =
-	 * Integer-value | Text-value
+	 * From wap-230-wsp-20010705-a.pdf Parameter = Typed-parameter | Untyped-parameter Typed-parameter = Well-known-parameter-token Typed-value the actual expected type of the value is implied by the well-known parameter Well-known-parameter-token = Integer-value the code values used for parameters are specified in the Assigned Numbers appendix Typed-value = Compact-value | Text-value In addition to the expected type, there may be no value. If the value cannot be encoded using the expected type, it shall be encoded as text. Compact-value = Integer-value | Date-value | Delta-seconds-value | Q-value | Version-value | Uri-value Untyped-parameter = Token-text Untyped-value the type of the value is unknown, but it shall be encoded as an integer, if that is possible. Untyped-value = Integer-value | Text-value
 	 */
 	assert (null != pduDataStream);
 	assert (length > 0);
@@ -1001,16 +950,9 @@ public class PduParser {
 
 	    switch (param) {
 	    /**
-	     * From rfc2387, chapter 3.1 The type parameter must be specified
-	     * and its value is the MIME media type of the "root" body part. It
-	     * permits a MIME user agent to determine the content-type without
-	     * reference to the enclosed body part. If the value of the type
-	     * parameter and the root body part's content-type differ then the
-	     * User Agent's behavior is undefined.
+	     * From rfc2387, chapter 3.1 The type parameter must be specified and its value is the MIME media type of the "root" body part. It permits a MIME user agent to determine the content-type without reference to the enclosed body part. If the value of the type parameter and the root body part's content-type differ then the User Agent's behavior is undefined.
 	     * 
-	     * From wap-230-wsp-20010705-a.pdf type = Constrained-encoding
-	     * Constrained-encoding = Extension-Media | Short-integer
-	     * Extension-media = *TEXT End-of-string
+	     * From wap-230-wsp-20010705-a.pdf type = Constrained-encoding Constrained-encoding = Extension-Media | Short-integer Extension-media = *TEXT End-of-string
 	     */
 	    case PduPart.P_TYPE:
 	    case PduPart.P_CT_MR_TYPE:
@@ -1040,13 +982,9 @@ public class PduParser {
 		break;
 
 	    /**
-	     * From oma-ts-mms-conf-v1_3.pdf, chapter 10.2.3. Start Parameter
-	     * Referring to Presentation
+	     * From oma-ts-mms-conf-v1_3.pdf, chapter 10.2.3. Start Parameter Referring to Presentation
 	     * 
-	     * From rfc2387, chapter 3.2 The start parameter, if given, is the
-	     * content-ID of the compound object's "root". If not present the
-	     * "root" is the first body part in the Multipart/Related entity.
-	     * The "root" is the element the applications processes first.
+	     * From rfc2387, chapter 3.2 The start parameter, if given, is the content-ID of the compound object's "root". If not present the "root" is the first body part in the Multipart/Related entity. The "root" is the element the applications processes first.
 	     * 
 	     * From wap-230-wsp-20010705-a.pdf start = Text-String
 	     */
@@ -1062,16 +1000,9 @@ public class PduParser {
 		break;
 
 	    /**
-	     * From oma-ts-mms-conf-v1_3.pdf In creation, the character set
-	     * SHALL be either us-ascii (IANA MIBenum 3) or utf-8 (IANA MIBenum
-	     * 106)[Unicode]. In retrieval, both us-ascii and utf-8 SHALL be
-	     * supported.
+	     * From oma-ts-mms-conf-v1_3.pdf In creation, the character set SHALL be either us-ascii (IANA MIBenum 3) or utf-8 (IANA MIBenum 106)[Unicode]. In retrieval, both us-ascii and utf-8 SHALL be supported.
 	     * 
-	     * From wap-230-wsp-20010705-a.pdf charset =
-	     * Well-known-charset|Text-String Well-known-charset = Any-charset |
-	     * Integer-value Both are encoded using values from Character Set
-	     * Assignments table in Assigned Numbers Any-charset = <Octet 128>
-	     * Equivalent to the special RFC2616 charset value "*"
+	     * From wap-230-wsp-20010705-a.pdf charset = Well-known-charset|Text-String Well-known-charset = Any-charset | Integer-value Both are encoded using values from Character Set Assignments table in Assigned Numbers Any-charset = <Octet 128> Equivalent to the special RFC2616 charset value "*"
 	     */
 	    case PduPart.P_CHARSET:
 		pduDataStream.mark(1);
@@ -1102,9 +1033,7 @@ public class PduParser {
 		break;
 
 	    /**
-	     * From oma-ts-mms-conf-v1_3.pdf A name for multipart object SHALL
-	     * be encoded using name-parameter for Content-Type header in WSP
-	     * multipart headers.
+	     * From oma-ts-mms-conf-v1_3.pdf A name for multipart object SHALL be encoded using name-parameter for Content-Type header in WSP multipart headers.
 	     * 
 	     * From wap-230-wsp-20010705-a.pdf name = Text-String
 	     */
@@ -1145,10 +1074,7 @@ public class PduParser {
      */
     protected static byte[] parseContentType(ByteArrayInputStream pduDataStream, HashMap<Integer, Object> map) {
 	/**
-	 * From wap-230-wsp-20010705-a.pdf Content-type-value =
-	 * Constrained-media | Content-general-form Content-general-form =
-	 * Value-length Media-type Media-type = (Well-known-media |
-	 * Extension-Media) *(Parameter)
+	 * From wap-230-wsp-20010705-a.pdf Content-type-value = Constrained-media | Content-general-form Content-general-form = Value-length Media-type Media-type = (Well-known-media | Extension-Media) *(Parameter)
 	 */
 	assert (null != pduDataStream);
 
@@ -1210,8 +1136,7 @@ public class PduParser {
      * 
      * @param headers
      *            pdu headers
-     * @return true if the pdu has all of the mandatory headers, false
-     *         otherwise.
+     * @return true if the pdu has all of the mandatory headers, false otherwise.
      */
     protected static boolean checkMandatoryHeader(PduHeaders headers) {
 	if (null == headers) {

@@ -61,17 +61,17 @@ public class Application {
 	MetaWatchService.WatchModes.APPLICATION = false;
 
 	int watchType = MetaWatchService.watchType;
-	disableToggleButton(watchType);
+	disableToggleButton(context, watchType);
 	if (watchType == MetaWatchService.WatchType.DIGITAL) {
-	    Protocol.disableButton(0, 1, MetaWatchService.WatchBuffers.APPLICATION); // right
-										     // top
-										     // -
-										     // press
+	    Protocol.getInstance(context).disableButton(0, 1, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // top
+	    // -
+	    // press
 	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-	    Protocol.disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION); // right
-										     // middle
-										     // -
-										     // press
+	    Protocol.getInstance(context).disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // press
 	}
 	if (currentApp != null) {
 	    currentApp.deactivate(context, MetaWatchService.watchType);
@@ -89,7 +89,7 @@ public class Application {
 	if (currentApp != null) {
 	    bitmap = currentApp.update(context, false, MetaWatchService.watchType);
 	} else {
-	    bitmap = Protocol.createTextBitmap(context, "Starting application mode ...");
+	    bitmap = Protocol.getInstance(context).createTextBitmap(context, "Starting application mode ...");
 	}
 
 	updateAppMode(context, bitmap);
@@ -105,57 +105,57 @@ public class Application {
 		MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
 
 	    if (MetaWatchService.watchState == MetaWatchService.WatchStates.APPLICATION) {
-		Protocol.sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.APPLICATION);
-		Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
+		Protocol.getInstance(context).sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.APPLICATION);
+		Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
 	    }
 	}
     }
 
-    public static void enableToggleButton(int watchType) {
+    public static void enableToggleButton(Context context, int watchType) {
 	if (watchType == MetaWatchService.WatchType.DIGITAL) {
-	    Protocol.enableButton(0, 2, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-												// top
-												// -
-												// hold
-	    Protocol.enableButton(0, 3, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-												// top
-												// -
-												// long
-												// hold
+	    Protocol.getInstance(context).enableButton(0, 2, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // top
+	    // -
+	    // hold
+	    Protocol.getInstance(context).enableButton(0, 3, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // top
+	    // -
+	    // long
+	    // hold
 	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-	    Protocol.enableButton(1, 2, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-												// middle
-												// -
-												// hold
-	    Protocol.enableButton(1, 3, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-												// middle
-												// -
-												// long
-												// hold
+	    Protocol.getInstance(context).enableButton(1, 2, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // hold
+	    Protocol.getInstance(context).enableButton(1, 3, TOGGLE_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // long
+	    // hold
 	}
     }
 
-    public static void disableToggleButton(int watchType) {
+    public static void disableToggleButton(Context context, int watchType) {
 	if (watchType == MetaWatchService.WatchType.DIGITAL) {
-	    Protocol.disableButton(0, 2, MetaWatchService.WatchBuffers.APPLICATION); // right
-										     // top
-										     // -
-										     // hold
-	    Protocol.disableButton(0, 3, MetaWatchService.WatchBuffers.APPLICATION); // right
-										     // top
-										     // -
-										     // long
-										     // hold
+	    Protocol.getInstance(context).disableButton(0, 2, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // top
+	    // -
+	    // hold
+	    Protocol.getInstance(context).disableButton(0, 3, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // top
+	    // -
+	    // long
+	    // hold
 	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-	    Protocol.disableButton(1, 2, MetaWatchService.WatchBuffers.APPLICATION); // right
-										     // middle
-										     // -
-										     // hold
-	    Protocol.disableButton(1, 3, MetaWatchService.WatchBuffers.APPLICATION); // right
-										     // middle
-										     // -
-										     // long
-										     // hold
+	    Protocol.getInstance(context).disableButton(1, 2, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // hold
+	    Protocol.getInstance(context).disableButton(1, 3, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // long
+	    // hold
 	}
     }
 
@@ -171,21 +171,21 @@ public class Application {
 	    updateAppMode(context);
 	}
 	if (watchType == MetaWatchService.WatchType.DIGITAL) {
-	    Protocol.enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-											      // top
-											      // -
-											      // press
+	    Protocol.getInstance(context).enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // top
+	    // -
+	    // press
 	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-	    Protocol.enableButton(1, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-											      // middle
-											      // -
-											      // press
+	    Protocol.getInstance(context).enableButton(1, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // press
 	}
 	if (currentApp != null && currentApp.isToggleable())
-	    enableToggleButton(watchType);
+	    enableToggleButton(context, watchType);
 
 	// update screen with cached buffer
-	Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
+	Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
     }
 
     public static void toggleApp(Context context, ApplicationBase app) {

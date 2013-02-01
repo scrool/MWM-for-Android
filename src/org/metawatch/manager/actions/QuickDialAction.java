@@ -49,14 +49,12 @@ public class QuickDialAction extends ContainerAction {
 
 	});
 
-	final String[] projection = new String[] { ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME,
-		ContactsContract.Contacts.HAS_PHONE_NUMBER, };
+	final String[] projection = new String[] { ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts.HAS_PHONE_NUMBER, };
 
 	Utils.CursorHandler ch = new Utils.CursorHandler();
 	try {
 
-	    Cursor people = ch.add(context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, projection, "starred=?", new String[] { "1" },
-		    ContactsContract.Contacts.TIMES_CONTACTED + " DESC"));
+	    Cursor people = ch.add(context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, projection, "starred=?", new String[] { "1" }, ContactsContract.Contacts.TIMES_CONTACTED + " DESC"));
 
 	    if (people == null)
 		return;

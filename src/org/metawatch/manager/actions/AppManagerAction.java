@@ -28,8 +28,7 @@ public class AppManagerAction extends ContainerAction {
 	for (final AppData a : AppManager.getAppInfos()) {
 
 	    int watchType = MetaWatchService.watchType;
-	    if ((watchType == MetaWatchService.WatchType.ANALOG && !a.supportsAnalog)
-		    || (watchType == MetaWatchService.WatchType.DIGITAL && !a.supportsDigital))
+	    if ((watchType == MetaWatchService.WatchType.ANALOG && !a.supportsAnalog) || (watchType == MetaWatchService.WatchType.DIGITAL && !a.supportsDigital))
 		continue; // Skip unsupported apps.
 
 	    subActions.add(new Action() {

@@ -111,8 +111,7 @@ public class IntentReceiver extends BroadcastReceiver {
 
 			/* This is a total unread count notification. */
 			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Received Gmail notification: total unread count for '" + recipient
-				    + "' is " + count + ".");
+			    Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Received Gmail notification: total unread count for '" + recipient + "' is " + count + ".");
 
 		    } else {
 			/* I have no idea what this is. */
@@ -122,8 +121,7 @@ public class IntentReceiver extends BroadcastReceiver {
 
 		    Monitors.updateGmailUnreadCount(recipient, count);
 		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Cached Gmail unread count for account '" + recipient + "' is "
-				+ Monitors.getGmailUnreadCount(recipient));
+			Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Cached Gmail unread count for account '" + recipient + "' is " + Monitors.getGmailUnreadCount(recipient));
 
 		    Idle.updateIdle(context, true);
 
@@ -162,9 +160,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		    return;
 
 		/*
-		 * The rows below are taken from AndroidNotifier
-		 * (http://code.google.com/p/android-notifier) and adapted for
-		 * MWM.
+		 * The rows below are taken from AndroidNotifier (http://code.google.com/p/android-notifier) and adapted for MWM.
 		 */
 		if (!intent.getType().equals("application/vnd.wap.mms-message")) {
 		    if (Preferences.logging)
@@ -243,9 +239,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		}
 
 		return;
-	    } else if (action.equals("com.android.alarmclock.ALARM_ALERT") || action.equals("com.htc.android.worldclock.ALARM_ALERT")
-		    || action.equals("com.android.deskclock.ALARM_ALERT") || action.equals("com.motorola.blur.alarmclock.ALARM_ALERT")
-		    || action.equals("com.motorola.blur.alarmclock.COUNT_DOWN") || action.equals("com.sonyericsson.alarm.ALARM_ALERT")) {
+	    } else if (action.equals("com.android.alarmclock.ALARM_ALERT") || action.equals("com.htc.android.worldclock.ALARM_ALERT") || action.equals("com.android.deskclock.ALARM_ALERT") || action.equals("com.motorola.blur.alarmclock.ALARM_ALERT") || action.equals("com.motorola.blur.alarmclock.COUNT_DOWN") || action.equals("com.sonyericsson.alarm.ALARM_ALERT")) {
 
 		if (!MetaWatchService.Preferences.notifyAlarm)
 		    return;
@@ -265,7 +259,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		    Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Received time set intent.");
 
 		/* The time has changed, so trigger a time update */
-		Protocol.getRealTimeClock();
+		Protocol.getInstance(context).getRealTimeClock();
 		return;
 	    } else if (action.equals("android.intent.action.TIMEZONE_CHANGED")) {
 
@@ -273,14 +267,12 @@ public class IntentReceiver extends BroadcastReceiver {
 		    Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Received timezone changed intent.");
 
 		/*
-		 * If we're in a new time zone, then the time has probably
-		 * changed. Notify the watch.
+		 * If we're in a new time zone, then the time has probably changed. Notify the watch.
 		 */
-		Protocol.getRealTimeClock();
+		Protocol.getInstance(context).getRealTimeClock();
 
 		/*
-		 * Check that the timezone has actually changed, so that we
-		 * don't spam the user with notifications.
+		 * Check that the timezone has actually changed, so that we don't spam the user with notifications.
 		 */
 
 		TimeZone tz = TimeZone.getDefault();
@@ -295,8 +287,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		return;
 	    }
 
-	    else if (intent.getAction().equals("org.metawatch.manager.UPDATE_CALENDAR")
-		    || intent.getAction().equals("org.metawatch.manager.UPDATE_APPSCREEN_CLOCK")) {
+	    else if (intent.getAction().equals("org.metawatch.manager.UPDATE_CALENDAR") || intent.getAction().equals("org.metawatch.manager.UPDATE_APPSCREEN_CLOCK")) {
 
 		if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
 		    Idle.updateIdle(context, true);
@@ -304,11 +295,7 @@ public class IntentReceiver extends BroadcastReceiver {
 
 	    }
 
-	    else if (intent.getAction().equals("com.android.music.metachanged") || intent.getAction().equals("mobi.beyondpod.action.PLAYBACK_STATUS")
-		    || intent.getAction().equals("com.htc.music.metachanged") || intent.getAction().equals("com.nullsoft.winamp.metachanged")
-		    || intent.getAction().equals("com.sonyericsson.music.playbackcontrol.ACTION_TRACK_STARTED")
-		    || intent.getAction().equals("com.amazon.mp3.metachanged") || intent.getAction().equals("com.adam.aslfms.notify.playstatechanged")
-		    || intent.getAction().equals("fm.last.android.metachanged")) {
+	    else if (intent.getAction().equals("com.android.music.metachanged") || intent.getAction().equals("mobi.beyondpod.action.PLAYBACK_STATUS") || intent.getAction().equals("com.htc.music.metachanged") || intent.getAction().equals("com.nullsoft.winamp.metachanged") || intent.getAction().equals("com.sonyericsson.music.playbackcontrol.ACTION_TRACK_STARTED") || intent.getAction().equals("com.amazon.mp3.metachanged") || intent.getAction().equals("com.adam.aslfms.notify.playstatechanged") || intent.getAction().equals("fm.last.android.metachanged")) {
 
 		/* If the intent specifies a "playing" extra, use it. */
 		if (intent.hasExtra("playing")) {

@@ -113,18 +113,18 @@ public class Idle {
 	public void activate(final Context context, int watchType) {
 	    // if (Preferences.quickButton != QuickButton.DISABLED) {
 	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
-		Protocol.disableButton(1, 0, MetaWatchService.WatchBuffers.IDLE); // Disable
-										  // built
-										  // in
-										  // action
-										  // for
-										  // Right
-										  // middle
-										  // immediate
-		Protocol.enableButton(1, 1, Idle.RIGHT_QUICK_BUTTON, screenMode(watchType)); // Right
-											     // middle
-											     // -
-											     // press
+		Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.IDLE); // Disable
+		// built
+		// in
+		// action
+		// for
+		// Right
+		// middle
+		// immediate
+		Protocol.getInstance(context).enableButton(1, 1, Idle.RIGHT_QUICK_BUTTON, screenMode(watchType)); // Right
+		// middle
+		// -
+		// press
 	    }
 	    // }
 	}
@@ -132,10 +132,10 @@ public class Idle {
 	public void deactivate(final Context context, int watchType) {
 	    // if (Preferences.quickButton != QuickButton.DISABLED) {
 	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
-		Protocol.disableButton(1, 1, screenMode(watchType)); // Right
-								     // middle
-								     // -
-								     // press
+		Protocol.getInstance(context).disableButton(1, 1, screenMode(watchType)); // Right
+		// middle
+		// -
+		// press
 	    }
 	    // }
 	}
@@ -236,13 +236,13 @@ public class Idle {
 	    app.appState = ApplicationBase.ACTIVE_IDLE;
 	    app.activate(context, watchType);
 	    if (app.isToggleable())
-		Application.enableToggleButton(watchType);
+		Application.enableToggleButton(context, watchType);
 	}
 
 	public void deactivate(final Context context, int watchType) {
 	    app.setInactive();
 	    app.deactivate(context, watchType);
-	    Application.disableToggleButton(watchType);
+	    Application.disableToggleButton(context, watchType);
 	}
 
 	public Bitmap draw(final Context context, boolean preview, Bitmap bitmap, int watchType) {
@@ -450,8 +450,7 @@ public class Idle {
     }
 
     /*
-     * Only this (central) method need to be synchronized, the one above calls
-     * this and will be blocked anyway.
+     * Only this (central) method need to be synchronized, the one above calls this and will be blocked anyway.
      */
     static synchronized Bitmap createIdle(Context context, boolean preview, int page) {
 	final int width = (MetaWatchService.watchType == WatchType.DIGITAL) ? 96 : 80;
@@ -516,13 +515,13 @@ public class Idle {
 	    }
 	}
 
-	Protocol.sendLcdBitmap(createIdle(context), mode);
+	Protocol.getInstance(context).sendLcdBitmap(createIdle(context), mode);
 	if (mode == MetaWatchService.WatchBuffers.IDLE)
-	    Protocol.configureIdleBufferSize(showClock, true);
+	    Protocol.getInstance(context).configureIdleBufferSize(showClock, true);
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle: Drawing idle screen on buffer " + mode);
-	Protocol.updateLcdDisplay(mode);
+	Protocol.getInstance(context).updateLcdDisplay(mode);
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle end");
@@ -549,38 +548,38 @@ public class Idle {
 	    sendLcdIdle(context, true);
 
 	    if (numPages() > 1) {
-		Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right
-												 // top
-												 // press
-		Protocol.enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.APPLICATION); // Right
-													// top
-													// press
-		Protocol.enableButton(5, 0, LEFT_QUICK_BUTTON, MetaWatchService.WatchBuffers.IDLE); // left
-												    // middle
-												    // -
-												    // press
+		Protocol.getInstance(context).enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right
+		// top
+		// press
+		Protocol.getInstance(context).enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.APPLICATION); // Right
+		// top
+		// press
+		Protocol.getInstance(context).enableButton(5, 0, LEFT_QUICK_BUTTON, MetaWatchService.WatchBuffers.IDLE); // left
+		// middle
+		// -
+		// press
 
 	    }
 
-	    Protocol.enableButton(0, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
-	    Protocol.enableButton(0, 3, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
+	    Protocol.getInstance(context).enableButton(0, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
+	    Protocol.getInstance(context).enableButton(0, 3, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
 
 	} else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-	    Protocol.disableButton(1, 0, MetaWatchService.WatchBuffers.IDLE); // Disable
-									      // built
-									      // in
-									      // action
-									      // for
-									      // Middle
-									      // immediate
-	    Protocol.enableButton(1, 1, IDLE_OLED_DISPLAY, MetaWatchService.WatchBuffers.IDLE); // Middle
-												// press
-	    Protocol.enableButton(1, 1, IDLE_OLED_DISPLAY, MetaWatchService.WatchBuffers.APPLICATION); // Middle
-												       // press
+	    Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.IDLE); // Disable
+	    // built
+	    // in
+	    // action
+	    // for
+	    // Middle
+	    // immediate
+	    Protocol.getInstance(context).enableButton(1, 1, IDLE_OLED_DISPLAY, MetaWatchService.WatchBuffers.IDLE); // Middle
+	    // press
+	    Protocol.getInstance(context).enableButton(1, 1, IDLE_OLED_DISPLAY, MetaWatchService.WatchBuffers.APPLICATION); // Middle
+	    // press
 	}
 
-	Protocol.enableButton(1, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
-	Protocol.enableButton(1, 3, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
+	Protocol.getInstance(context).enableButton(1, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
+	Protocol.getInstance(context).enableButton(1, 3, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
     }
 
     public static void updateIdle(final Context context, final boolean refresh) {
@@ -640,9 +639,9 @@ public class Idle {
 	    Bitmap bitmap = Bitmap.createBitmap(80, 16, Bitmap.Config.RGB_565);
 	    Canvas canvas = new Canvas(bitmap);
 	    canvas.drawBitmap(oledIdle, 0, -(i * 16), null);
-	    Protocol.sendOledBitmap(bitmap, mode, i);
+	    Protocol.getInstance(context).sendOledBitmap(bitmap, mode, i);
 	}
-	Protocol.oledChangeMode(mode);
+	Protocol.getInstance(context).oledChangeMode(mode);
     }
 
     public static int appButtonPressed(Context context, int id) {

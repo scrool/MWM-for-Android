@@ -132,9 +132,7 @@ public class EncodedStringValue implements Cloneable {
     }
 
     /**
-     * Convert this object to a {@link java.lang.String}. If the encoding of the
-     * EncodedStringValue is null or unsupported, it will be treated as
-     * iso-8859-1 encoding.
+     * Convert this object to a {@link java.lang.String}. If the encoding of the EncodedStringValue is null or unsupported, it will be treated as iso-8859-1 encoding.
      * 
      * @return The decoded String.
      */
@@ -211,8 +209,7 @@ public class EncodedStringValue implements Cloneable {
      * 
      * @param pattern
      *            the delimiting pattern
-     * @return the array of encoded strings computed by splitting this encoded
-     *         string around matches of the given pattern
+     * @return the array of encoded strings computed by splitting this encoded string around matches of the given pattern
      */
     public EncodedStringValue[] split(String pattern) {
 	String[] temp = getString().split(pattern);

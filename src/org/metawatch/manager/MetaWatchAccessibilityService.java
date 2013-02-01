@@ -67,8 +67,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 
 	if (eventType == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
 	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "MetaWatchAccessibilityService.onAccessibilityEvent(): Received event, packageName = '" + packageName
-			+ "' className = '" + className + "'");
+		Log.d(MetaWatchStatus.TAG, "MetaWatchAccessibilityService.onAccessibilityEvent(): Received event, packageName = '" + packageName + "' className = '" + className + "'");
 
 	    Parcelable p = event.getParcelableData();
 	    if (p instanceof android.app.Notification == false) {
@@ -79,8 +78,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 
 	    android.app.Notification notification = (android.app.Notification) p;
 	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "MetaWatchAccessibilityService.onAccessibilityEvent(): notification text = '" + notification.tickerText
-			+ "' flags = " + notification.flags + " (" + Integer.toBinaryString(notification.flags) + ")");
+		Log.d(MetaWatchStatus.TAG, "MetaWatchAccessibilityService.onAccessibilityEvent(): notification text = '" + notification.tickerText + "' flags = " + notification.flags + " (" + Integer.toBinaryString(notification.flags) + ")");
 
 	    if (notification.tickerText == null || notification.tickerText.toString().trim().length() == 0) {
 		if (Preferences.logging)
@@ -168,8 +166,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 		    packageInfo = pm.getPackageInfo(packageName.toString(), 0);
 		    appName = packageInfo.applicationInfo.loadLabel(pm).toString();
 		    int iconId = notification.icon;
-		    icon = NotificationIconShrinker.shrink(pm.getResourcesForApplication(packageInfo.applicationInfo), iconId, packageName.toString(),
-			    NotificationIconShrinker.NOTIFICATION_ICON_SIZE);
+		    icon = NotificationIconShrinker.shrink(pm.getResourcesForApplication(packageInfo.applicationInfo), iconId, packageName.toString(), NotificationIconShrinker.NOTIFICATION_ICON_SIZE);
 		} catch (NameNotFoundException e) {
 		    /* OK, appName is null */
 		}

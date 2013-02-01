@@ -91,11 +91,9 @@ public class Test extends SherlockPreferenceActivity {
 		if (MetaWatchService.watchType == WatchType.DIGITAL) {
 		    // NotificationBuilder.createSmart(context,
 		    // "Notification", ipsum);
-		    Notification.addTextNotification(context, "Notification", new VibratePattern(true, 500, 500, 3), Notification
-			    .getDefaultNotificationTimeout(context));
+		    Notification.addTextNotification(context, "Notification", new VibratePattern(true, 500, 500, 3), Notification.getDefaultNotificationTimeout(context));
 		} else {
-		    Notification.addOledNotification(context, Protocol.createOled2lines(context, "Display A, line 1", "Display A, line 2"), Protocol
-			    .createOled2lines(context, "Display B, line 1", "Display B, line 2"), null, 0, null, "notification");
+		    Notification.addOledNotification(context, Protocol.createOled2lines(context, "Display A, line 1", "Display A, line 2"), Protocol.createOled2lines(context, "Display B, line 1", "Display B, line 2"), null, 0, null, "notification");
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "Notification timeout is: " + Notification.getDefaultNotificationTimeout(context));
 
@@ -188,8 +186,7 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("k9").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		NotificationBuilder.createK9(context, "The Doctor <doctor@gallifrey.net>",
-			"Now drop your weapons, or I'll kill him with this deadly jelly baby!", "tardis:INBOX");
+		NotificationBuilder.createK9(context, "The Doctor <doctor@gallifrey.net>", "Now drop your weapons, or I'll kill him with this deadly jelly baby!", "tardis:INBOX");
 		return true;
 	    }
 	});
@@ -203,8 +200,7 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("gmail_full").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		NotificationBuilder.createGmail(context, "bruce@wayneenterprises.com", "me@gmail.com", "Need a ride",
-			"Alfred, would you bring the car around to the docks?");
+		NotificationBuilder.createGmail(context, "bruce@wayneenterprises.com", "me@gmail.com", "Need a ride", "Alfred, would you bring the car around to the docks?");
 		return true;
 	    }
 	});
@@ -275,7 +271,7 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("vibrate").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		Protocol.vibrate(300, 500, 3);
+		Protocol.getInstance(context).vibrate(300, 500, 3);
 		return true;
 	    }
 	});
@@ -286,7 +282,7 @@ public class Test extends SherlockPreferenceActivity {
 		// timing
 		// of the round trip, so we can try and correct for that
 		// when setting the time
-		Protocol.getRealTimeClock();
+		Protocol.getInstance(context).getRealTimeClock();
 		return true;
 	    }
 	});
@@ -294,7 +290,7 @@ public class Test extends SherlockPreferenceActivity {
 	preferenceScreen.findPreference("load_template").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
 		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Protocol.loadTemplate(MetaWatchService.WatchBuffers.IDLE);
+		    Protocol.getInstance(context).loadTemplate(MetaWatchService.WatchBuffers.IDLE);
 
 		return true;
 	    }
@@ -303,7 +299,7 @@ public class Test extends SherlockPreferenceActivity {
 	preferenceScreen.findPreference("update_display").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
 		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.IDLE);
+		    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.IDLE);
 		return true;
 	    }
 	});
@@ -311,7 +307,7 @@ public class Test extends SherlockPreferenceActivity {
 	preferenceScreen.findPreference("write_buffer").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
 		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Protocol.writeBuffer();
+		    Protocol.getInstance(context).writeBuffer();
 		return true;
 	    }
 	});
@@ -328,10 +324,7 @@ public class Test extends SherlockPreferenceActivity {
 		// Protocol.enableMediaButtons();
 		// Protocol.queryNvalTime();
 		/*
-		 * if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
-		 * "sending notif test"); Protocol.loadTemplate(2); Protocol
-		 * .sendLcdBitmap(Protocol.createTextBitmap(context, "abc"),
-		 * true); Protocol.updateDisplay(2);
+		 * if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "sending notif test"); Protocol.loadTemplate(2); Protocol .sendLcdBitmap(Protocol.createTextBitmap(context, "abc"), true); Protocol.updateDisplay(2);
 		 */
 
 		// Intent intent = new
@@ -378,21 +371,21 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("led_on").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		Protocol.ledChange(true);
+		Protocol.getInstance(context).ledChange(true);
 		return true;
 	    }
 	});
 
 	preferenceScreen.findPreference("led_off").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		Protocol.ledChange(false);
+		Protocol.getInstance(context).ledChange(false);
 		return true;
 	    }
 	});
 
 	preferenceScreen.findPreference("time_24hr").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		Protocol.setTimeDateFormat(context);
+		Protocol.getInstance(context).setTimeDateFormat(context);
 		NotificationBuilder.createOtherNotification(context, null, "Time and date", "Formats updated.", 1);
 		return true;
 	    }
@@ -409,7 +402,7 @@ public class Test extends SherlockPreferenceActivity {
 		int minute = 60 - (calendar.get(Calendar.MINUTE));
 		int second = 60 - (calendar.get(Calendar.SECOND));
 
-		Protocol.sendAdvanceHands(hour, minute, second);
+		Protocol.getInstance(context).sendAdvanceHands(hour, minute, second);
 
 		return true;
 	    }
@@ -426,7 +419,7 @@ public class Test extends SherlockPreferenceActivity {
 		int minute = calendar.get(Calendar.MINUTE);
 		int second = calendar.get(Calendar.SECOND);
 
-		Protocol.sendAdvanceHands(hour, minute, second);
+		Protocol.getInstance(context).sendAdvanceHands(hour, minute, second);
 
 		return true;
 	    }

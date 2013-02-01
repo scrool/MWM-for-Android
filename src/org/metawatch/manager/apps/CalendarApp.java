@@ -61,40 +61,40 @@ public class CalendarApp extends ApplicationBase {
 	refresh(context);
 
 	if (watchType == WatchType.DIGITAL) {
-	    Protocol.enableButton(1, 1, CALENDAR_FLIPVIEW, MetaWatchService.WatchBuffers.APPLICATION); // right
-												       // middle
-												       // -
-												       // press
-	    Protocol.enableButton(2, 1, CALENDAR_TODAY, MetaWatchService.WatchBuffers.APPLICATION); // right
-												    // bottom
-												    // -
-												    // press
+	    Protocol.getInstance(context).enableButton(1, 1, CALENDAR_FLIPVIEW, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // press
+	    Protocol.getInstance(context).enableButton(2, 1, CALENDAR_TODAY, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // bottom
+	    // -
+	    // press
 
 	    final int leftLower = getLeftLowerButtonCode();
 	    final int leftUpper = getLeftUpperButtonCode();
 
-	    Protocol.enableButton(leftLower, 1, CALENDAR_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
-													   // bottom
-													   // -
-													   // press
-	    Protocol.enableButton(leftUpper, 1, CALENDAR_PREV, MetaWatchService.WatchBuffers.APPLICATION); // left
-													   // middle
-													   // -
-													   // press
+	    Protocol.getInstance(context).enableButton(leftLower, 1, CALENDAR_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
+	    // bottom
+	    // -
+	    // press
+	    Protocol.getInstance(context).enableButton(leftUpper, 1, CALENDAR_PREV, MetaWatchService.WatchBuffers.APPLICATION); // left
+	    // middle
+	    // -
+	    // press
 	}
     }
 
     @Override
     public void deactivate(Context context, int watchType) {
 	if (watchType == WatchType.DIGITAL) {
-	    Protocol.disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
 
 	    final int leftLower = getLeftLowerButtonCode();
 	    final int leftUpper = getLeftUpperButtonCode();
 
-	    Protocol.disableButton(leftLower, 1, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(leftUpper, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftLower, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftUpper, 1, MetaWatchService.WatchBuffers.APPLICATION);
 	}
     }
 
@@ -165,8 +165,7 @@ public class CalendarApp extends ApplicationBase {
 		    Idle.updateIdle(context, false);
 
 		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "CalendarApp.refresh() stop - " + (calendarEntries == null ? "0" : calendarEntries.size())
-				+ " entries found");
+			Log.d(MetaWatchStatus.TAG, "CalendarApp.refresh() stop - " + (calendarEntries == null ? "0" : calendarEntries.size()) + " entries found");
 		}
 
 	    }

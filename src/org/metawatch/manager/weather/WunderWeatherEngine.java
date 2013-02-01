@@ -46,8 +46,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 	    return "weather_fog.bmp";
 	else if (cond.equals("tstorms") || cond.equals("chancetstorms"))
 	    return "weather_thunderstorm.bmp";
-	else if (cond.equals("snow") || cond.equals("chancesnow") || cond.equals("sleet") || cond.equals("chancesleet") || cond.equals("flurries")
-		|| cond.equals("chanceflurries"))
+	else if (cond.equals("snow") || cond.equals("chancesnow") || cond.equals("sleet") || cond.equals("chancesleet") || cond.equals("flurries") || cond.equals("chanceflurries"))
 	    return "weather_snow.bmp";
 	else
 	    return "weather_cloudy.bmp";
@@ -83,8 +82,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		    weatherData.locationName = Preferences.weatherCity;
 		    String weatherLocation = Preferences.weatherCity.replace(",", " ").replace("  ", " ").replace(" ", "%20");
 
-		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/conditions/" + forecastQuery + "q/" + weatherLocation
-			    + ".json";
+		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/conditions/" + forecastQuery + "q/" + weatherLocation + ".json";
 		}
 		    break;
 
@@ -92,15 +90,13 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		    GoogleGeoCoderLocationData locationData = reverseLookupGeoLocation(context, LocationData.latitude, LocationData.longitude);
 		    weatherData.locationName = locationData.getLocationName();
 		    String weatherLocation = Double.toString(LocationData.latitude) + "," + Double.toString(LocationData.longitude);
-		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/conditions/" + forecastQuery + "q/" + weatherLocation
-			    + ".json";
+		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/conditions/" + forecastQuery + "q/" + weatherLocation + ".json";
 		}
 		    break;
 
 		case GeolocationMode.USEPROVIDER: {
 		    String weatherLocation = Double.toString(LocationData.latitude) + "," + Double.toString(LocationData.longitude);
-		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/geolookup/conditions/" + forecastQuery + "q/"
-			    + weatherLocation + ".json";
+		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/geolookup/conditions/" + forecastQuery + "q/" + weatherLocation + ".json";
 		}
 		    break;
 
@@ -135,8 +131,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		int hours = cal.get(Calendar.HOUR_OF_DAY);
 		int minutes = cal.get(Calendar.MINUTE);
 
-		if ((hours < weatherData.sunriseH) || (hours == weatherData.sunriseH && minutes < weatherData.sunriseM) || (hours > weatherData.sunsetH)
-			|| (hours == weatherData.sunsetH && minutes > weatherData.sunsetM)) {
+		if ((hours < weatherData.sunriseH) || (hours == weatherData.sunriseH && minutes < weatherData.sunriseM) || (hours > weatherData.sunsetH) || (hours == weatherData.sunsetH && minutes > weatherData.sunsetM)) {
 		    isDay = false;
 		}
 

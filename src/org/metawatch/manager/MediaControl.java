@@ -213,11 +213,11 @@ public class MediaControl {
 	    VibratePattern vibratePattern = NotificationBuilder.createVibratePatternFromPreference(context, "settingsMusicNumberBuzzes");
 
 	    if (vibratePattern.vibrate)
-		Protocol.vibrate(vibratePattern.on, vibratePattern.off, vibratePattern.cycles);
+		Protocol.getInstance(context).vibrate(vibratePattern.on, vibratePattern.off, vibratePattern.cycles);
 
 	    if (MetaWatchService.watchType == WatchType.DIGITAL) {
 		if (Preferences.notifyLight)
-		    Protocol.ledChange(true);
+		    Protocol.getInstance(context).ledChange(true);
 	    } else if (MetaWatchService.watchType == WatchType.ANALOG) {
 		if (mediaPlayerState == ApplicationBase.ACTIVE_IDLE)
 		    Idle.sendOledIdle(context);

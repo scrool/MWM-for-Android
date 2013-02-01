@@ -81,9 +81,7 @@ class PduPart {
     public static final String P_QUOTED_PRINTABLE = "quoted-printable";
 
     /**
-     * Value of disposition can be set to PduPart when the value is octet in the
-     * PDU. "from-data" instead of Form-data<Octet 128>. "attachment" instead of
-     * Attachment<Octet 129>. "inline" instead of Inline<Octet 130>.
+     * Value of disposition can be set to PduPart when the value is octet in the PDU. "from-data" instead of Form-data<Octet 128>. "attachment" instead of Attachment<Octet 129>. "inline" instead of Inline<Octet 130>.
      */
     static final byte[] DISPOSITION_FROM_DATA = "from-data".getBytes();
     static final byte[] DISPOSITION_ATTACHMENT = "attachment".getBytes();

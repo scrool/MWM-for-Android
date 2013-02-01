@@ -34,8 +34,7 @@ public abstract class Action {
     }
 
     /*
-     * -1 for Actions that never have a timestamp. 0 for
-     * "no timestamp right now". Otherwise a timestamp.
+     * -1 for Actions that never have a timestamp. 0 for "no timestamp right now". Otherwise a timestamp.
      */
     public long getTimestamp() {
 	return -1;

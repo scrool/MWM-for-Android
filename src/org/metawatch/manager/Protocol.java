@@ -57,18 +57,40 @@ import org.metawatch.manager.Log;
 
 public class Protocol {
 
-    private static volatile BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
+    private volatile BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
 
-    private static boolean idleShowClock = true;
+    private boolean idleShowClock = true;
 
-    private static byte[][][] LCDDiffBuffer = new byte[3][48][30];
+    private byte[][][] LCDDiffBuffer = new byte[3][48][30];
 
-    public static void resetLCDDiffBuffer() {
+    private Context mContext;
+
+    private static int sentPackets = 0;
+    private Thread protocolWatchdogThread = null;
+
+    private static Protocol mInstance;
+
+    public static Protocol getInstance(Context context) {
+	if (mInstance == null)
+	    mInstance = new Protocol(context);
+	return mInstance;
+    }
+
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
+
+    private Protocol(Context context) {
+	mContext = context;
+    }
+
+    public void resetLCDDiffBuffer() {
 	LCDDiffBuffer = new byte[3][48][30];
     }
 
     private static volatile boolean protocolSenderRunning = false;
-    private static Runnable protocolSender = new Runnable() {
+    private Runnable protocolSender = new Runnable() {
 	public void run() {
 	    while (protocolSenderRunning) {
 		try {
@@ -91,9 +113,9 @@ public class Protocol {
 	    }
 	}
     };
-    private static Thread protocolSenderThread = null;
+    private Thread protocolSenderThread = null;
 
-    private static Runnable protocolWatchdog = new Runnable() {
+    private Runnable protocolWatchdog = new Runnable() {
 	public void run() {
 
 	    while (protocolSenderRunning) {
@@ -109,8 +131,8 @@ public class Protocol {
 		    if ((sendQueue.size() != 0) && (prevSentPackets == sentPackets)) {
 			if (MetaWatchService.connectionState == ConnectionState.CONNECTED) {
 			    if (Preferences.autoRestart) {
-				Protocol.stopProtocolSender();
-				Protocol.startProtocolSender();
+				stopProtocolSender();
+				startProtocolSender();
 				Log.d(MetaWatchStatus.TAG, "Protocol restarted due to stalled queue");
 				return;
 			    }
@@ -125,10 +147,8 @@ public class Protocol {
 	    }
 	}
     };
-    private static int sentPackets = 0;
-    private static Thread protocolWatchdogThread = null;
 
-    public static synchronized void startProtocolSender() {
+    public synchronized void startProtocolSender() {
 	if (protocolSenderRunning == false) {
 	    protocolSenderRunning = true;
 	    protocolSenderThread = new Thread(protocolSender, "ProtocolSender");
@@ -139,11 +159,10 @@ public class Protocol {
 	}
     }
 
-    public static synchronized void stopProtocolSender() {
+    public synchronized void stopProtocolSender() {
 	if (protocolSenderRunning == true) {
 	    /* Stops thread gracefully */
 	    protocolSenderRunning = false;
-	    /* Wakes up thread if it's sleeping on the queue */
 	    protocolSenderThread.interrupt();
 	    protocolWatchdogThread.interrupt();
 	    /* Thread is dead, we can mark it for garbage collection. */
@@ -152,7 +171,7 @@ public class Protocol {
 	}
     }
 
-    public static boolean sendLcdBitmap(Bitmap bitmap, int bufferType) {
+    public boolean sendLcdBitmap(Bitmap bitmap, int bufferType) {
 	if (bitmap == null || bitmap.getWidth() != 96 || bitmap.getHeight() != 96) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Protocol.sendLcdBitmap - null or non 96px bitmap!");
@@ -170,7 +189,7 @@ public class Protocol {
 	return sendLcdArray(pixelArray, bufferType);
     }
 
-    static boolean sendLcdArray(int[] pixelArray, int bufferType) {
+    public boolean sendLcdArray(int[] pixelArray, int bufferType) {
 	byte send[] = new byte[1152];
 
 	for (int i = 0; i < 1152; i++) {
@@ -193,7 +212,7 @@ public class Protocol {
 	return sendLcdBuffer(send, bufferType);
     }
 
-    static boolean sendLcdBuffer(byte[] buffer, int bufferType) {
+    public boolean sendLcdBuffer(byte[] buffer, int bufferType) {
 	if (MetaWatchService.connectionState != MetaWatchService.ConnectionState.CONNECTED)
 	    return false;
 
@@ -233,12 +252,12 @@ public class Protocol {
 	return (sentLines > 0);
     }
 
-    public static void idleShowClock(boolean show) {
+    public void idleShowClock(boolean show) {
 	idleShowClock = show;
 
     }
 
-    public static void enqueue(byte[] bytes) {
+    public void enqueue(byte[] bytes) {
 
 	if (MetaWatchService.fakeWatch)
 	    return;
@@ -251,7 +270,7 @@ public class Protocol {
 
     // Force the message packet to the head of the queue
     // this should only be used when really necessary / time critical
-    public static void pushhead(byte[] bytes) {
+    public void pushhead(byte[] bytes) {
 
 	if (MetaWatchService.fakeWatch)
 	    return;
@@ -265,7 +284,7 @@ public class Protocol {
 	    MetaWatchService.notifyClients();
     }
 
-    public static void send(byte[] bytes) throws IOException {
+    public void send(byte[] bytes) throws IOException {
 	if (bytes == null)
 	    return;
 
@@ -273,7 +292,7 @@ public class Protocol {
 	byteArrayOutputStream.write(bytes);
 	byteArrayOutputStream.write(crc(bytes));
 
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.context);
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 	if (sharedPreferences.getBoolean("logPacketDetails", false)) {
 	    String str = "sending: ";
 	    byte[] b = byteArrayOutputStream.toByteArray();
@@ -298,7 +317,7 @@ public class Protocol {
 	    MetaWatchService.notifyClients();
     }
 
-    public static void sendAdvanceHands(int hour, int minute, int second) {
+    public void sendAdvanceHands(int hour, int minute, int second) {
 	try {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Protocol.sendAdvanceHands()");
@@ -321,7 +340,7 @@ public class Protocol {
 	}
     }
 
-    public static void setRealTimeClock(Context context) {
+    public void setRealTimeClock(Context context) {
 	try {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Protocol.setRealTimeClock()");
@@ -353,7 +372,7 @@ public class Protocol {
 	}
     }
 
-    public static void getRealTimeClock() {
+    public void getRealTimeClock() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.getRealTimeClock()");
 	byte[] bytes = new byte[4];
@@ -386,7 +405,7 @@ public class Protocol {
 	return result;
     }
 
-    public static Bitmap createTextBitmap(Context context, String text) {
+    public Bitmap createTextBitmap(Context context, String text) {
 
 	FontCache.FontInfo font = FontCache.instance(context).Get();
 
@@ -402,9 +421,7 @@ public class Protocol {
 	canvas.drawColor(Color.WHITE);
 	canvas = breakText(canvas, text, paint, 0, 0);
 	/*
-	 * FileOutputStream fos = new FileOutputStream("/sdcard/test.png");
-	 * image.compress(Bitmap.CompressFormat.PNG, 100, fos); fos.close(); if
-	 * (Preferences.logging) Log.d("ow", "bmp ok");
+	 * FileOutputStream fos = new FileOutputStream("/sdcard/test.png"); image.compress(Bitmap.CompressFormat.PNG, 100, fos); fos.close(); if (Preferences.logging) Log.d("ow", "bmp ok");
 	 */
 	return bitmap;
     }
@@ -428,7 +445,7 @@ public class Protocol {
 	return canvas;
     }
 
-    public static void loadTemplate(int mode) {
+    public void loadTemplate(int mode) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.loadTemplate(): mode=" + mode);
 	byte[] bytes = new byte[5];
@@ -443,7 +460,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void updateLcdDisplay(int bufferType) {
+    public void updateLcdDisplay(int bufferType) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.updateLcdDisplay(): bufferType=" + bufferType);
 	// byte[] bytes = new byte[MetaWatchService.watchGen ==
@@ -482,7 +499,7 @@ public class Protocol {
 	}
     }
 
-    public static void oledChangeMode(int bufferType) {
+    public void oledChangeMode(int bufferType) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.OledChangeMode(): bufferType=" + bufferType);
 	byte[] bytes = new byte[4];
@@ -495,7 +512,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void vibrate(int on, int off, int cycles) {
+    public void vibrate(int on, int off, int cycles) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.vibrate(): on=" + on + " off=" + off + " cycles=" + cycles);
 	byte[] bytes = new byte[10];
@@ -515,7 +532,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void writeBuffer() {
+    public void writeBuffer() {
 
 	// for (int j = 0; j < 96; j = j+2) {
 	byte[] bytes = new byte[17];
@@ -548,7 +565,7 @@ public class Protocol {
 	// }
     }
 
-    public static void enableButton(int button, int type, int code, int mode) {
+    public void enableButton(int button, int type, int code, int mode) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.enableButton(): button=" + button + " type=" + type + " code=" + code);
 	byte[] bytes = new byte[9];
@@ -567,7 +584,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void disableButton(int button, int type, int mode) {
+    public void disableButton(int button, int type, int mode) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.disableButton(): button=" + button + " type=" + type);
 	byte[] bytes = new byte[7];
@@ -584,7 +601,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void readButtonConfiguration() {
+    public void readButtonConfiguration() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.readButtonConfiguration()");
 	byte[] bytes = new byte[9];
@@ -603,7 +620,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void configureMode() {
+    public void configureMode() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.configureMode()");
 	byte[] bytes = new byte[6];
@@ -619,7 +636,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void configureIdleBufferSize(boolean showClock, boolean force) {
+    public void configureIdleBufferSize(boolean showClock, boolean force) {
 
 	if (idleShowClock != showClock || force) {
 	    if (Preferences.logging)
@@ -639,7 +656,7 @@ public class Protocol {
 	}
     }
 
-    public static void getDeviceType() {
+    public void getDeviceType() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.getDeviceType()");
 	byte[] bytes = new byte[4];
@@ -652,7 +669,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void readBatteryVoltage() {
+    public void readBatteryVoltage() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.readBatteryVoltage()");
 	byte[] bytes = new byte[4];
@@ -665,7 +682,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void readLightSensor() {
+    public void readLightSensor() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.readLightSensor()");
 	byte[] bytes = new byte[4];
@@ -678,31 +695,31 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void setTimeDateFormat(Context context) {
+    public void setTimeDateFormat(Context context) {
 	// Set the watch to 12h or 24h mode, depending on watch setting
 	if (DateFormat.is24HourFormat(context)) {
-	    Protocol.setNvalTime(true);
+	    setNvalTime(true);
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Setting watch to 24h format");
 	} else {
-	    Protocol.setNvalTime(false);
+	    setNvalTime(false);
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Setting watch to 12h format");
 	}
 
 	char[] order = DateFormat.getDateFormatOrder(context);
 	if (order[0] == DateFormat.DATE) {
-	    Protocol.setNvalDate(true);
+	    setNvalDate(true);
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Setting watch to ddmm format");
 	} else {
-	    Protocol.setNvalDate(false);
+	    setNvalDate(false);
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Setting watch to mmdd format");
 	}
     }
 
-    public static void setNvalLcdInvert(boolean invert) {
+    public void setNvalLcdInvert(boolean invert) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.setNvalLcdInvert()");
 	byte[] bytes = new byte[8];
@@ -723,7 +740,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void setNvalTime(boolean militaryTime) {
+    public void setNvalTime(boolean militaryTime) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.setNvalTime()");
 	byte[] bytes = new byte[8];
@@ -744,7 +761,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void setNvalDate(boolean dayFirst) {
+    public void setNvalDate(boolean dayFirst) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.setNvalDate()");
 	byte[] bytes = new byte[8];
@@ -765,7 +782,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void ledChange(boolean ledOn) {
+    public void ledChange(boolean ledOn) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.ledChange()");
 	byte[] bytes = new byte[4];
@@ -909,7 +926,7 @@ public class Protocol {
 	return (int) paint.measureText(line) - 79;
     }
 
-    public static void sendOledBitmap(Bitmap bitmap, int bufferType, int page) {
+    public void sendOledBitmap(Bitmap bitmap, int bufferType, int page) {
 	if (bitmap == null)
 	    return;
 
@@ -922,7 +939,7 @@ public class Protocol {
 	sendOledArray(pixelArray, bufferType, page);
     }
 
-    static void sendOledArray(int[] pixelArray, int bufferType, int page) {
+    private void sendOledArray(int[] pixelArray, int bufferType, int page) {
 	byte[] send = new byte[160];
 
 	for (int i = 0; i < 160; i++) {
@@ -949,7 +966,7 @@ public class Protocol {
 	sendOledBuffer(send, bufferType, page, false);
     }
 
-    public static void sendOledBuffer(byte[] display, int bufferType, int page, boolean scroll) {
+    public void sendOledBuffer(byte[] display, int bufferType, int page, boolean scroll) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.sendOledBuffer()");
 	try {
@@ -984,7 +1001,7 @@ public class Protocol {
 	}
     }
 
-    public static void updateOledDisplay(boolean top, int bufferType, boolean scroll) {
+    public void updateOledDisplay(boolean top, int bufferType, boolean scroll) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.updateOledNotification(): top=" + top + " scroll=" + scroll);
 	byte[] bytes = new byte[7];
@@ -1007,12 +1024,12 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void updateOledsNotification() {
+    public void updateOledsNotification() {
 	updateOledDisplay(true, WatchBuffers.NOTIFICATION, false);
 	updateOledDisplay(false, WatchBuffers.NOTIFICATION, false);
     }
 
-    public static void sendOledBuffer(boolean startScroll) {
+    public void sendOledBuffer(boolean startScroll) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.sendOledBuffer(): startScroll=" + startScroll);
 	byte[] bytes = new byte[25];
@@ -1032,7 +1049,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static void sendOledBufferPart(byte[] display, int start, int length, boolean startScroll, boolean last) {
+    public void sendOledBufferPart(byte[] display, int start, int length, boolean startScroll, boolean last) {
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.sendOledBufferPart(): sending oled buffer part, start: " + start + ", length: " + length);
@@ -1063,7 +1080,7 @@ public class Protocol {
 
     }
 
-    public static void changeMode(int mode) {
+    public void changeMode(int mode) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Protocol.changeMode()");
 	byte[] bytes = new byte[4];
@@ -1076,7 +1093,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static int getQueueLength() {
+    public int getQueueLength() {
 	return sendQueue.size();
     }
 

@@ -221,14 +221,11 @@ public class ActionManager {
 	// result.add(getAction(InternalActions.WoodchuckAction.id);
 
 	/*
-	 * // For scroll testing. for (int i = 0; i < 12; i++) { final int f =
-	 * i; result.add(new Action() { public String getName() { return
-	 * String.valueOf(f); }
+	 * // For scroll testing. for (int i = 0; i < 12; i++) { final int f = i; result.add(new Action() { public String getName() { return String.valueOf(f); }
 	 * 
 	 * public String bulletIcon() { return "bullet_triangle.bmp"; }
 	 * 
-	 * public int performAction(Context context) { return BUTTON_USED; } });
-	 * }
+	 * public int performAction(Context context) { return BUTTON_USED; } }); }
 	 */
 
 	return result;

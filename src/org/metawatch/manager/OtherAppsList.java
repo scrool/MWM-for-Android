@@ -34,8 +34,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 public class OtherAppsList extends SherlockFragmentActivity {
 
-    public static final String DEFAULT_BLACKLIST = "com.android.mms," + "com.google.android.gm," + "com.fsck.k9," + "com.android.alarmclock,"
-	    + "com.htc.android.worldclock," + "com.android.deskclock," + "com.sonyericsson.alarm," + "com.motorola.blur.alarmclock";
+    public static final String DEFAULT_BLACKLIST = "com.android.mms," + "com.google.android.gm," + "com.fsck.k9," + "com.android.alarmclock," + "com.htc.android.worldclock," + "com.android.deskclock," + "com.sonyericsson.alarm," + "com.motorola.blur.alarmclock";
     private List<AppInfo> appInfos;
 
     private class AppLoader extends AsyncTask<Void, Void, List<AppInfo>> {

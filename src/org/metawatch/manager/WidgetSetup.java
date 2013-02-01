@@ -173,7 +173,7 @@ public class WidgetSetup extends SherlockFragment {
 	    if (bmp != null) {
 		icon.setImageBitmap(Bitmap.createScaledBitmap(bmp, bmp.getWidth() * 2, bmp.getHeight() * 2, false));
 	    }
-	    if (convertView.getTag() == null || !((Boolean)convertView.getTag())) {
+	    if (convertView.getTag() == null || !((Boolean) convertView.getTag())) {
 		ObjectAnimator fadeIn = ObjectAnimator.ofFloat(convertView, "alpha", 0, 1);
 		fadeIn.setDuration(750);
 		fadeIn.start();
@@ -333,8 +333,7 @@ public class WidgetSetup extends SherlockFragment {
 	    ;
 	    if (bmp != null) {
 		int backCol = Color.LTGRAY;
-		int viewId = (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) ? R.layout.idle_screen_preview_oled
-			: R.layout.idle_screen_preview;
+		int viewId = (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) ? R.layout.idle_screen_preview_oled : R.layout.idle_screen_preview;
 
 		if (Preferences.invertLCD || MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
 		    bmp = Utils.invertBitmap(bmp);
@@ -390,12 +389,12 @@ public class WidgetSetup extends SherlockFragment {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() end");
     }
-    
+
     private ObjectAnimator downFromTop(final View view) {
- 	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "translationY", -1000, 0);
- 	downFromTop.setDuration(750);
- 	return downFromTop;
-     }
+	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "translationY", -1000, 0);
+	downFromTop.setDuration(750);
+	return downFromTop;
+    }
 
     private Bitmap createGlow(Bitmap src) {
 	int margin = 12;

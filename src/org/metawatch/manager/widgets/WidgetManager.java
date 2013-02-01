@@ -128,8 +128,7 @@ public class WidgetManager {
 
 	    Bundle b = intent.getExtras();
 
-	    if (!b.containsKey("id") || !b.containsKey("desc") || !b.containsKey("width") || !b.containsKey("height") || !b.containsKey("priority")
-		    || !b.containsKey("array")) {
+	    if (!b.containsKey("id") || !b.containsKey("desc") || !b.containsKey("width") || !b.containsKey("height") || !b.containsKey("priority") || !b.containsKey("array")) {
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "Malformed WIDGET_UPDATE intent");
 		return;

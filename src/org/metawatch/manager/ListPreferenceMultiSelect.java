@@ -8,12 +8,9 @@ import android.preference.Preference;
 import android.util.AttributeSet;
 
 /**
- * A {@link Preference} that displays a list of entries as a dialog and allows
- * multiple selections
+ * A {@link Preference} that displays a list of entries as a dialog and allows multiple selections
  * <p>
- * This preference will store a string into the SharedPreferences. This string
- * will be the values selected from the {@link #setEntryValues(CharSequence[])}
- * array.
+ * This preference will store a string into the SharedPreferences. This string will be the values selected from the {@link #setEntryValues(CharSequence[])} array.
  * </p>
  */
 public class ListPreferenceMultiSelect extends ListPreference {
@@ -101,9 +98,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * android.preference.ListPreference#onPrepareDialogBuilder(android.app.
-     * AlertDialog.Builder)
+     * @see android.preference.ListPreference#onPrepareDialogBuilder(android.app. AlertDialog.Builder)
      */
     @Override
     protected void onPrepareDialogBuilder(final Builder builder) {
@@ -171,8 +166,7 @@ public class ListPreferenceMultiSelect extends ListPreference {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * android.preference.ListPreference#setEntries(java.lang.CharSequence[])
+     * @see android.preference.ListPreference#setEntries(java.lang.CharSequence[])
      */
     @Override
     public void setEntries(final CharSequence[] entries) {

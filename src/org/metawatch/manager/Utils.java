@@ -205,14 +205,11 @@ public class Utils {
 		int photoID = c.getInt(c.getColumnIndex(PhoneLookup.PHOTO_ID));
 
 		photoUri = ContactsContract.Data.CONTENT_URI;
-		c = ch.add(context.getContentResolver().query(photoUri,
-			new String[] { ContactsContract.CommonDataKinds.Photo.PHOTO, ContactsContract.Data.PHOTO_ID }, Data.PHOTO_ID + " = " + photoID, null,
-			null));
+		c = ch.add(context.getContentResolver().query(photoUri, new String[] { ContactsContract.CommonDataKinds.Photo.PHOTO, ContactsContract.Data.PHOTO_ID }, Data.PHOTO_ID + " = " + photoID, null, null));
 
 		if (c != null && c.moveToFirst()) {
 		    try {
-			ByteArrayInputStream rawPhotoStream = new ByteArrayInputStream(c.getBlob(c
-				.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO)));
+			ByteArrayInputStream rawPhotoStream = new ByteArrayInputStream(c.getBlob(c.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Photo.PHOTO)));
 			Bitmap contactPhoto = BitmapFactory.decodeStream(rawPhotoStream);
 			return contactPhoto;
 		    } catch (NullPointerException ex) {
@@ -235,8 +232,7 @@ public class Utils {
 
 	// SMS
 	try {
-	    Cursor cursor = context.getContentResolver().query(Uri.withAppendedPath(Uri.parse("content://sms"), "inbox"), new String[] { "_id" }, "read=0",
-		    null, null);
+	    Cursor cursor = context.getContentResolver().query(Uri.withAppendedPath(Uri.parse("content://sms"), "inbox"), new String[] { "_id" }, "read=0", null, null);
 
 	    if (cursor != null) {
 		try {
@@ -252,8 +248,7 @@ public class Utils {
 
 	// MMS
 	try {
-	    Cursor cursor = context.getContentResolver().query(Uri.withAppendedPath(Uri.parse("content://mms"), "inbox"), new String[] { "_id" }, "read=0",
-		    null, null);
+	    Cursor cursor = context.getContentResolver().query(Uri.withAppendedPath(Uri.parse("content://mms"), "inbox"), new String[] { "_id" }, "read=0", null, null);
 
 	    if (cursor != null) {
 		try {
@@ -324,9 +319,7 @@ public class Utils {
 	CursorHandler ch = new CursorHandler();
 
 	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "Calendars to display: "
-		    + ((Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? "All"
-			    : Preferences.displayCalendars));
+	    Log.d(MetaWatchStatus.TAG, "Calendars to display: " + ((Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? "All" : Preferences.displayCalendars));
 
 	try {
 	    ContentResolver cr = context.getContentResolver();
@@ -334,8 +327,7 @@ public class Utils {
 
 	    ContentUris.appendId(builder, startTime);
 	    ContentUris.appendId(builder, endTime);
-	    Cursor eventCursor = ch.add(cr.query(builder.build(), new String[] { "event_id", "begin", "end", "allDay" }, null, null,
-		    "startDay ASC, startMinute ASC"));
+	    Cursor eventCursor = ch.add(cr.query(builder.build(), new String[] { "event_id", "begin", "end", "allDay" }, null, null, "startDay ASC, startMinute ASC"));
 
 	    while (eventCursor.moveToNext()) {
 		boolean isAllDay = !eventCursor.getString(3).equals("0");
@@ -346,8 +338,7 @@ public class Utils {
 		entry.isAllDay = isAllDay;
 		String uid2 = eventCursor.getString(0);
 		Uri CALENDAR_URI = Uri.parse("content://com.android.calendar/events/" + uid2);
-		final String selection = (Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? null
-			: "calendar_id IN (" + Preferences.displayCalendars + ")";
+		final String selection = (Utils.stringIsEmpty(Preferences.displayCalendars) || Preferences.displayCalendars.contains("#ALL#")) ? null : "calendar_id IN (" + Preferences.displayCalendars + ")";
 		Cursor c = ch.add(cr.query(CALENDAR_URI, new String[] { "title", "eventLocation", "description", }, selection, null, null));
 		if (c.moveToFirst()) {
 		    entry.title = c.getString(c.getColumnIndex("title"));
@@ -645,8 +636,7 @@ public class Utils {
 	canvas.drawText(text, x, y, col);
     }
 
-    public static void drawWrappedOutlinedText(String text, Canvas canvas, int x, int y, int width, TextPaint col, TextPaint outline,
-	    android.text.Layout.Alignment align) {
+    public static void drawWrappedOutlinedText(String text, Canvas canvas, int x, int y, int width, TextPaint col, TextPaint outline, android.text.Layout.Alignment align) {
 	drawWrappedText(text, canvas, x - 1, y, width, outline, align);
 	drawWrappedText(text, canvas, x + 1, y, width, outline, align);
 	drawWrappedText(text, canvas, x, y - 1, width, outline, align);
@@ -741,8 +731,7 @@ public class Utils {
 	final String ACCESSIBILITY_SERVICE_NAME = context.getPackageName() + "/org.metawatch.manager.MetaWatchAccessibilityService";
 
 	try {
-	    accessibilityEnabled = android.provider.Settings.Secure
-		    .getInt(context.getContentResolver(), android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
+	    accessibilityEnabled = android.provider.Settings.Secure.getInt(context.getContentResolver(), android.provider.Settings.Secure.ACCESSIBILITY_ENABLED);
 	} catch (SettingNotFoundException e) {
 	    return false;
 	}
@@ -750,8 +739,7 @@ public class Utils {
 	android.text.TextUtils.SimpleStringSplitter mStringColonSplitter = new android.text.TextUtils.SimpleStringSplitter(':');
 
 	if (accessibilityEnabled == 1) {
-	    String settingValue = android.provider.Settings.Secure.getString(context.getContentResolver(),
-		    android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+	    String settingValue = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
 	    if (settingValue != null) {
 		android.text.TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
 		splitter.setString(settingValue);
@@ -1008,13 +996,11 @@ public class Utils {
     }
 
     public static boolean isSameDate(Calendar cal1, Calendar cal2) {
-	return (cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2
-		.get(Calendar.DAY_OF_YEAR));
+	return (cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR));
     }
 
     public static boolean isDifferentMonth(Calendar cal1, Calendar cal2) {
-	return (cal1.get(Calendar.ERA) != cal2.get(Calendar.ERA) || cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.MONTH) != cal2
-		.get(Calendar.MONTH));
+	return (cal1.get(Calendar.ERA) != cal2.get(Calendar.ERA) || cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.MONTH) != cal2.get(Calendar.MONTH));
     }
 
     public static IOException createCompatibleIOException(Throwable cause) {

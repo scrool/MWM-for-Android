@@ -56,8 +56,7 @@ public class ThemePicker extends SherlockFragment implements OnItemClickListener
 	}
 
 	/**
-	 * The number of items in the list is determined by the number of
-	 * speeches in our array.
+	 * The number of items in the list is determined by the number of speeches in our array.
 	 * 
 	 * @see android.widget.ListAdapter#getCount()
 	 */
@@ -66,10 +65,7 @@ public class ThemePicker extends SherlockFragment implements OnItemClickListener
 	}
 
 	/**
-	 * Since the data comes from an array, just returning the index is
-	 * sufficient to get at the data. If we were using a more complex data
-	 * structure, we would return whatever object represents one row in the
-	 * list.
+	 * Since the data comes from an array, just returning the index is sufficient to get at the data. If we were using a more complex data structure, we would return whatever object represents one row in the list.
 	 * 
 	 * @see android.widget.ListAdapter#getItem(int)
 	 */
@@ -89,8 +85,7 @@ public class ThemePicker extends SherlockFragment implements OnItemClickListener
 	/**
 	 * Make a view to hold each row.
 	 * 
-	 * @see android.widget.ListAdapter#getView(int, android.view.View,
-	 *      android.view.ViewGroup)
+	 * @see android.widget.ListAdapter#getView(int, android.view.View, android.view.ViewGroup)
 	 */
 	public View getView(int position, View convertView, ViewGroup parent) {
 	    // A ViewHolder keeps references to children views to avoid

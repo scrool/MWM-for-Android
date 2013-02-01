@@ -36,19 +36,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 	// http://developer.yahoo.com/weather/
 
 	/*
-	 * 0 tornado 1 tropical storm 2 hurricane 3 severe thunderstorms 4
-	 * thunderstorms 5 mixed rain and snow 6 mixed rain and sleet 7 mixed
-	 * snow and sleet 8 freezing drizzle 9 drizzle 10 freezing rain 11
-	 * showers 12 showers 13 snow flurries 14 light snow showers 15 blowing
-	 * snow 16 snow 17 hail 18 sleet 19 dust 20 foggy 21 haze 22 smoky 23
-	 * blustery 24 windy 25 cold 26 cloudy 27 mostly cloudy (night) 28
-	 * mostly cloudy (day) 29 partly cloudy (night) 30 partly cloudy (day)
-	 * 31 clear (night) 32 sunny 33 fair (night) 34 fair (day) 35 mixed rain
-	 * and hail 36 hot 37 isolated thunderstorms 38 scattered thunderstorms
-	 * 39 scattered thunderstorms 40 scattered showers 41 heavy snow 42
-	 * scattered snow showers 43 heavy snow 44 partly cloudy 45
-	 * thundershowers 46 snow showers 47 isolated thundershowers 3200 not
-	 * available
+	 * 0 tornado 1 tropical storm 2 hurricane 3 severe thunderstorms 4 thunderstorms 5 mixed rain and snow 6 mixed rain and sleet 7 mixed snow and sleet 8 freezing drizzle 9 drizzle 10 freezing rain 11 showers 12 showers 13 snow flurries 14 light snow showers 15 blowing snow 16 snow 17 hail 18 sleet 19 dust 20 foggy 21 haze 22 smoky 23 blustery 24 windy 25 cold 26 cloudy 27 mostly cloudy (night) 28 mostly cloudy (day) 29 partly cloudy (night) 30 partly cloudy (day) 31 clear (night) 32 sunny 33 fair (night) 34 fair (day) 35 mixed rain and hail 36 hot 37 isolated thunderstorms 38 scattered thunderstorms 39 scattered thunderstorms 40 scattered showers 41 heavy snow 42 scattered snow showers 43 heavy snow 44 partly cloudy 45 thundershowers 46 snow showers 47 isolated thundershowers 3200 not available
 	 */
 
 	switch (code) {
@@ -177,8 +165,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
     }
 
     /**
-     * Checks the YAHOO PLACEFINDER service to lookup WOED, an unique weather
-     * location id. This is required to access the weather service later on.
+     * Checks the YAHOO PLACEFINDER service to lookup WOED, an unique weather location id. This is required to access the weather service later on.
      */
     private WeatherData requestWeatherFromYahooPlacefinder(String placeFinderUrl, WeatherData weatherData) throws IOException {
 	try {
@@ -231,14 +218,11 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
     }
 
     /**
-     * YAHOO Weather API. Checkout documentation:
-     * http://developer.yahoo.com/weather/.
+     * YAHOO Weather API. Checkout documentation: http://developer.yahoo.com/weather/.
      * 
-     * To request the weather from "DALLAS,US" the WOEID (Where On Earth ID) is
-     * "2388929". http://weather.yahooapis.com/forecastrss?w=2388929
+     * To request the weather from "DALLAS,US" the WOEID (Where On Earth ID) is "2388929". http://weather.yahooapis.com/forecastrss?w=2388929
      * 
-     * If temperature shall be returned in CELSIUS and all units in metric
-     * system, an argument "u=c" shall be sent to the API.
+     * If temperature shall be returned in CELSIUS and all units in metric system, an argument "u=c" shall be sent to the API.
      * 
      * @param woeId
      *            Where On Earth ID of YAHOO web services

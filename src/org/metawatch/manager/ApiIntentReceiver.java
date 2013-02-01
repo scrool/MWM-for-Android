@@ -131,8 +131,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 	    /* Set up vibrate pattern. */
 	    VibratePattern vibrate = getVibratePatternFromIntent(intent);
 
-	    if (intent.hasExtra("oled1") || intent.hasExtra("oled1a") || intent.hasExtra("oled1b") || intent.hasExtra("oled2") || intent.hasExtra("oled2a")
-		    || intent.hasExtra("oled2b")) {
+	    if (intent.hasExtra("oled1") || intent.hasExtra("oled1a") || intent.hasExtra("oled1b") || intent.hasExtra("oled2") || intent.hasExtra("oled2a") || intent.hasExtra("oled2b")) {
 
 		byte[] line1 = Protocol.createOled1line(context, null, "");
 		byte[] line2 = Protocol.createOled1line(context, null, "");
@@ -181,8 +180,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 
 		Bitmap icon = null;
 		if (intent.hasExtra("icon")) {
-		    icon = Bitmap.createBitmap(intent.getIntArrayExtra("icon"), intent.getIntExtra("iconWidth", 16), intent.getIntExtra("iconHeight", 16),
-			    Bitmap.Config.RGB_565);
+		    icon = Bitmap.createBitmap(intent.getIntArrayExtra("icon"), intent.getIntExtra("iconWidth", 16), intent.getIntExtra("iconHeight", 16), Bitmap.Config.RGB_565);
 		}
 
 		boolean sticky = intent.getBooleanExtra("sticky", true);
@@ -206,14 +204,16 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 	    VibratePattern vibrate = getVibratePatternFromIntent(intent);
 
 	    if (vibrate.vibrate)
-		Protocol.vibrate(vibrate.on, vibrate.off, vibrate.cycles);
+		Protocol.getInstance(context).vibrate(vibrate.on, vibrate.off, vibrate.cycles);
 
 	    return;
 	}
 
 	else if (action.equals("org.metawatch.manager.SILENTMODE")) {
 	    if (intent.hasExtra("enabled")) {
-		MetaWatchService.setSilentMode(intent.getBooleanExtra("enabled", false));
+		Intent setSilentMode = new Intent(context, MetaWatchService.class);
+		setSilentMode.putExtra(MetaWatchService.COMMAND_KEY, intent.getBooleanExtra("enabled", false) ? MetaWatchService.SILENT_MODE_ENABLE : MetaWatchService.SILENT_MODE_DISABLE);
+		context.startService(setSilentMode);
 	    }
 	}
 

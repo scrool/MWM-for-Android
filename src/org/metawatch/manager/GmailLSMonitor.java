@@ -211,8 +211,7 @@ public class GmailLSMonitor implements GmailMonitor {
 		    String sender = "";
 		    String snippet = "";
 
-		    Cursor c3 = ch.add(context.getContentResolver().query(
-			    Uri.parse("content://gmail-ls/conversations/" + account + "/" + convId + "/messages"), null, null, null, null));
+		    Cursor c3 = ch.add(context.getContentResolver().query(Uri.parse("content://gmail-ls/conversations/" + account + "/" + convId + "/messages"), null, null, null, null));
 		    // startManagingCursor(c3);
 		    c3.moveToFirst();
 

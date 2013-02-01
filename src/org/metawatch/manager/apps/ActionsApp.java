@@ -118,55 +118,55 @@ public class ActionsApp extends ApplicationBase {
 	init(context);
 
 	if (watchType == WatchType.DIGITAL) {
-	    Protocol.enableButton(1, 1, ACTION_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // right
-												 // middle
-												 // -
-												 // press
-	    Protocol.enableButton(1, 2, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // right
-												// middle
-												// -
-												// hold
-	    Protocol.enableButton(1, 3, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // right
-												// middle
-												// -
-												// long
-												// hold
+	    Protocol.getInstance(context).enableButton(1, 1, ACTION_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // press
+	    Protocol.getInstance(context).enableButton(1, 2, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // hold
+	    Protocol.getInstance(context).enableButton(1, 3, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // long
+	    // hold
 
-	    Protocol.enableButton(2, 1, ACTION_PERFORM, MetaWatchService.WatchBuffers.APPLICATION); // right
-												    // bottom
-												    // -
-												    // press
-	    Protocol.enableButton(2, 2, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // right
-												      // bottom
-												      // -
-												      // hold
-	    Protocol.enableButton(2, 3, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // right
-												      // bottom
-												      // -
-												      // long
-												      // hold
+	    Protocol.getInstance(context).enableButton(2, 1, ACTION_PERFORM, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // bottom
+	    // -
+	    // press
+	    Protocol.getInstance(context).enableButton(2, 2, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // bottom
+	    // -
+	    // hold
+	    Protocol.getInstance(context).enableButton(2, 3, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // bottom
+	    // -
+	    // long
+	    // hold
 	} else if (watchType == WatchType.ANALOG) {
-	    Protocol.enableButton(0, 1, ACTION_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // top
-												 // -
-												 // press
-	    Protocol.enableButton(0, 2, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // top
-												// -
-												// hold
-	    Protocol.enableButton(0, 3, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // top
-												// -
-												// long
-												// hold
+	    Protocol.getInstance(context).enableButton(0, 1, ACTION_NEXT, MetaWatchService.WatchBuffers.APPLICATION); // top
+	    // -
+	    // press
+	    Protocol.getInstance(context).enableButton(0, 2, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // top
+	    // -
+	    // hold
+	    Protocol.getInstance(context).enableButton(0, 3, ACTION_TOP, MetaWatchService.WatchBuffers.APPLICATION); // top
+	    // -
+	    // long
+	    // hold
 
-	    Protocol.enableButton(2, 1, ACTION_PERFORM, MetaWatchService.WatchBuffers.APPLICATION); // bottom
-												    // -
-												    // press
-	    Protocol.enableButton(2, 2, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // bottom
-												      // -
-												      // hold
-	    Protocol.enableButton(2, 3, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // bottom
-												      // -
-												      // long
-												      // hold
+	    Protocol.getInstance(context).enableButton(2, 1, ACTION_PERFORM, MetaWatchService.WatchBuffers.APPLICATION); // bottom
+	    // -
+	    // press
+	    Protocol.getInstance(context).enableButton(2, 2, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // bottom
+	    // -
+	    // hold
+	    Protocol.getInstance(context).enableButton(2, 3, ACTION_SECONDARY, MetaWatchService.WatchBuffers.APPLICATION); // bottom
+	    // -
+	    // long
+	    // hold
 	}
     }
 
@@ -175,15 +175,15 @@ public class ActionsApp extends ApplicationBase {
 	toRoot();
 
 	if (watchType == WatchType.DIGITAL) {
-	    Protocol.disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 2, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 3, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 2, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 3, MetaWatchService.WatchBuffers.APPLICATION);
 	} else if (watchType == WatchType.ANALOG) {
-	    Protocol.disableButton(0, 1, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 2, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 3, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(0, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 2, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 3, MetaWatchService.WatchBuffers.APPLICATION);
 	}
 
     }

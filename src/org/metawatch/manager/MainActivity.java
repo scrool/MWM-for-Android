@@ -28,7 +28,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	    downFromTop(status).start();
 	}
     }
-    
+
     private ObjectAnimator downFromTop(final View view) {
 	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "translationY", -1000, 0);
 	downFromTop.setDuration(1250);
@@ -39,19 +39,22 @@ public class MainActivity extends SherlockFragmentActivity {
 		view.setVisibility(View.VISIBLE);
 		MainActivity.this.setProgressBarIndeterminateVisibility(Boolean.TRUE);
 	    }
+
 	    public void onAnimationEnd(Animator animation) {
 		setProgressBarIndeterminateVisibility(Boolean.FALSE);
 	    }
+
 	    @Override
 	    public void onAnimationCancel(Animator animation) {
 	    }
+
 	    @Override
 	    public void onAnimationRepeat(Animator animation) {
 	    }
 	});
 	return downFromTop;
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 	super.onCreateOptionsMenu(menu);

@@ -262,9 +262,7 @@ public class CalendarWidget implements InternalWidget {
 	} else if (widget.height == 46 && icon != null) {
 	    canvas.drawBitmap(icon, 11, iconOffset.y, null);
 
-	    if ((Preferences.displayLocationInSmallCalendarWidget) && (!meetingTime.equals("None")) && (calendarEntry.location != null)
-		    && (!calendarEntry.location.equals("---")) && (widget_id.equals(id_0)) && (calendarEntry.location.length() > 0)
-		    && (calendarEntry.location.length() <= 3)) {
+	    if ((Preferences.displayLocationInSmallCalendarWidget) && (!meetingTime.equals("None")) && (calendarEntry.location != null) && (!calendarEntry.location.equals("---")) && (widget_id.equals(id_0)) && (calendarEntry.location.length() > 0) && (calendarEntry.location.length() <= 3)) {
 		canvas.drawText(calendarEntry.location, 23, (iconOffset.y + 13), paintSmall);
 	    } else {
 		Calendar c = Calendar.getInstance();
@@ -283,9 +281,7 @@ public class CalendarWidget implements InternalWidget {
 	} else if (icon != null) {
 	    canvas.drawBitmap(icon, 0, iconOffset.y, null);
 
-	    if ((Preferences.displayLocationInSmallCalendarWidget) && (!meetingTime.equals("None")) && (calendarEntry.location != null)
-		    && (!calendarEntry.location.equals("---")) && (widget_id.equals(id_0)) && (calendarEntry.location.length() > 0)
-		    && (calendarEntry.location.length() <= 3)) {
+	    if ((Preferences.displayLocationInSmallCalendarWidget) && (!meetingTime.equals("None")) && (calendarEntry.location != null) && (!calendarEntry.location.equals("---")) && (widget_id.equals(id_0)) && (calendarEntry.location.length() > 0) && (calendarEntry.location.length() <= 3)) {
 		canvas.drawText(calendarEntry.location, 12, (iconOffset.y + 13), paintSmall);
 	    } else {
 		Calendar c = Calendar.getInstance();

@@ -81,8 +81,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, text, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "SMS from"), Protocol.createOled2lines(context, name, text),
-		    scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "SMS from"), Protocol.createOled2lines(context, name, text), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -97,8 +96,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, name, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "MMS from"), Protocol.createOled2lines(context, name, ""),
-		    scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "MMS from"), Protocol.createOled2lines(context, name, ""), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -123,8 +121,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, text, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, title), Protocol.createOled2lines(context, title, text), scroll,
-		    len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, title), Protocol.createOled2lines(context, title, text), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -138,8 +135,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, subject, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "K9 mail"), Protocol.createOled2lines(context, sender, subject),
-		    scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "K9 mail"), Protocol.createOled2lines(context, sender, subject), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -154,8 +150,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, snippet, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled2lines(context, "Gmail from " + sender, email), Protocol.createOled2lines(context,
-		    subject, snippet), scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled2lines(context, "Gmail from " + sender, email), Protocol.createOled2lines(context, subject, snippet), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -170,8 +165,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, recipient, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, " Gmail"), Protocol
-		    .createOled2lines(context, messages, recipient), scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, " Gmail"), Protocol.createOled2lines(context, messages, recipient), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -185,8 +179,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, ticker, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "TouchDown"), Protocol.createOled2lines(context, title, ticker),
-		    scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "TouchDown"), Protocol.createOled2lines(context, title, ticker), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -200,8 +193,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, text, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "  Calendar"), Protocol.createOled2lines(context,
-		    "Event Reminder:", text), scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "  Calendar"), Protocol.createOled2lines(context, "Event Reminder:", text), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -215,8 +207,7 @@ public class NotificationBuilder {
 	    Bitmap bitmap = smartLines(context, icon, "Alarm", new String[] { currentTime }, FontCache.FontSize.LARGE);
 	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Alarm"), Protocol.createOled1line(context, null, currentTime),
-		    null, 0, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Alarm"), Protocol.createOled1line(context, null, currentTime), null, 0, vibratePattern, description);
 	}
     }
 
@@ -230,8 +221,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, track, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, artist), Protocol.createOled2lines(context, album, track),
-		    scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, artist), Protocol.createOled2lines(context, album, track), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -244,8 +234,7 @@ public class NotificationBuilder {
 	    Bitmap bitmap = smartLines(context, icon, "Timezone", new String[] { "Timezone Changed", tz.getDisplayName() });
 	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Timezone"), Protocol.createOled1line(context, null, tz
-		    .getDisplayName()), null, 0, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Timezone"), Protocol.createOled1line(context, null, tz.getDisplayName()), null, 0, vibratePattern, description);
 	}
     }
 
@@ -266,8 +255,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, notificationText, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, appName), Protocol.createOled2lines(context, "Notification",
-		    notificationText), scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, appName), Protocol.createOled2lines(context, "Notification", notificationText), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -281,8 +269,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, track, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, artist), Protocol.createOled2lines(context, album, track),
-		    scroll, len, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, artist), Protocol.createOled2lines(context, album, track), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -297,8 +284,7 @@ public class NotificationBuilder {
 	    Bitmap bitmap = smartLines(context, icon, "Battery", new String[] { "Phone battery at", builder.toString() });
 	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Warning!"), Protocol.createOled2lines(context,
-		    "Phone battery at", builder.toString()), null, 0, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Warning!"), Protocol.createOled2lines(context, "Phone battery at", builder.toString()), null, 0, vibratePattern, description);
 	}
     }
 
@@ -311,8 +297,7 @@ public class NotificationBuilder {
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.createOled2linesLong(context, desc, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, appName), Protocol.createOled2lines(context, event, desc),
-		    scroll, len, vibratePattern, appName + ": " + event);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, appName), Protocol.createOled2lines(context, event, desc), scroll, len, vibratePattern, appName + ": " + event);
 	}
     }
 
@@ -324,8 +309,7 @@ public class NotificationBuilder {
 	    Bitmap bitmap = smartLines(context, icon, "Voicemail", new String[] { "You have", "new voicemail" });
 	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Voicemail"), Protocol.createOled2lines(context, "You have",
-		    "new voicemail"), null, 0, vibratePattern, description);
+	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Voicemail"), Protocol.createOled2lines(context, "You have", "new voicemail"), null, 0, vibratePattern, description);
 	}
     }
 

@@ -283,7 +283,6 @@ public class BitmapCache {
 	return filename.substring(0, filename.lastIndexOf('.'));
     }
 
-
     public static void downloadAndInstallTheme(final ThemeContainer themeContainer, final String uri) {
 
 	Thread thread = new Thread("ThemeInstaller") {

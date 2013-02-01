@@ -114,8 +114,7 @@ public class Monitors {
 	    Integer accountCount = gmailUnreadCounts.get(key);
 	    totalCount += accountCount.intValue();
 	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Monitors.getGmailUnreadCount(): account='" + key + "' accountCount='" + accountCount + "' totalCount='"
-			+ totalCount + "'");
+		Log.d(MetaWatchStatus.TAG, "Monitors.getGmailUnreadCount(): account='" + key + "' accountCount='" + accountCount + "' totalCount='" + totalCount + "'");
 	}
 	return totalCount;
     }
@@ -128,8 +127,7 @@ public class Monitors {
     }
 
     public static void start(Context context/*
-					     * , TelephonyManager
-					     * telephonyManager
+					     * , TelephonyManager telephonyManager
 					     */) {
 	// start weather updater
 
@@ -203,7 +201,7 @@ public class Monitors {
 	Location location = null;
 	try {
 	    location = locationFinder.getLastBestKnownLocation();
-	} catch(NullPointerException e) {
+	} catch (NullPointerException e) {
 	    e.printStackTrace();
 	}
 	if (location != null) {
@@ -252,13 +250,7 @@ public class Monitors {
 
 	    @Override
 	    public void run() {
-		PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-		PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Weather");
-		wl.acquire();
-
 		weatherData = WeatherEngineFactory.getEngine().update(context, weatherData);
-
-		wl.release();
 	    }
 	};
 	thread.start();

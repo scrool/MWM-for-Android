@@ -111,7 +111,7 @@ public class MetaWatchStatus extends SherlockFragment {
 	    startActivity(new Intent(context, DeviceSelection.class));
 	    context.finish();
 	}
-	Protocol.configureMode();
+	Protocol.getInstance(context).configureMode();
     }
 
     private void configureBugSense() {
@@ -207,7 +207,7 @@ public class MetaWatchStatus extends SherlockFragment {
 	case MetaWatchService.ConnectionState.DISCONNECTING:
 	    mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnecting));
 	    break;
-	}	
+	}
     }
 
     private void getStatistics() {
@@ -235,7 +235,7 @@ public class MetaWatchStatus extends SherlockFragment {
 		mStatisticsText.append(res.getString(R.string.status_weather_waiting));
 	    }
 	}
-	
+
 	if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
 	    mStatisticsText.append("\n");
 	    if (LocationData.received) {
@@ -247,7 +247,7 @@ public class MetaWatchStatus extends SherlockFragment {
 		mStatisticsText.append("\n");
 	    }
 	}
-	
+
 	mStatisticsText.append("\n");
 	if (Utils.isAccessibilityEnabled(context)) {
 	    if (MetaWatchAccessibilityService.accessibilityReceived) {
@@ -263,14 +263,14 @@ public class MetaWatchStatus extends SherlockFragment {
 	    mStatisticsText.append(res.getString(R.string.status_accessibility_disabled));
 	}
 	mStatisticsText.append("\n");
-	
-	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getQueueLength());
+
+	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getInstance(context).getQueueLength());
 	mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getQueueLength() + "\n");
-	
+
 	if (Preferences.showNotificationQueue) {
 	    mStatisticsText.append(Notification.dumpQueue());
 	}
-	    
+
 	mStatisticsText.append("\nStatus updated at ");
 	printDate(mStatisticsText, System.currentTimeMillis());
     }

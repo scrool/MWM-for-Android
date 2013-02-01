@@ -16,8 +16,7 @@ public class NotificationIconShrinker {
 
     /** Used for the initial colour-to-monochrome threshold */
     public static double chooseThreshold(String packageName) {
-	return (packageName.equals("com.google.android.music") || packageName.equals("com.android.music") || packageName.equals("com.google.android.apps.maps")) ? 0.1
-		: packageName.startsWith("com.meecel.") ? 0.9 : 0.65;
+	return (packageName.equals("com.google.android.music") || packageName.equals("com.android.music") || packageName.equals("com.google.android.apps.maps")) ? 0.1 : packageName.startsWith("com.meecel.") ? 0.9 : 0.65;
     }
 
     /** Used to resolve dithered pixels after shrinking */

@@ -31,8 +31,7 @@ import android.text.TextUtils;
  * </p>
  * 
  * <p>
- * Developers can use this content provider to display label information to the
- * user. <br/>
+ * Developers can use this content provider to display label information to the user. <br/>
  * The label information includes:
  * <ul>
  * <li>Label name</li>
@@ -44,17 +43,10 @@ import android.text.TextUtils;
  * </p>
  * 
  * <p>
- * This content provider is available in Gmail version 2.3.6 or newer for
- * Froyo/Gingerbread and version 4.0.5 and newer for Honeycomb and Ice Cream
- * Sandwich
+ * This content provider is available in Gmail version 2.3.6 or newer for Froyo/Gingerbread and version 4.0.5 and newer for Honeycomb and Ice Cream Sandwich
  * </p>
  * <p>
- * An application can query the <a href=
- * "http://developer.android.com/reference/android/content/ContentResolver.html"
- * > Content Resolver</a> directly (or use a <a
- * href="http://developer.android.com/guide/topics/fundamentals/loaders.html"
- * target="_blank">Loader</a>) to obtain a Cursor with information for all
- * labels on an account
+ * An application can query the <a href= "http://developer.android.com/reference/android/content/ContentResolver.html" > Content Resolver</a> directly (or use a <a href="http://developer.android.com/guide/topics/fundamentals/loaders.html" target="_blank">Loader</a>) to obtain a Cursor with information for all labels on an account
  * </p>
  * <code>Cursor labelsCursor = getContentResolver().query(GmailContract.Labels.getLabelsUri(
  * selectedAccount), null, null, null, null);</code>
@@ -64,8 +56,7 @@ public final class GmailContract {
     }
 
     /**
-     * Permission required to access this
-     * {@link android.content.ContentProvider}
+     * Permission required to access this {@link android.content.ContentProvider}
      */
     public static final String PERMISSION = "com.google.android.gm.permission.READ_CONTENT_PROVIDER";
 
@@ -178,8 +169,7 @@ public final class GmailContract {
 	public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.com.google.android.gm.label";
 
 	/**
-	 * This string value is the canonical name of a label. Canonical names
-	 * are not localized and are not user-facing.
+	 * This string value is the canonical name of a label. Canonical names are not localized and are not user-facing.
 	 * 
 	 * <p>
 	 * Type: TEXT
@@ -187,8 +177,7 @@ public final class GmailContract {
 	 */
 	public static final String CANONICAL_NAME = "canonicalName";
 	/**
-	 * This string value is the user-visible name of a label. Names of
-	 * system labels (Inbox, Sent, Drafts...) are localized.
+	 * This string value is the user-visible name of a label. Names of system labels (Inbox, Sent, Drafts...) are localized.
 	 * 
 	 * <p>
 	 * Type: TEXT
@@ -204,8 +193,7 @@ public final class GmailContract {
 	 */
 	public static final String NUM_CONVERSATIONS = "numConversations";
 	/**
-	 * This integer value is the number of unread conversations in this
-	 * label.
+	 * This integer value is the number of unread conversations in this label.
 	 * 
 	 * <p>
 	 * Type: INTEGER
@@ -213,8 +201,7 @@ public final class GmailContract {
 	 */
 	public static final String NUM_UNREAD_CONVERSATIONS = "numUnreadConversations";
 	/**
-	 * This integer value is the label's foreground text color in 32-bit
-	 * 0xAARRGGBB format.
+	 * This integer value is the label's foreground text color in 32-bit 0xAARRGGBB format.
 	 * 
 	 * <p>
 	 * Type: INTEGER
@@ -222,8 +209,7 @@ public final class GmailContract {
 	 */
 	public static final String TEXT_COLOR = "text_color";
 	/**
-	 * This integer value is the label's background color in 32-bit
-	 * 0xAARRGGBB format.
+	 * This integer value is the label's background color in 32-bit 0xAARRGGBB format.
 	 * 
 	 * <p>
 	 * Type: INTEGER
@@ -231,9 +217,7 @@ public final class GmailContract {
 	 */
 	public static final String BACKGROUND_COLOR = "background_color";
 	/**
-	 * This string column value is the uri that can be used in subsequent
-	 * calls to {@link android.content.ContentProvider#query()} to query for
-	 * information on the single label represented by this row.
+	 * This string column value is the uri that can be used in subsequent calls to {@link android.content.ContentProvider#query()} to query for information on the single label represented by this row.
 	 * 
 	 * <p>
 	 * Type: TEXT
@@ -242,14 +226,9 @@ public final class GmailContract {
 	public static final String URI = "labelUri";
 
 	/**
-	 * Returns a URI that, when queried, will return the list of labels for
-	 * an account.
+	 * Returns a URI that, when queried, will return the list of labels for an account.
 	 * <p>
-	 * To use the Labels API, an app must first find the email address of a
-	 * valid Gmail account to query for label information. The <a href=
-	 * "http://developer.android.com/reference/android/accounts/AccountManager.html"
-	 * target="_blank">AccountManager</a> can return this information (<a
-	 * href="https://developers.google.com/gmail/android">example</a>).
+	 * To use the Labels API, an app must first find the email address of a valid Gmail account to query for label information. The <a href= "http://developer.android.com/reference/android/accounts/AccountManager.html" target="_blank">AccountManager</a> can return this information (<a href="https://developers.google.com/gmail/android">example</a>).
 	 * </p>
 	 * 
 	 * @param account

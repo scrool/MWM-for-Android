@@ -26,10 +26,7 @@ public class WeatherData {
 
     @Override
     public String toString() {
-	return "WeatherData [received=" + received + ", icon=" + icon + ", temp=" + temp + ", condition=" + condition + ", locationName=" + locationName
-		+ ", celsius=" + celsius + ", sunriseH=" + sunriseH + ", sunriseM=" + sunriseM + ", sunsetH=" + sunsetH + ", sunsetM=" + sunsetM
-		+ ", moonPercentIlluminated=" + moonPercentIlluminated + ", ageOfMoon=" + ageOfMoon + ", forecast=" + Arrays.toString(forecast)
-		+ ", timeStamp=" + timeStamp + ", forecastTimeStamp=" + forecastTimeStamp + "]";
+	return "WeatherData [received=" + received + ", icon=" + icon + ", temp=" + temp + ", condition=" + condition + ", locationName=" + locationName + ", celsius=" + celsius + ", sunriseH=" + sunriseH + ", sunriseM=" + sunriseM + ", sunsetH=" + sunsetH + ", sunsetM=" + sunsetM + ", moonPercentIlluminated=" + moonPercentIlluminated + ", ageOfMoon=" + ageOfMoon + ", forecast=" + Arrays.toString(forecast) + ", timeStamp=" + timeStamp + ", forecastTimeStamp=" + forecastTimeStamp + "]";
     }
 
     public boolean error = false;

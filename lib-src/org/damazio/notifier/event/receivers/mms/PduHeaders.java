@@ -121,17 +121,13 @@ public class PduHeaders {
     public static final int MESSAGE_TYPE_CANCEL_CONF = 0x97;
 
     /**
-     * X-Mms-Delivery-Report | X-Mms-Read-Report | X-Mms-Report-Allowed |
-     * X-Mms-Sender-Visibility | X-Mms-Store | X-Mms-Stored | X-Mms-Totals |
-     * X-Mms-Quotas | X-Mms-Distribution-Indicator | X-Mms-DRM-Content |
-     * X-Mms-Adaptation-Allowed | field types.
+     * X-Mms-Delivery-Report | X-Mms-Read-Report | X-Mms-Report-Allowed | X-Mms-Sender-Visibility | X-Mms-Store | X-Mms-Stored | X-Mms-Totals | X-Mms-Quotas | X-Mms-Distribution-Indicator | X-Mms-DRM-Content | X-Mms-Adaptation-Allowed | field types.
      */
     public static final int VALUE_YES = 0x80;
     public static final int VALUE_NO = 0x81;
 
     /**
-     * Delivery-Time | Expiry and Reply-Charging-Deadline | field type
-     * components.
+     * Delivery-Time | Expiry and Reply-Charging-Deadline | field type components.
      */
     public static final int VALUE_ABSOLUTE_TOKEN = 0x80;
     public static final int VALUE_RELATIVE_TOKEN = 0x81;
@@ -325,8 +321,7 @@ public class PduHeaders {
      * 
      * @param field
      *            the field
-     * @return the octet value of the pdu header with specified header field.
-     *         Return 0 if the value is not set.
+     * @return the octet value of the pdu header with specified header field. Return 0 if the value is not set.
      */
     protected int getOctet(int field) {
 	Integer octet = (Integer) mHeaderMap.get(field);
@@ -349,8 +344,7 @@ public class PduHeaders {
      */
     protected void setOctet(int value, int field) throws IllegalArgumentException {
 	/**
-	 * Check whether this field can be set for specific header and check
-	 * validity of the field.
+	 * Check whether this field can be set for specific header and check validity of the field.
 	 */
 	switch (field) {
 	case REPORT_ALLOWED:
@@ -424,8 +418,7 @@ public class PduHeaders {
 		value = RETRIEVE_STATUS_ERROR_TRANSIENT_FAILURE;
 	    } else if ((value > RETRIEVE_STATUS_ERROR_PERMANENT_CONTENT_UNSUPPORTED) && (value <= RETRIEVE_STATUS_ERROR_END)) {
 		value = RETRIEVE_STATUS_ERROR_PERMANENT_FAILURE;
-	    } else if ((value < RETRIEVE_STATUS_OK) || ((value > RETRIEVE_STATUS_OK) && (value < RETRIEVE_STATUS_ERROR_TRANSIENT_FAILURE))
-		    || (value > RETRIEVE_STATUS_ERROR_END)) {
+	    } else if ((value < RETRIEVE_STATUS_OK) || ((value > RETRIEVE_STATUS_OK) && (value < RETRIEVE_STATUS_ERROR_TRANSIENT_FAILURE)) || (value > RETRIEVE_STATUS_ERROR_END)) {
 		value = RETRIEVE_STATUS_ERROR_PERMANENT_FAILURE;
 	    }
 	    break;
@@ -436,8 +429,7 @@ public class PduHeaders {
 		value = STORE_STATUS_ERROR_TRANSIENT_FAILURE;
 	    } else if ((value > STORE_STATUS_ERROR_PERMANENT_MMBOX_FULL) && (value <= STORE_STATUS_ERROR_END)) {
 		value = STORE_STATUS_ERROR_PERMANENT_FAILURE;
-	    } else if ((value < STORE_STATUS_SUCCESS) || ((value > STORE_STATUS_SUCCESS) && (value < STORE_STATUS_ERROR_TRANSIENT_FAILURE))
-		    || (value > STORE_STATUS_ERROR_END)) {
+	    } else if ((value < STORE_STATUS_SUCCESS) || ((value > STORE_STATUS_SUCCESS) && (value < STORE_STATUS_ERROR_TRANSIENT_FAILURE)) || (value > STORE_STATUS_ERROR_END)) {
 		value = STORE_STATUS_ERROR_PERMANENT_FAILURE;
 	    }
 	    break;
@@ -446,10 +438,7 @@ public class PduHeaders {
 	    // invalid value.
 	    if ((value > RESPONSE_STATUS_ERROR_TRANSIENT_PARTIAL_SUCCESS) && (value < RESPONSE_STATUS_ERROR_PERMANENT_FAILURE)) {
 		value = RESPONSE_STATUS_ERROR_TRANSIENT_FAILURE;
-	    } else if (((value > RESPONSE_STATUS_ERROR_PERMANENT_LACK_OF_PREPAID) && (value <= RESPONSE_STATUS_ERROR_PERMANENT_END))
-		    || (value < RESPONSE_STATUS_OK)
-		    || ((value > RESPONSE_STATUS_ERROR_UNSUPPORTED_MESSAGE) && (value < RESPONSE_STATUS_ERROR_TRANSIENT_FAILURE))
-		    || (value > RESPONSE_STATUS_ERROR_PERMANENT_END)) {
+	    } else if (((value > RESPONSE_STATUS_ERROR_PERMANENT_LACK_OF_PREPAID) && (value <= RESPONSE_STATUS_ERROR_PERMANENT_END)) || (value < RESPONSE_STATUS_OK) || ((value > RESPONSE_STATUS_ERROR_UNSUPPORTED_MESSAGE) && (value < RESPONSE_STATUS_ERROR_TRANSIENT_FAILURE)) || (value > RESPONSE_STATUS_ERROR_PERMANENT_END)) {
 		value = RESPONSE_STATUS_ERROR_PERMANENT_FAILURE;
 	    }
 	    break;
@@ -477,8 +466,7 @@ public class PduHeaders {
      * 
      * @param field
      *            the field
-     * @return the TextString value of the pdu header with specified header
-     *         field
+     * @return the TextString value of the pdu header with specified header field
      */
     protected byte[] getTextString(int field) {
 	return (byte[]) mHeaderMap.get(field);
@@ -491,15 +479,13 @@ public class PduHeaders {
      *            the value
      * @param field
      *            the field
-     * @return the TextString value of the pdu header with specified header
-     *         field
+     * @return the TextString value of the pdu header with specified header field
      * @throws NullPointerException
      *             if the value is null.
      */
     protected void setTextString(byte[] value, int field) {
 	/**
-	 * Check whether this field can be set for specific header and check
-	 * validity of the field.
+	 * Check whether this field can be set for specific header and check validity of the field.
 	 */
 	if (null == value) {
 	    throw new NullPointerException();
@@ -530,8 +516,7 @@ public class PduHeaders {
      * 
      * @param field
      *            the field
-     * @return the EncodedStringValue value of the pdu header with specified
-     *         header field
+     * @return the EncodedStringValue value of the pdu header with specified header field
      */
     protected EncodedStringValue getEncodedStringValue(int field) {
 	return (EncodedStringValue) mHeaderMap.get(field);
@@ -542,8 +527,7 @@ public class PduHeaders {
      * 
      * @param field
      *            the field
-     * @return the EncodeStringValue array of the pdu header with specified
-     *         header field
+     * @return the EncodeStringValue array of the pdu header with specified header field
      */
     protected EncodedStringValue[] getEncodedStringValues(int field) {
 	@SuppressWarnings("unchecked")
@@ -562,15 +546,13 @@ public class PduHeaders {
      *            the value
      * @param field
      *            the field
-     * @return the EncodedStringValue value of the pdu header with specified
-     *         header field
+     * @return the EncodedStringValue value of the pdu header with specified header field
      * @throws NullPointerException
      *             if the value is null.
      */
     protected void setEncodedStringValue(EncodedStringValue value, int field) {
 	/**
-	 * Check whether this field can be set for specific header and check
-	 * validity of the field.
+	 * Check whether this field can be set for specific header and check validity of the field.
 	 */
 	if (null == value) {
 	    throw new NullPointerException();
@@ -602,15 +584,13 @@ public class PduHeaders {
      *            the value
      * @param field
      *            the field
-     * @return the EncodedStringValue value array of the pdu header with
-     *         specified header field
+     * @return the EncodedStringValue value array of the pdu header with specified header field
      * @throws NullPointerException
      *             if the value is null.
      */
     protected void setEncodedStringValues(EncodedStringValue[] value, int field) {
 	/**
-	 * Check whether this field can be set for specific header and check
-	 * validity of the field.
+	 * Check whether this field can be set for specific header and check validity of the field.
 	 */
 	if (null == value) {
 	    throw new NullPointerException();
@@ -671,8 +651,7 @@ public class PduHeaders {
      * 
      * @param field
      *            the field
-     * @return the LongInteger value of the pdu header with specified header
-     *         field. if return -1, the field is not existed in pdu header.
+     * @return the LongInteger value of the pdu header with specified header field. if return -1, the field is not existed in pdu header.
      */
     protected long getLongInteger(int field) {
 	Long longInteger = (Long) mHeaderMap.get(field);
@@ -693,8 +672,7 @@ public class PduHeaders {
      */
     protected void setLongInteger(long value, int field) {
 	/**
-	 * Check whether this field can be set for specific header and check
-	 * validity of the field.
+	 * Check whether this field can be set for specific header and check validity of the field.
 	 */
 	switch (field) {
 	case DATE:

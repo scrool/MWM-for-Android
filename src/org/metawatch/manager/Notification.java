@@ -109,53 +109,50 @@ public class Notification {
 		    if (MetaWatchService.watchType == WatchType.DIGITAL) {
 
 			if (notification.bitmaps != null && notification.bitmaps.length > 0) {
-			    Protocol.sendLcdBitmap(notification.bitmaps[0], MetaWatchService.WatchBuffers.NOTIFICATION);
+			    Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[0], MetaWatchService.WatchBuffers.NOTIFICATION);
 			    currentNotificationPage = 0;
 
 			    if (Preferences.logging)
 				Log.d(MetaWatchStatus.TAG, "Notification contains " + notification.bitmaps.length + " bitmaps.");
 
 			} else if (notification.array != null)
-			    Protocol.sendLcdArray(notification.array, MetaWatchService.WatchBuffers.NOTIFICATION);
+			    Protocol.getInstance(context).sendLcdArray(notification.array, MetaWatchService.WatchBuffers.NOTIFICATION);
 			else if (notification.buffer != null)
-			    Protocol.sendLcdBuffer(notification.buffer, MetaWatchService.WatchBuffers.NOTIFICATION);
+			    Protocol.getInstance(context).sendLcdBuffer(notification.buffer, MetaWatchService.WatchBuffers.NOTIFICATION);
 			else {
 			    continue;
 			}
 
-			Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
+			Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
 
 			/*
-			 * Wait until the watch shows the notification before
-			 * starting the timeout.
+			 * Wait until the watch shows the notification before starting the timeout.
 			 */
 			synchronized (Notification.modeChanged) {
 			    modeChanged.wait(60000);
 			}
 
 			/*
-			 * Ensure we're in NOTIFICATION mode (massive kludge,
-			 * but it stops the watch rebounding straight out of a
-			 * notification immediately
+			 * Ensure we're in NOTIFICATION mode (massive kludge, but it stops the watch rebounding straight out of a notification immediately
 			 */
-			Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
+			Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
 
 			if (notification.vibratePattern.vibrate)
-			    Protocol.vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
+			    Protocol.getInstance(context).vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
 
 			if (Preferences.notifyLight)
-			    Protocol.ledChange(true);
+			    Protocol.getInstance(context).ledChange(true);
 
 			if (Preferences.logging)
 			    Log.d(MetaWatchStatus.TAG, "notif bitmap sent from thread");
 
 		    } else {
 
-			Protocol.sendOledBuffer(notification.oledTop, WatchBuffers.NOTIFICATION, 0, false);
-			Protocol.sendOledBuffer(notification.oledBottom, WatchBuffers.NOTIFICATION, 1, false);
+			Protocol.getInstance(context).sendOledBuffer(notification.oledTop, WatchBuffers.NOTIFICATION, 0, false);
+			Protocol.getInstance(context).sendOledBuffer(notification.oledBottom, WatchBuffers.NOTIFICATION, 1, false);
 
 			if (notification.vibratePattern.vibrate)
-			    Protocol.vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
+			    Protocol.getInstance(context).vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
 
 			if (notification.oledScroll != null) {
 
@@ -163,9 +160,7 @@ public class Notification {
 				Log.d(MetaWatchStatus.TAG, "notification.scrollLength = " + notification.scrollLength);
 
 			    /*
-			     * If requested, let the notification stay on the
-			     * screen for a few seconds before starting to
-			     * scroll.
+			     * If requested, let the notification stay on the screen for a few seconds before starting to scroll.
 			     */
 			    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 			    if (sharedPreferences.getBoolean("pauseBeforeScrolling", false)) {
@@ -176,7 +171,7 @@ public class Notification {
 
 			    if (notification.scrollLength >= 240) {
 
-				Protocol.sendOledBufferPart(notification.oledScroll, 0, 240, true, false);
+				Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, 0, 240, true, false);
 				// wait continue with scroll
 
 				for (int i = 240; i < notification.scrollLength; i += 80) {
@@ -189,15 +184,15 @@ public class Notification {
 				    }
 
 				    if (i + 80 >= notification.scrollLength)
-					Protocol.sendOledBufferPart(notification.oledScroll, i, 80, false, true);
+					Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, i, 80, false, true);
 				    else
-					Protocol.sendOledBufferPart(notification.oledScroll, i, 80, false, false);
+					Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, i, 80, false, false);
 				}
 
 			    } else if (notification.scrollLength > 0) {
 
 				int len = notification.scrollLength / 20 + 1;
-				Protocol.sendOledBufferPart(notification.oledScroll, 0, len * 20, true, true);
+				Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, 0, len * 20, true, true);
 
 			    }
 			}
@@ -208,16 +203,16 @@ public class Notification {
 		    if (notification.timeout < 0) {
 			notifyButtonPress = NOTIFICATION_NONE;
 			if (notification.bitmaps != null & notification.bitmaps.length > 1) {
-			    Protocol.enableButton(0, 1, NOTIFICATION_UP, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-														      // top
-														      // press
-			    Protocol.enableButton(1, 1, NOTIFICATION_DOWN, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-															// middle
-															// press
+			    Protocol.getInstance(context).enableButton(0, 1, NOTIFICATION_UP, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			    // top
+			    // press
+			    Protocol.getInstance(context).enableButton(1, 1, NOTIFICATION_DOWN, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			    // middle
+			    // press
 			}
-			Protocol.enableButton(2, 1, NOTIFICATION_DISMISS, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-														       // bottom
-														       // press
+			Protocol.getInstance(context).enableButton(2, 1, NOTIFICATION_DISMISS, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			// bottom
+			// press
 		    }
 
 		    if (notification.isNew) {
@@ -247,10 +242,10 @@ public class Notification {
 
 			    if (notifyButtonPress == NOTIFICATION_UP && currentNotificationPage > 0) {
 				currentNotificationPage--;
-				Protocol.sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
+				Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
 			    } else if (notifyButtonPress == NOTIFICATION_DOWN && currentNotificationPage < notification.bitmaps.length - 1) {
 				currentNotificationPage++;
-				Protocol.sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
+				Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
 			    }
 
 			    if ((System.currentTimeMillis() - startTicks) > timeout) {
@@ -260,15 +255,15 @@ public class Notification {
 			    if (Preferences.logging)
 				Log.d(MetaWatchStatus.TAG, "Displaying page " + currentNotificationPage + " / " + notification.bitmaps.length);
 
-			    Protocol.updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
+			    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
 			} while (notifyButtonPress != NOTIFICATION_DISMISS);
 
-			Protocol.disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-												  // top
-			Protocol.disableButton(1, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-												  // middle
-			Protocol.disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-												  // bottom
+			Protocol.getInstance(context).disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			// top
+			Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			// middle
+			Protocol.getInstance(context).disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			// bottom
 
 			if (Preferences.logging)
 			    Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Done sleeping.");
@@ -322,7 +317,6 @@ public class Notification {
 	if (notificationSenderRunning == true) {
 	    /* Stops thread gracefully */
 	    notificationSenderRunning = false;
-	    /* Wakes up thread if it's sleeping on the queue */
 	    notificationSenderThread.interrupt();
 	    /* Thread is dead, we can mark it for garbage collection. */
 	    notificationSenderThread = null;
@@ -406,7 +400,7 @@ public class Notification {
 
     public static void addTextNotification(Context context, String text, VibratePattern vibratePattern, int timeout) {
 	NotificationType notification = new NotificationType();
-	notification.bitmaps = new Bitmap[] { Protocol.createTextBitmap(context, text) };
+	notification.bitmaps = new Bitmap[] { Protocol.getInstance(context).createTextBitmap(context, text) };
 	notification.timeout = timeout;
 	notification.description = "Text: " + text;
 	if (vibratePattern == null)
@@ -467,8 +461,7 @@ public class Notification {
 
     }
 
-    public static void addOledNotification(Context context, byte[] top, byte[] bottom, byte[] scroll, int scrollLength, VibratePattern vibratePattern,
-	    String description) {
+    public static void addOledNotification(Context context, byte[] top, byte[] bottom, byte[] scroll, int scrollLength, VibratePattern vibratePattern, String description) {
 	NotificationType notification = new NotificationType();
 	notification.oledTop = top;
 	notification.oledBottom = bottom;

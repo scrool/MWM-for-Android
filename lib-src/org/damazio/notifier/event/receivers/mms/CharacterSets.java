@@ -24,8 +24,7 @@ class CharacterSets {
     /**
      * IANA assigned MIB enum numbers.
      * 
-     * From wap-230-wsp-20010705-a.pdf Any-charset = <Octet 128> Equivalent to
-     * the special RFC2616 charset value "*"
+     * From wap-230-wsp-20010705-a.pdf Any-charset = <Octet 128> Equivalent to the special RFC2616 charset value "*"
      */
     public static final int ANY_CHARSET = 0x00;
     public static final int US_ASCII = 0x03;
@@ -52,8 +51,7 @@ class CharacterSets {
     /**
      * Array of MIB enum numbers.
      */
-    private static final int[] MIBENUM_NUMBERS = { ANY_CHARSET, US_ASCII, ISO_8859_1, ISO_8859_2, ISO_8859_3, ISO_8859_4, ISO_8859_5, ISO_8859_6, ISO_8859_7,
-	    ISO_8859_8, ISO_8859_9, SHIFT_JIS, UTF_8, BIG5, UCS2, UTF_16, };
+    private static final int[] MIBENUM_NUMBERS = { ANY_CHARSET, US_ASCII, ISO_8859_1, ISO_8859_2, ISO_8859_3, ISO_8859_4, ISO_8859_5, ISO_8859_6, ISO_8859_7, ISO_8859_8, ISO_8859_9, SHIFT_JIS, UTF_8, BIG5, UCS2, UTF_16, };
 
     /**
      * The Well-known-charset Mime name.
@@ -80,9 +78,7 @@ class CharacterSets {
     /**
      * Array of the names of character sets.
      */
-    private static final String[] MIME_NAMES = { MIMENAME_ANY_CHARSET, MIMENAME_US_ASCII, MIMENAME_ISO_8859_1, MIMENAME_ISO_8859_2, MIMENAME_ISO_8859_3,
-	    MIMENAME_ISO_8859_4, MIMENAME_ISO_8859_5, MIMENAME_ISO_8859_6, MIMENAME_ISO_8859_7, MIMENAME_ISO_8859_8, MIMENAME_ISO_8859_9, MIMENAME_SHIFT_JIS,
-	    MIMENAME_UTF_8, MIMENAME_BIG5, MIMENAME_UCS2, MIMENAME_UTF_16, };
+    private static final String[] MIME_NAMES = { MIMENAME_ANY_CHARSET, MIMENAME_US_ASCII, MIMENAME_ISO_8859_1, MIMENAME_ISO_8859_2, MIMENAME_ISO_8859_3, MIMENAME_ISO_8859_4, MIMENAME_ISO_8859_5, MIMENAME_ISO_8859_6, MIMENAME_ISO_8859_7, MIMENAME_ISO_8859_8, MIMENAME_ISO_8859_9, MIMENAME_SHIFT_JIS, MIMENAME_UTF_8, MIMENAME_BIG5, MIMENAME_UCS2, MIMENAME_UTF_16, };
 
     private static final HashMap<Integer, String> MIBENUM_TO_NAME_MAP;
     private static final HashMap<String, Integer> NAME_TO_MIBENUM_MAP;
@@ -103,8 +99,7 @@ class CharacterSets {
     } // Non-instantiatable
 
     /**
-     * Map an MIBEnum number to the name of the charset which this number is
-     * assigned to by IANA.
+     * Map an MIBEnum number to the name of the charset which this number is assigned to by IANA.
      * 
      * @param mibEnumValue
      *            An IANA assigned MIBEnum number.

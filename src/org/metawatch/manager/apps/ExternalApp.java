@@ -61,7 +61,7 @@ public class ExternalApp extends ApplicationBase {
 			    actualButton++;
 		    }
 
-		    Protocol.enableButton(actualButton, type, code, MetaWatchService.WatchBuffers.APPLICATION);
+		    Protocol.getInstance(context).enableButton(actualButton, type, code, MetaWatchService.WatchBuffers.APPLICATION);
 		}
 	    }
 
@@ -85,7 +85,7 @@ public class ExternalApp extends ApplicationBase {
 
 		    if (actualButton > 3)
 			actualButton++;
-		    Protocol.disableButton(actualButton, mode, MetaWatchService.WatchBuffers.APPLICATION);
+		    Protocol.getInstance(context).disableButton(actualButton, mode, MetaWatchService.WatchBuffers.APPLICATION);
 		}
 	    }
 	}
@@ -126,7 +126,7 @@ public class ExternalApp extends ApplicationBase {
 
     private void initBuffer(Context context) {
 	if (buffer == null) {
-	    buffer = Protocol.createTextBitmap(context, "Starting application mode ...");
+	    buffer = Protocol.getInstance(context).createTextBitmap(context, "Starting application mode ...");
 	}
     }
 

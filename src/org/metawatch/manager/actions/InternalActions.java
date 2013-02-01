@@ -222,8 +222,7 @@ public class InternalActions {
 	}
 
 	public int performAction(Context context) {
-	    audioManager.setRingerMode(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT ? AudioManager.RINGER_MODE_NORMAL
-		    : AudioManager.RINGER_MODE_SILENT);
+	    audioManager.setRingerMode(audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT ? AudioManager.RINGER_MODE_NORMAL : AudioManager.RINGER_MODE_SILENT);
 	    return ApplicationBase.BUTTON_USED;
 	}
     }
@@ -244,7 +243,9 @@ public class InternalActions {
 	}
 
 	public int performAction(Context context) {
-	    MetaWatchService.setSilentMode(!MetaWatchService.SilentMode());
+	    Intent setSilentMode = new Intent(context, MetaWatchService.class);
+	    setSilentMode.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.INVERT_SILENT_MODE);
+	    context.startService(setSilentMode);
 	    return ApplicationBase.BUTTON_USED;
 	}
     }

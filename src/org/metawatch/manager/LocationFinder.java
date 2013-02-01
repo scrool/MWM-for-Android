@@ -14,8 +14,7 @@ import android.os.Bundle;
 import org.metawatch.manager.Log;
 
 /**
- * Creates a simple location finder. It can be used to return the last best
- * known location and if that isn't good enough, request a single update.
+ * Creates a simple location finder. It can be used to return the last best known location and if that isn't good enough, request a single update.
  * 
  * It uses the Fluent pattern so you can write it like: </br></br><code>
  * &nbsp;&nbsp;LocationFinder finder = new LocationFinder()</br>
@@ -63,10 +62,7 @@ public class LocationFinder {
     }
 
     /**
-     * Sets the maximum time of a location to be fresh. When you call
-     * getLastBestKnownLocation(), if the location isn't fresh enough, the
-     * system will request a single location update with a provider that matches
-     * the current criteria.</br></br> <strong>Default:</strong> 5 * 60 * 1000
+     * Sets the maximum time of a location to be fresh. When you call getLastBestKnownLocation(), if the location isn't fresh enough, the system will request a single location update with a provider that matches the current criteria.</br></br> <strong>Default:</strong> 5 * 60 * 1000
      * 
      * @param time
      *            Maximum time to consider a location as fresh.
@@ -82,10 +78,7 @@ public class LocationFinder {
     }
 
     /**
-     * Sets the minimum accuracy of a location. When you call
-     * getLastBestKnownLocation(), if the location isn't accurate enough, the
-     * system will request a single location update with a provider that matches
-     * the current criteria.</br></br> <strong>Default:</strong> 100.0f
+     * Sets the minimum accuracy of a location. When you call getLastBestKnownLocation(), if the location isn't accurate enough, the system will request a single location update with a provider that matches the current criteria.</br></br> <strong>Default:</strong> 100.0f
      * 
      * @param accuracy
      *            Minimum accuracy for location requests.
@@ -113,9 +106,7 @@ public class LocationFinder {
     }
 
     /**
-     * Returns the most accurate and fresh known location. If the returned
-     * location doesn't match the minimum requirements, it'll trigger a single
-     * location update using the current criteria.
+     * Returns the most accurate and fresh known location. If the returned location doesn't match the minimum requirements, it'll trigger a single location update using the current criteria.
      * 
      * @return best known location
      */
@@ -149,8 +140,7 @@ public class LocationFinder {
 	}
 
 	if (Preferences.logging) {
-	    String info = String.format("Best Known location from %s (freshness: %d secs ago, accuracy: %.2f m)", bestResult.getProvider(),
-		    bestFreshness / 1000, bestAccuracy);
+	    String info = String.format("Best Known location from %s (freshness: %d secs ago, accuracy: %.2f m)", bestResult.getProvider(), bestFreshness / 1000, bestAccuracy);
 	    Log.d(TAG, info);
 	}
 

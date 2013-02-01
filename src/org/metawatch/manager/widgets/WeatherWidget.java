@@ -371,8 +371,7 @@ public class WeatherWidget implements InternalWidget {
 		paintSmall.setTextAlign(Paint.Align.LEFT);
 	    }
 
-	    Utils.drawOutlinedText((String) TextUtils.ellipsize(Monitors.weatherData.locationName, paintSmall, 63, TruncateAt.END), canvas, 1, 31, paintSmall,
-		    paintSmallOutline);
+	    Utils.drawOutlinedText((String) TextUtils.ellipsize(Monitors.weatherData.locationName, paintSmall, 63, TruncateAt.END), canvas, 1, 31, paintSmall, paintSmallOutline);
 
 	} else {
 	    paintSmall.setTextAlign(Paint.Align.CENTER);
@@ -511,8 +510,7 @@ public class WeatherWidget implements InternalWidget {
 	    paintSmall.setTextAlign(Paint.Align.LEFT);
 	    paintSmallOutline.setTextAlign(Paint.Align.LEFT);
 
-	    Utils.drawOutlinedText((String) TextUtils.ellipsize(Monitors.weatherData.locationName, paintSmall, 47, TruncateAt.END), canvas, 0, 16, paintSmall,
-		    paintSmallOutline);
+	    Utils.drawOutlinedText((String) TextUtils.ellipsize(Monitors.weatherData.locationName, paintSmall, 47, TruncateAt.END), canvas, 0, 16, paintSmall, paintSmallOutline);
 
 	} else {
 	    paintSmall.setTextAlign(Paint.Align.CENTER);
@@ -639,8 +637,7 @@ public class WeatherWidget implements InternalWidget {
 		paintSmall.setTextAlign(Paint.Align.LEFT);
 	    }
 
-	    Utils.drawOutlinedText((String) TextUtils.ellipsize(Monitors.weatherData.locationName, paintSmall, 48, TruncateAt.END), canvas, 0, 30, paintSmall,
-		    paintSmallOutline);
+	    Utils.drawOutlinedText((String) TextUtils.ellipsize(Monitors.weatherData.locationName, paintSmall, 48, TruncateAt.END), canvas, 0, 30, paintSmall, paintSmallOutline);
 
 	} else {
 	    paintSmall.setTextAlign(Paint.Align.CENTER);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.metawatch.manager.FontCache;
+import org.metawatch.manager.Log;
 import org.metawatch.manager.MediaControl;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
@@ -23,7 +24,6 @@ import android.provider.MediaStore;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import org.metawatch.manager.Log;
 
 public class MediaPlayerApp extends ApplicationBase {
 
@@ -55,87 +55,87 @@ public class MediaPlayerApp extends ApplicationBase {
 	    Log.d(MetaWatchStatus.TAG, "Entering media mode");
 
 	if (watchType == WatchType.DIGITAL) {
-	    Protocol.enableButton(1, 0, TOGGLE, MetaWatchService.WatchBuffers.APPLICATION); // right
-											    // middle
-											    // -
-											    // immediate
+	    Protocol.getInstance(context).enableButton(1, 0, TOGGLE, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // middle
+	    // -
+	    // immediate
 
-	    Protocol.enableButton(2, 1, MENU, MetaWatchService.WatchBuffers.APPLICATION); // right
-											  // bottom
-											  // -
-											  // press
+	    Protocol.getInstance(context).enableButton(2, 1, MENU, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    // bottom
+	    // -
+	    // press
 
 	    final int leftLower = getLeftLowerButtonCode();
 	    final int leftUpper = getLeftUpperButtonCode();
 
 	    if (Preferences.inverseMediaPlayerButtons) {
-		Protocol.enableButton(leftLower, 1, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left
-													  // middle
-													  // -
-													  // press
-		Protocol.enableButton(leftLower, 2, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left
-													     // middle
-													     // -
-													     // hold
-		Protocol.enableButton(leftLower, 3, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left
-													     // middle
-													     // -
-													     // long
-													     // hold
+		Protocol.getInstance(context).enableButton(leftLower, 1, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// middle
+		// -
+		// press
+		Protocol.getInstance(context).enableButton(leftLower, 2, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// middle
+		// -
+		// hold
+		Protocol.getInstance(context).enableButton(leftLower, 3, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// middle
+		// -
+		// long
+		// hold
 
-		Protocol.enableButton(leftUpper, 1, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
-												      // top
-												      // -
-												      // press
-		Protocol.enableButton(leftUpper, 2, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left
-													   // top
-													   // -
-													   // hold
-		Protocol.enableButton(leftUpper, 3, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left
-													   // top
-													   // -
-													   // long
-													   // hold
+		Protocol.getInstance(context).enableButton(leftUpper, 1, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// top
+		// -
+		// press
+		Protocol.getInstance(context).enableButton(leftUpper, 2, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// top
+		// -
+		// hold
+		Protocol.getInstance(context).enableButton(leftUpper, 3, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// top
+		// -
+		// long
+		// hold
 
 	    } else {
 
-		Protocol.enableButton(leftLower, 1, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left
-													     // middle
-													     // -
-													     // press
-		Protocol.enableButton(leftLower, 2, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left
-													  // middle
-													  // -
-													  // hold
-		Protocol.enableButton(leftLower, 3, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left
-													  // middle
-													  // -
-													  // long
-													  // hold
+		Protocol.getInstance(context).enableButton(leftLower, 1, VOLUME_DOWN, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// middle
+		// -
+		// press
+		Protocol.getInstance(context).enableButton(leftLower, 2, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// middle
+		// -
+		// hold
+		Protocol.getInstance(context).enableButton(leftLower, 3, PREVIOUS, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// middle
+		// -
+		// long
+		// hold
 
-		Protocol.enableButton(leftUpper, 1, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left
-													   // top
-													   // -
-													   // press
-		Protocol.enableButton(leftUpper, 2, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
-												      // top
-												      // -
-												      // hold
-		Protocol.enableButton(leftUpper, 3, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
-												      // top
-												      // -
-												      // long
-												      // hold
+		Protocol.getInstance(context).enableButton(leftUpper, 1, VOLUME_UP, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// top
+		// -
+		// press
+		Protocol.getInstance(context).enableButton(leftUpper, 2, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// top
+		// -
+		// hold
+		Protocol.getInstance(context).enableButton(leftUpper, 3, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // left
+		// top
+		// -
+		// long
+		// hold
 	    }
 	} else if (watchType == WatchType.ANALOG) {
-	    Protocol.enableButton(0, 1, TOGGLE, MetaWatchService.WatchBuffers.APPLICATION); // top
-											    // -
-											    // press
-	    Protocol.enableButton(0, 2, MENU, MetaWatchService.WatchBuffers.APPLICATION); // top
-											  // hold
-	    Protocol.enableButton(2, 1, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // bottom
-											  // -
-											  // press
+	    Protocol.getInstance(context).enableButton(0, 1, TOGGLE, MetaWatchService.WatchBuffers.APPLICATION); // top
+	    // -
+	    // press
+	    Protocol.getInstance(context).enableButton(0, 2, MENU, MetaWatchService.WatchBuffers.APPLICATION); // top
+	    // hold
+	    Protocol.getInstance(context).enableButton(2, 1, NEXT, MetaWatchService.WatchBuffers.APPLICATION); // bottom
+	    // -
+	    // press
 	}
     }
 
@@ -144,24 +144,24 @@ public class MediaPlayerApp extends ApplicationBase {
 	    Log.d(MetaWatchStatus.TAG, "Leaving media mode");
 
 	if (watchType == WatchType.DIGITAL) {
-	    Protocol.disableButton(1, 0, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.APPLICATION);
 
-	    Protocol.disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
 
 	    final int leftLower = getLeftLowerButtonCode();
 	    final int leftUpper = getLeftUpperButtonCode();
 
-	    Protocol.disableButton(leftLower, 0, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(leftLower, 2, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(leftLower, 3, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftLower, 0, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftLower, 2, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftLower, 3, MetaWatchService.WatchBuffers.APPLICATION);
 
-	    Protocol.disableButton(leftUpper, 0, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(leftUpper, 2, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(leftUpper, 3, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftUpper, 0, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftUpper, 2, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(leftUpper, 3, MetaWatchService.WatchBuffers.APPLICATION);
 	} else if (watchType == WatchType.ANALOG) {
-	    Protocol.disableButton(0, 1, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(0, 2, MetaWatchService.WatchBuffers.APPLICATION);
-	    Protocol.disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(0, 1, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(0, 2, MetaWatchService.WatchBuffers.APPLICATION);
+	    Protocol.getInstance(context).disableButton(2, 1, MetaWatchService.WatchBuffers.APPLICATION);
 	}
     }
 
