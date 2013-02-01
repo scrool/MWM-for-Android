@@ -112,7 +112,7 @@ public class MetaWatchService extends Service {
 
     private void setSilentMode(boolean enabled) {
 	silentMode = enabled;
-	Idle.updateIdle(MetaWatchService.this, true);
+	Idle.getInstance().updateIdle(MetaWatchService.this, true);
 	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this);
 	Editor editor = sharedPreferences.edit();
 	editor.putBoolean("SilentMode", silentMode);
@@ -272,11 +272,11 @@ public class MetaWatchService extends Service {
 	    }
 
 	    if (key.contains("Idle") || key.contains(".app_enabled")) {
-		Idle.reset(MetaWatchService.this);
+		Idle.getInstance().reset(MetaWatchService.this);
 	    }
 
 	    if (key.contains("Widget") || (key.equals("SilentMode")) || key.equals("ClockOnAppBuffers")) {
-		Idle.updateIdle(MetaWatchService.this, true);
+		Idle.getInstance().updateIdle(MetaWatchService.this, true);
 	    }
 
 	    if (key.equals("InvertLCD")) {
@@ -289,7 +289,7 @@ public class MetaWatchService extends Service {
 
 	    if (key.contains("Calendar")) {
 		Monitors.calendarChangedTimestamp = System.currentTimeMillis();
-		Idle.updateIdle(MetaWatchService.this, true);
+		Idle.getInstance().updateIdle(MetaWatchService.this, true);
 	    }
 	}
     };
@@ -576,6 +576,7 @@ public class MetaWatchService extends Service {
 	notifyClients();
 	mClients.clear();
 	Protocol.getInstance(this).destroy();
+	Idle.getInstance().destroy();
 	mIsRunning = false;
     }
 
@@ -954,7 +955,7 @@ public class MetaWatchService extends Service {
 		    // The watch switches back to idle mode (showing the initial
 		    // page) after 10 minutes
 		    // Activate the last used idle page in this case
-		    Idle.toIdle(MetaWatchService.this);
+		    Idle.getInstance().toIdle(MetaWatchService.this);
 		}
 	    }
 
@@ -974,8 +975,8 @@ public class MetaWatchService extends Service {
 			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; analog watch (gen1)");
 
 		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
-			Idle.toIdle(this);
-			Idle.updateIdle(this, true);
+			Idle.getInstance().toIdle(this);
+			Idle.getInstance().updateIdle(this, true);
 		    }
 
 		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1009,8 +1010,8 @@ public class MetaWatchService extends Service {
 		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION);
 
 		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
-			Idle.toIdle(this);
-			Idle.updateIdle(this, true);
+			Idle.getInstance().toIdle(this);
+			Idle.getInstance().updateIdle(this, true);
 		    }
 
 		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1033,7 +1034,7 @@ public class MetaWatchService extends Service {
 		    NotificationBuilder.createOtherNotification(MetaWatchService.this, null, "MetaWatch", getResources().getString(R.string.connection_connected), 1);
 		}
 
-		Idle.activateButtons(this);
+		Idle.getInstance().activateButtons(this);
 
 	    } else if (bytes[2] == eMessageType.ReadBatteryVoltageResponse.msg) {
 		boolean powerGood = bytes[4] > 0;
@@ -1131,23 +1132,23 @@ public class MetaWatchService extends Service {
 	    switch (watchState) {
 	    case WatchStates.IDLE: {
 
-		int idleAppButton = Idle.appButtonPressed(this, button);
+		int idleAppButton = Idle.getInstance().appButtonPressed(this, button);
 		if (idleAppButton == ApplicationBase.BUTTON_NOT_USED) {
 
 		    switch (button) {
 
 		    case Idle.LEFT_QUICK_BUTTON:
-			Idle.quickButtonAction(MetaWatchService.this, Preferences.quickButtonL);
+			Idle.getInstance().quickButtonAction(MetaWatchService.this, Preferences.quickButtonL);
 			break;
 
 		    case Idle.RIGHT_QUICK_BUTTON:
-			Idle.quickButtonAction(MetaWatchService.this, Preferences.quickButtonR);
+			Idle.getInstance().quickButtonAction(MetaWatchService.this, Preferences.quickButtonR);
 			break;
 
 		    case Idle.IDLE_NEXT_PAGE:
 			if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
-			    Idle.nextPage(this);
-			    Idle.updateIdle(this, true);
+			    Idle.getInstance().nextPage(this);
+			    Idle.getInstance().updateIdle(this, true);
 			}
 			break;
 
@@ -1160,22 +1161,22 @@ public class MetaWatchService extends Service {
 			long time = System.currentTimeMillis();
 
 			if (time - lastOledCrownPress < 1000 * 5) {
-			    Idle.nextPage(this);
-			    Idle.updateIdle(this, true);
+			    Idle.getInstance().nextPage(this);
+			    Idle.getInstance().updateIdle(this, true);
 			}
 
 			lastOledCrownPress = time;
-			Idle.sendOledIdle(this);
+			Idle.getInstance().sendOledIdle(this);
 			break;
 
 		    case Application.TOGGLE_APP:
-			Application.toggleApp(MetaWatchService.this, Idle.getCurrentApp());
+			Application.toggleApp(MetaWatchService.this, Idle.getInstance().getCurrentApp());
 			break;
 		    }
 		} else if (idleAppButton != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
-		    Idle.updateIdle(this, false);
+		    Idle.getInstance().updateIdle(this, false);
 		    if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
-			Idle.sendOledIdle(this);
+			Idle.getInstance().sendOledIdle(this);
 		}
 		break;
 	    }

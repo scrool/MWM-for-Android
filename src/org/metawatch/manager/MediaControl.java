@@ -110,7 +110,7 @@ public class MediaControl {
 	}
 
 	if (MetaWatchService.watchType == WatchType.ANALOG) {
-	    Idle.sendOledIdle(context);
+	    Idle.getInstance().sendOledIdle(context);
 	}
     }
 
@@ -200,7 +200,7 @@ public class MediaControl {
 	lastTrack = new TrackInfo(artist, album, track);
 	lastTimeUpdate = System.currentTimeMillis();
 
-	Idle.updateIdle(context, true);
+	Idle.getInstance().updateIdle(context, true);
 
 	int mediaPlayerState = AppManager.getAppState(MediaPlayerApp.APP_ID);
 	if (mediaPlayerState == ApplicationBase.ACTIVE_POPUP)
@@ -220,7 +220,7 @@ public class MediaControl {
 		    Protocol.getInstance(context).ledChange(true);
 	    } else if (MetaWatchService.watchType == WatchType.ANALOG) {
 		if (mediaPlayerState == ApplicationBase.ACTIVE_IDLE)
-		    Idle.sendOledIdle(context);
+		    Idle.getInstance().sendOledIdle(context);
 		// else if (mediaPlayerState == InternalApp.ACTIVE_STANDALONE)
 		// FIXME ...
 	    }
@@ -239,6 +239,6 @@ public class MediaControl {
 	lastTrack = new TrackInfo();
 	lastTimeUpdate = System.currentTimeMillis();
 
-	Idle.updateIdle(context, true);
+	Idle.getInstance().updateIdle(context, true);
     }
 }

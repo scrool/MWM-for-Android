@@ -152,7 +152,7 @@ public class WidgetManager {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Received widget " + widget.id + " successfully");
 
-	    Idle.updateIdle(context, false); // false as we don't want to
+	    Idle.getInstance().updateIdle(context, false); // false as we don't want to
 					     // trigger another UPDATE
 					     // broadcast
 
@@ -174,6 +174,6 @@ public class WidgetManager {
 	Toast toast = Toast.makeText(context, "Reset widget layouts", Toast.LENGTH_SHORT);
 	toast.show();
 
-	Idle.updateIdle(context, true);
+	Idle.getInstance().updateIdle(context, true);
     }
 }

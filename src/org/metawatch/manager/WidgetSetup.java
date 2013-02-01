@@ -310,9 +310,9 @@ public class WidgetSetup extends SherlockFragment {
 		adapter.notifyDataSetChanged();
 		storeWidgetLayout();
 		refreshPreview();
-		Idle.updateIdle(mActivity, true);
+		Idle.getInstance().updateIdle(mActivity, true);
 		if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-		    Idle.sendOledIdle(mActivity);
+		    Idle.getInstance().sendOledIdle(mActivity);
 		}
 
 	    }
@@ -322,14 +322,14 @@ public class WidgetSetup extends SherlockFragment {
     private void refreshPreview() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() start");
-	if (!Idle.isBusy())
-	    Idle.updateIdlePages(mActivity, true);
-	int pages = Idle.numPages();
+	if (!Idle.getInstance().isBusy())
+	    Idle.getInstance().updateIdlePages(mActivity, true);
+	int pages = Idle.getInstance().numPages();
 	if (mCurrentNumberOfPages > pages)
 	    mIdlePreviews.removeAllViews();
 	mCurrentNumberOfPages = pages;
 	for (int i = 0; i < pages; ++i) {
-	    Bitmap bmp = Idle.createIdle(mActivity, true, i);
+	    Bitmap bmp = Idle.getInstance().createIdle(mActivity, true, i);
 	    ;
 	    if (bmp != null) {
 		int backCol = Color.LTGRAY;
@@ -355,10 +355,10 @@ public class WidgetSetup extends SherlockFragment {
 			// @Override
 			public void onClick(View v) {
 			    Integer page = (Integer) v.getTag();
-			    Idle.toPage(mActivity, page);
-			    Idle.updateIdle(v.getContext(), true);
+			    Idle.getInstance().toPage(mActivity, page);
+			    Idle.getInstance().updateIdle(v.getContext(), true);
 			    if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
-				Idle.sendOledIdle(v.getContext());
+				Idle.getInstance().sendOledIdle(v.getContext());
 			    }
 			}
 		    });

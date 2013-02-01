@@ -188,7 +188,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 		if (!className.startsWith("com.fsck.k9")) {
 		    // User has switched away from k9, so refresh the read count
 		    Utils.refreshUnreadK9Count(this);
-		    Idle.updateIdle(this, true);
+		    Idle.getInstance().updateIdle(this, true);
 		}
 	    }
 

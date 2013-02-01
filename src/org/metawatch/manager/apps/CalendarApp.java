@@ -162,7 +162,7 @@ public class CalendarApp extends ApplicationBase {
 
 		    calendarEntries = Utils.readCalendar(context, startTime, endTime, false);
 
-		    Idle.updateIdle(context, false);
+		    Idle.getInstance().updateIdle(context, false);
 
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "CalendarApp.refresh() stop - " + (calendarEntries == null ? "0" : calendarEntries.size()) + " entries found");

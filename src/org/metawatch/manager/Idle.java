@@ -53,7 +53,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.preference.PreferenceManager;
-import org.metawatch.manager.Log;
 
 public class Idle {
 
@@ -65,10 +64,33 @@ public class Idle {
     final static byte TOGGLE_SILENT = 63;
     final static byte LEFT_QUICK_BUTTON = 64;
 
-    private static boolean busy = false;
-    private static Object busyObj = new Object();
+    private boolean busy = false;
+    private Object busyObj = new Object();
+    
+    static int currentPage = 0;
+    static boolean initialised = false;
 
-    public static boolean isBusy() {
+    Bitmap oledIdle = null;
+    
+    private ArrayList<IdlePage> idlePages = null;
+    private Map<String, WidgetData> widgetData = null;
+    
+    private static Idle mInstance = null;
+    
+    public static Idle getInstance() {
+	if (mInstance == null)
+	    mInstance = new Idle();
+	return mInstance;
+    }
+    
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
+    
+    private Idle(){}
+
+    public boolean isBusy() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.isBusy()");
 	synchronized (busyObj) {
@@ -78,7 +100,7 @@ public class Idle {
 	}
     }
 
-    private static void setBusy(boolean isBusy) {
+    private void setBusy(boolean isBusy) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.setBusy()");
 	synchronized (busyObj) {
@@ -100,7 +122,7 @@ public class Idle {
 	public int buttonPressed(Context context, int id);
     }
 
-    private static class WidgetPage implements IdlePage {
+    private class WidgetPage implements IdlePage {
 
 	private List<WidgetRow> rows;
 	private int pageIndex;
@@ -224,7 +246,7 @@ public class Idle {
 	}
     }
 
-    private static class AppPage implements IdlePage {
+    private class AppPage implements IdlePage {
 
 	private ApplicationBase app;
 
@@ -258,16 +280,11 @@ public class Idle {
 	}
     }
 
-    static int currentPage = 0;
-    static boolean initialised = false;
-
-    static Bitmap oledIdle = null;
-
-    public static void nextPage(final Context context) {
+    public void nextPage(final Context context) {
 	toPage(context, currentPage + 1);
     }
 
-    public static void toPage(final Context context, int page) {
+    public void toPage(final Context context, int page) {
 
 	if (idlePages != null && idlePages.size() > currentPage) {
 	    idlePages.get(currentPage).deactivate(context, MetaWatchService.watchType);
@@ -280,11 +297,11 @@ public class Idle {
 	}
     }
 
-    public static int numPages() {
+    public int numPages() {
 	return (idlePages == null || idlePages.size() == 0) ? 1 : idlePages.size();
     }
 
-    public static int getAppPage(String appId) {
+    public int getAppPage(String appId) {
 	if (idlePages != null) {
 	    for (int page = 0; page < idlePages.size(); page++) {
 		if (idlePages.get(page) instanceof AppPage && ((AppPage) idlePages.get(page)).app.getId().equals(appId)) {
@@ -297,7 +314,7 @@ public class Idle {
 	return -1;
     }
 
-    public static ApplicationBase getCurrentApp() {
+    public ApplicationBase getCurrentApp() {
 	if (idlePages != null && idlePages.get(currentPage) instanceof AppPage) {
 	    return ((AppPage) idlePages.get(currentPage)).app;
 	}
@@ -306,7 +323,7 @@ public class Idle {
 	return null;
     }
 
-    public static synchronized int addAppPage(final Context context, ApplicationBase app) {
+    public synchronized int addAppPage(final Context context, ApplicationBase app) {
 	int page = getAppPage(app.getId());
 
 	if (page == -1) {
@@ -323,7 +340,7 @@ public class Idle {
 	return page;
     }
 
-    public static synchronized void removeAppPage(final Context context, ApplicationBase app) {
+    public synchronized void removeAppPage(final Context context, ApplicationBase app) {
 	int page = getAppPage(app.getId());
 
 	if (page != -1) {
@@ -337,17 +354,14 @@ public class Idle {
 	}
     }
 
-    private static ArrayList<IdlePage> idlePages = null;
-    private static Map<String, WidgetData> widgetData = null;
-
-    public static void reset(Context context) {
+    public void reset(Context context) {
 	toPage(context, 0);
 	if (idlePages != null)
 	    idlePages.clear();
 	idlePages = null;
     }
 
-    public static void updateIdlePages(Context context, boolean refresh) {
+    public void updateIdlePages(Context context, boolean refresh) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 	try {
@@ -445,14 +459,14 @@ public class Idle {
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages end");
     }
 
-    static Bitmap createIdle(Context context) {
+    Bitmap createIdle(Context context) {
 	return createIdle(context, false, currentPage);
     }
 
     /*
      * Only this (central) method need to be synchronized, the one above calls this and will be blocked anyway.
      */
-    static synchronized Bitmap createIdle(Context context, boolean preview, int page) {
+    synchronized Bitmap createIdle(Context context, boolean preview, int page) {
 	final int width = (MetaWatchService.watchType == WatchType.DIGITAL) ? 96 : 80;
 	final int height = (MetaWatchService.watchType == WatchType.DIGITAL) ? 96 : 32;
 	Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
@@ -476,7 +490,7 @@ public class Idle {
 	return canvas;
     }
 
-    private static int getScreenMode(int watchType) {
+    private int getScreenMode(int watchType) {
 	int mode = MetaWatchService.WatchBuffers.IDLE;
 	if (idlePages != null && idlePages.size() > currentPage) {
 	    mode = idlePages.get(currentPage).screenMode(watchType);
@@ -484,7 +498,7 @@ public class Idle {
 	return mode;
     }
 
-    private static void sendLcdIdle(Context context, boolean refresh) {
+    private void sendLcdIdle(Context context, boolean refresh) {
 	if (MetaWatchService.watchState != MetaWatchService.WatchStates.IDLE) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
@@ -527,7 +541,7 @@ public class Idle {
 	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle end");
     }
 
-    public static void toIdle(Context context) {
+    public synchronized void toIdle(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.toIdle()");
 
@@ -579,10 +593,9 @@ public class Idle {
 	}
 
 	Protocol.getInstance(context).enableButton(1, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
-	Protocol.getInstance(context).enableButton(1, 3, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
     }
 
-    public static void updateIdle(final Context context, final boolean refresh) {
+    public void updateIdle(final Context context, final boolean refresh) {
 
 	if (MetaWatchService.watchType == MetaWatchService.WatchType.UNKNOWN) {
 	    if (Preferences.logging)
@@ -613,7 +626,7 @@ public class Idle {
 
     }
 
-    private static void updateOledIdle(Context context, boolean refresh) {
+    private void updateOledIdle(Context context, boolean refresh) {
 	if (isBusy())
 	    return;
 
@@ -627,7 +640,7 @@ public class Idle {
     }
 
     // Send oled widgets view on demand
-    public static void sendOledIdle(Context context) {
+    public void sendOledIdle(Context context) {
 	if (oledIdle == null) {
 	    updateOledIdle(context, true);
 	}
@@ -644,14 +657,14 @@ public class Idle {
 	Protocol.getInstance(context).oledChangeMode(mode);
     }
 
-    public static int appButtonPressed(Context context, int id) {
+    public int appButtonPressed(Context context, int id) {
 	if (idlePages != null && idlePages.size() > currentPage) {
 	    return idlePages.get(currentPage).buttonPressed(context, id);
 	}
 	return ApplicationBase.BUTTON_NOT_USED;
     }
 
-    public static void quickButtonAction(Context context, String actionId) {
+    public void quickButtonAction(Context context, String actionId) {
 
 	if (actionId.startsWith(AppManagerAction.appManagerPrefix)) {
 	    String appId = actionId.replace(AppManagerAction.appManagerPrefix, "");
@@ -676,7 +689,7 @@ public class Idle {
 	}
     }
 
-    public static void activateButtons(final Context context) {
+    public void activateButtons(final Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.activateButtons()");
 	if (idlePages != null && idlePages.size() > currentPage) {
@@ -684,7 +697,7 @@ public class Idle {
 	}
     }
 
-    public static void deactivateButtons(final Context context) {
+    public void deactivateButtons(final Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.deactivateButtons()");
 	if (idlePages != null && idlePages.size() > currentPage) {

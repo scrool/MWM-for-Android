@@ -336,7 +336,7 @@ public class Test extends SherlockPreferenceActivity {
 
 		// Protocol.stopProtocolSender();
 
-		Idle.sendOledIdle(context);
+		Idle.getInstance().sendOledIdle(context);
 
 		return true;
 	    }

@@ -57,8 +57,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -139,16 +137,16 @@ public class MetaWatchStatus extends SherlockFragment {
 	    }
 	});
 	toggleButton = (ToggleButton) mMainView.findViewById(R.id.toggleButton);
-	toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+	toggleButton.setOnClickListener(new OnClickListener() {
 	    @Override
-	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+	    public void onClick(View v) {
 		wiggleButton();
-		if (isChecked)
+		displayStatus();
+		if (!MetaWatchService.isRunning())
 		    startService();
 		else
 		    stopService();
 	    }
-
 	    private void wiggleButton() {
 		ObjectAnimator right = ObjectAnimator.ofFloat(toggleButton, "translationX", 0, 5);
 		right.setDuration(45);
@@ -166,7 +164,6 @@ public class MetaWatchStatus extends SherlockFragment {
 		set.playSequentially(right, left, centerHorizontal, up, down, centerVertical);
 		set.start();
 	    }
-
 	});
 	return mMainView;
     }
@@ -175,6 +172,7 @@ public class MetaWatchStatus extends SherlockFragment {
     public void onResume() {
 	super.onResume();
 	startService();
+	displayStatus();
     }
 
     @Override

@@ -180,7 +180,7 @@ public class GmailAPIMonitor implements GmailMonitor {
 	    }
 
 	    if (currentUnreadCount != lastUnreadCount) {
-		Idle.updateIdle(context, true);
+		Idle.getInstance().updateIdle(context, true);
 	    }
 
 	    lastUnreadCount = currentUnreadCount;

@@ -160,7 +160,7 @@ public class Call {
 	else if (MetaWatchService.WatchModes.APPLICATION == true)
 	    Application.toApp(context);
 	else if (MetaWatchService.WatchModes.IDLE == true)
-	    Idle.toIdle(context);
+	    Idle.getInstance().toIdle(context);
     }
 
 }

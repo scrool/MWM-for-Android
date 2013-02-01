@@ -290,7 +290,7 @@ public class Monitors {
 	public void onChange(boolean selfChange) {
 	    super.onChange(selfChange);
 	    // change in SMS/MMS database
-	    Idle.updateIdle(context, true);
+	    Idle.getInstance().updateIdle(context, true);
 	}
     }
 
@@ -309,7 +309,7 @@ public class Monitors {
 	    // change in call history database
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "call history change");
-	    Idle.updateIdle(context, true);
+	    Idle.getInstance().updateIdle(context, true);
 	}
     }
 
@@ -329,7 +329,7 @@ public class Monitors {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "calendar change");
 	    calendarChangedTimestamp = System.currentTimeMillis();
-	    Idle.updateIdle(context, true);
+	    Idle.getInstance().updateIdle(context, true);
 	}
     }
 
@@ -391,7 +391,7 @@ public class Monitors {
 		}
 		if (BatteryData.level != level) {
 		    BatteryData.level = level;
-		    Idle.updateIdle(context, true);
+		    Idle.getInstance().updateIdle(context, true);
 		}
 	    }
 	};

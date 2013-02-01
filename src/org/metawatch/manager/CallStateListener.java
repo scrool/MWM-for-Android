@@ -75,7 +75,7 @@ class CallStateListener extends PhoneStateListener {
 		    MediaControl.setSpeakerphone(context, Call.previousSpeakerphoneState);
 		}
 		if (Preferences.showActionsInCall) {
-		    Idle.toPage(context, 0);
+		    Idle.getInstance().toPage(context, 0);
 		}
 		if (Call.previousRingerMode != -1) {
 		    AudioManager as = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -108,7 +108,7 @@ class CallStateListener extends PhoneStateListener {
 	    if (messageWaiting) {
 		NotificationBuilder.createNewVoicemail(context);
 	    }
-	    Idle.updateIdle(context, true);
+	    Idle.getInstance().updateIdle(context, true);
 
 	}
     }

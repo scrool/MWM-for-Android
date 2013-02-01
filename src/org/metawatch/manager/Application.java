@@ -80,7 +80,7 @@ public class Application {
 	currentApp = null;
 
 	if (MetaWatchService.WatchModes.IDLE == true) {
-	    Idle.toIdle(context);
+	    Idle.getInstance().toIdle(context);
 	}
     }
 
@@ -163,7 +163,7 @@ public class Application {
 	MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
 
 	// Idle app pages uses the same button mode, so disable those buttons.
-	Idle.deactivateButtons(context);
+	Idle.getInstance().deactivateButtons(context);
 
 	int watchType = MetaWatchService.watchType;
 	if (currentApp != null) {
@@ -196,7 +196,7 @@ public class Application {
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "Application.toggleApp(): switching to popup.");
 
-		Idle.removeAppPage(context, app);
+		Idle.getInstance().removeAppPage(context, app);
 		app.open(context, true);
 		return;
 
@@ -204,8 +204,8 @@ public class Application {
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "Application.toggleApp(): switching to idle page.");
 
-		Idle.addAppPage(context, app);
-		Idle.toPage(context, 0);
+		Idle.getInstance().addAppPage(context, app);
+		Idle.getInstance().toPage(context, 0);
 		stopAppMode(context); // Goes to Idle if not in Notification.
 		return;
 	    }

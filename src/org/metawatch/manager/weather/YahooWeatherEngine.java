@@ -145,7 +145,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 		weatherData.error = false;
 		weatherData.errorString = "";
 
-		Idle.updateIdle(context, true);
+		Idle.getInstance().updateIdle(context, true);
 		MetaWatchService.sendNotifyClientsRequest(context);
 	    }
 

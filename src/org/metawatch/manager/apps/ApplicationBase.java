@@ -152,12 +152,12 @@ public abstract class ApplicationBase {
 	    return;
 	}
 
-	int page = Idle.getAppPage(getInfo().id);
+	int page = Idle.getInstance().getAppPage(getInfo().id);
 
 	// Open the existing Idle app page.
 	if (page != -1) {
-	    Idle.toPage(context, page);
-	    Idle.toIdle(context);
+	    Idle.getInstance().toPage(context, page);
+	    Idle.getInstance().toIdle(context);
 
 	    // Open new app.
 	} else {
@@ -173,9 +173,9 @@ public abstract class ApplicationBase {
 		}
 
 	    } else if (Preferences.appLaunchMode == AppLaunchMode.APP_PAGE) {
-		page = Idle.addAppPage(context, this);
-		Idle.toPage(context, page);
-		Idle.toIdle(context);
+		page = Idle.getInstance().addAppPage(context, this);
+		Idle.getInstance().toPage(context, page);
+		Idle.getInstance().toIdle(context);
 	    }
 	}
     }

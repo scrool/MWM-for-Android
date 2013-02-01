@@ -334,7 +334,7 @@ public class BitmapCache {
 		    Preferences.themeName = themeName;
 		    MetaWatchService.saveTheme(themeContainer, Preferences.themeName);
 
-		    Idle.updateIdle(themeContainer, true);
+		    Idle.getInstance().updateIdle(themeContainer, true);
 		} catch (MalformedURLException e) {
 		} catch (IOException e) {
 		} finally {

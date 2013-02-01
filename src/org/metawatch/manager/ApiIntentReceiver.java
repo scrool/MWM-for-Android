@@ -71,7 +71,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		    ((ExternalApp) app).setBuffer(bmp);
 
 		    if (app.appState == ApplicationBase.ACTIVE_IDLE)
-			Idle.updateIdle(context, true);
+			Idle.getInstance().updateIdle(context, true);
 		    else if (app.appState == ApplicationBase.ACTIVE_POPUP)
 			Application.updateAppMode(context);
 		}
@@ -99,14 +99,14 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 
 	    if (MetaWatchService.connectionState == ConnectionState.CONNECTED) {
 		if (action.equals("org.metawatch.manager.APPLICATION_START")) {
-		    int page = Idle.addAppPage(context, app);
-		    Idle.toPage(context, page);
+		    int page = Idle.getInstance().addAppPage(context, app);
+		    Idle.getInstance().toPage(context, page);
 		} else {
 		    // Auto open as a page, if it's enabled in preferences
 		    final String pageSetting = app.getInfo().getPageSettingName();
 		    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		    if (prefs.getBoolean(pageSetting, false)) {
-			Idle.addAppPage(context, app);
+			Idle.getInstance().addAppPage(context, app);
 		    }
 		}
 	    }
@@ -119,8 +119,8 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 
 	    ApplicationBase app = AppManager.getApp(id);
 	    if (app != null) {
-		Idle.removeAppPage(context, app);
-		Idle.updateIdle(context, true);
+		Idle.getInstance().removeAppPage(context, app);
+		Idle.getInstance().updateIdle(context, true);
 	    }
 
 	    return;

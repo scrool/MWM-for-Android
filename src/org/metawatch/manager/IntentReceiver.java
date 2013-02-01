@@ -123,7 +123,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Cached Gmail unread count for account '" + recipient + "' is " + Monitors.getGmailUnreadCount(recipient));
 
-		    Idle.updateIdle(context, true);
+		    Idle.getInstance().updateIdle(context, true);
 
 		    return;
 		}
@@ -200,7 +200,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		Call.inCall = true;
 		if (intent.hasExtra("android.intent.extra.PHONE_NUMBER"))
 		    Call.phoneNumber = intent.getStringExtra("android.intent.extra.PHONE_NUMBER");
-		Idle.updateIdle(context, true);
+		Idle.getInstance().updateIdle(context, true);
 
 	    } else if (action.equals("com.fsck.k9.intent.action.EMAIL_RECEIVED")) {
 
@@ -213,7 +213,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		    NotificationBuilder.createK9(context, sender, subject, account + ":" + folder);
 		}
 		Utils.refreshUnreadK9Count(context);
-		Idle.updateIdle(context, true);
+		Idle.getInstance().updateIdle(context, true);
 
 		return;
 	    } else if (action.equals("windroid.SMART_DEVICE_UPDATE_EMAILS")) {
@@ -235,7 +235,7 @@ public class IntentReceiver extends BroadcastReceiver {
 
 		if (bundle.containsKey("windroid.extra.SMARTWATCH_COUNT")) {
 		    Monitors.TouchDownData.unreadMailCount = bundle.getInt("windroid.extra.SMARTWATCH_COUNT");
-		    Idle.updateIdle(context, true);
+		    Idle.getInstance().updateIdle(context, true);
 		}
 
 		return;
@@ -290,7 +290,7 @@ public class IntentReceiver extends BroadcastReceiver {
 	    else if (intent.getAction().equals("org.metawatch.manager.UPDATE_CALENDAR") || intent.getAction().equals("org.metawatch.manager.UPDATE_APPSCREEN_CLOCK")) {
 
 		if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
-		    Idle.updateIdle(context, true);
+		    Idle.getInstance().updateIdle(context, true);
 		}
 
 	    }

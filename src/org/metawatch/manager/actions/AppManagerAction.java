@@ -42,7 +42,7 @@ public class AppManagerAction extends ContainerAction {
 		}
 
 		private boolean isRunning() {
-		    return Idle.getAppPage(a.id) != -1;
+		    return Idle.getInstance().getAppPage(a.id) != -1;
 		}
 
 		public String bulletIcon() {
@@ -60,7 +60,7 @@ public class AppManagerAction extends ContainerAction {
 
 		public int performSecondary(Context context) {
 		    if (isRunning()) {
-			Idle.removeAppPage(context, AppManager.getApp(a.id));
+			Idle.getInstance().removeAppPage(context, AppManager.getApp(a.id));
 			return ApplicationBase.BUTTON_USED;
 		    }
 

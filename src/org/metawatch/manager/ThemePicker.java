@@ -206,6 +206,6 @@ public class ThemePicker extends SherlockFragment implements OnItemClickListener
 	getActivity().setResult(Activity.RESULT_OK, result);
 
 	Toast.makeText(getActivity(), R.string.theme_applied, Toast.LENGTH_SHORT).show();
-	Idle.updateIdle(getActivity(), true);
+	Idle.getInstance().updateIdle(getActivity(), true);
     }
 }
