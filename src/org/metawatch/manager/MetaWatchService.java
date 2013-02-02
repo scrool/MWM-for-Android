@@ -654,6 +654,8 @@ public class MetaWatchService extends Service {
 	    // Protocol.setTimeDateFormat(this);
 
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
+	    
+	    Protocol.getInstance(context).setTimeDateFormat(context);
 
 	    Notification.startNotificationSender(this);
 
