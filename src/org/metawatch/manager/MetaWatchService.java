@@ -119,7 +119,7 @@ public class MetaWatchService extends Service {
 	editor.commit();
     }
     
-    public static void sendNotifyClientsRequest(Context context) {
+    public static synchronized void sendNotifyClientsRequest(Context context) {
 	Intent intent = new Intent(context, MetaWatchService.class);
 	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
 	context.startService(intent);
@@ -520,7 +520,7 @@ public class MetaWatchService extends Service {
     }
 
     @Override
-    public synchronized int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
 	if (intent != null) {
 	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
 	    case SILENT_MODE_ENABLE:
