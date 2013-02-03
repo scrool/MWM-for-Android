@@ -891,7 +891,7 @@ public class MetaWatchService extends Service {
 	return result;
     }
 
-    void start() {
+    private void start() {
 
 	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
 	watchReceiverThread.start();
@@ -920,7 +920,7 @@ public class MetaWatchService extends Service {
 
     }
 
-    void readFromDevice() {
+    private void readFromDevice() {
 
 	if (MetaWatchService.fakeWatch) {
 	    try {
@@ -931,11 +931,7 @@ public class MetaWatchService extends Service {
 	}
 
 	try {
-	    if (inputStream.available() > 0) {
-		wakeLock.acquire();
-	    } else {
-		return;
-	    }
+	    wakeLock.acquire();
 	    
 	    byte[] bytes = new byte[256];
 	    if (Preferences.logging)
@@ -1149,7 +1145,7 @@ public class MetaWatchService extends Service {
 	}
     }
 
-    void broadcastConnection(boolean connected) {
+    private void broadcastConnection(boolean connected) {
 	if (connected != lastConnectionState) {
 	    lastConnectionState = connected;
 	    Intent intent = new Intent("org.metawatch.manager.CONNECTION_CHANGE");
@@ -1164,7 +1160,7 @@ public class MetaWatchService extends Service {
 
     static long lastOledCrownPress = 0;
 
-    void pressedButton(int button) {
+    private void pressedButton(int button) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "button code: " + Integer.toString(button));
 
