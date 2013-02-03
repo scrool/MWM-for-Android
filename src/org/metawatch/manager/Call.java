@@ -75,18 +75,18 @@ public class Call {
 	    int top = 0;
 	    int centre = 48;
 
-//	    Bitmap contactImage = Utils.getContactPhotoFromNumber(context, number);
-//	    if (contactImage != null) {
-//		int iconSize = 70;
-//		contactImage = Utils.resize(contactImage, iconSize, iconSize);
-//		contactImage = Utils.ditherTo1bit(contactImage, Preferences.invertLCD);
-//		canvas.drawBitmap(contactImage, (96 - iconSize) / 2, 0, null);
-//
-//		top = iconSize;
-//		centre = (96 + iconSize) / 2;
-//	    } else {
+	    Bitmap contactImage = Utils.getContactPhotoFromNumber(context, number);
+	    if (contactImage != null) {
+		int iconSize = 70;
+		contactImage = Utils.resize(contactImage, iconSize, iconSize);
+		contactImage = Utils.ditherTo1bit(contactImage, Preferences.invertLCD);
+		canvas.drawBitmap(contactImage, (96 - iconSize) / 2, 0, null);
+
+		top = iconSize;
+		centre = (96 + iconSize) / 2;
+	    } else {
 		canvas.drawBitmap(Utils.getBitmap(context, "phone.bmp"), 0, 0, null);
-//	    }
+	    }
 
 	    String displayText;
 	    if (name.equals(number))

@@ -38,6 +38,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.actions.ActionManager;
@@ -77,6 +79,7 @@ public class MetaWatchService extends Service {
     private InputStream inputStream;
     private OutputStream outputStream;
     private ServiceThread serviceThread;
+    private Executor mExecutor = Executors.newSingleThreadExecutor();
 
     private PowerManager powerManager;
 
@@ -454,11 +457,13 @@ public class MetaWatchService extends Service {
 	case ConnectionState.CONNECTED:
 	    builder.setContentText(getResources().getString(R.string.connection_connected));
 	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.connected));
+	    builder.setProgress(100, 100, false);
 	    broadcastConnection(true);
 	    break;
 	default:
 	    builder.setContentText(getResources().getString(R.string.connection_disconnected));
 	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
+	    builder.setProgress(100, 50, false);
 	    broadcastConnection(false);
 	    break;
 	}
@@ -520,7 +525,7 @@ public class MetaWatchService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(final Intent intent, int flags, int startId) {
 	if (intent != null) {
 	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
 	    case SILENT_MODE_ENABLE:
@@ -533,14 +538,19 @@ public class MetaWatchService extends Service {
 		setSilentMode(!silentMode);
 		break;
 	    case SEND_BYTE_ARRAY:
-		try {
-		    outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
-		    outputStream.flush();
-		} catch (Exception e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		}
-		    break;
+		mExecutor.execute(new Runnable() {
+		    @Override
+		    public void run() {
+			try {
+			    outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
+			    outputStream.flush();
+			} catch (Exception e) {
+			    // TODO Auto-generated catch block
+			    e.printStackTrace();
+			}
+		    }
+		});
+		break;
 	    case NOTIFY_CLIENTS:
 		notifyClients();
 		break;
