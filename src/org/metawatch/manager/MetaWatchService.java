@@ -124,16 +124,20 @@ public class MetaWatchService extends Service {
     }
     
     public static void sendNotifyClientsRequest(Context context) {
-	Intent intent = new Intent(context, MetaWatchService.class);
-	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
-	context.startService(intent);
+	if (mIsRunning) {
+	    Intent intent = new Intent(context, MetaWatchService.class);
+	    intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
+	    context.startService(intent);
+	}
     }
     
     public static void sentBytes(Context context, byte[] bytes) {
-	Intent intent = new Intent(context, MetaWatchService.class);
-	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.SEND_BYTE_ARRAY);
-	intent.putExtra(MetaWatchService.BYTE_ARRAY, bytes);
-	context.startService(intent);
+	if (mIsRunning) {
+	    Intent intent = new Intent(context, MetaWatchService.class);
+	    intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.SEND_BYTE_ARRAY);
+	    intent.putExtra(MetaWatchService.BYTE_ARRAY, bytes);
+	    context.startService(intent);
+	}
     }
 
     final static class ConnectionState {
