@@ -42,7 +42,6 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchBuffers;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -54,7 +53,6 @@ import android.preference.PreferenceManager;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
-import org.metawatch.manager.Log;
 
 public class Protocol {
 
@@ -304,10 +302,7 @@ public class Protocol {
 		Log.d(MetaWatchStatus.TAG, str);
 	}
 
-	Intent intent = new Intent(mContext, MetaWatchService.class);
-	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.SEND_BYTE_ARRAY);
-	intent.putExtra(MetaWatchService.BYTE_ARRAY, byteArrayOutputStream.toByteArray());
-	mContext.startService(intent);
+	MetaWatchService.sentBytes(mContext, byteArrayOutputStream.toByteArray());
 	sentPackets++;
 	if (sentPackets < 0)
 	    sentPackets = 1;

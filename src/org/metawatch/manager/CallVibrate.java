@@ -29,7 +29,6 @@
 package org.metawatch.manager;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
-import org.metawatch.manager.MetaWatchService.WatchType;
 
 import android.content.Context;
 
@@ -47,10 +46,10 @@ public class CallVibrate implements Runnable {
 	    Protocol.getInstance(mContext).vibrate(1000, 1000, 1);
 	    if (Preferences.notifyLight)
 		Protocol.getInstance(mContext).ledChange(true);
-	    if (MetaWatchService.watchType == WatchType.DIGITAL)
-		Protocol.getInstance(mContext).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
-	    else
-		Protocol.getInstance(mContext).updateOledsNotification();
+//	    if (MetaWatchService.watchType == WatchType.DIGITAL)
+//		Protocol.getInstance(mContext).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
+//	    else
+//		Protocol.getInstance(mContext).updateOledsNotification();
 
 	    try {
 		Thread.sleep(2000);

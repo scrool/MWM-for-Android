@@ -78,8 +78,8 @@ public class MetaWatchService extends Service {
     private BluetoothSocket bluetoothSocket;
     private InputStream inputStream;
     private OutputStream outputStream;
-    private ServiceThread serviceThread;
-    private Executor mExecutor = Executors.newSingleThreadExecutor();
+    private WatchReceiverThread watchReceiverThread;
+    private Executor watchTransmitThread = Executors.newSingleThreadExecutor();
 
     private PowerManager powerManager;
 
@@ -125,6 +125,13 @@ public class MetaWatchService extends Service {
     public static void sendNotifyClientsRequest(Context context) {
 	Intent intent = new Intent(context, MetaWatchService.class);
 	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
+	context.startService(intent);
+    }
+    
+    public static void sentBytes(Context context, byte[] bytes) {
+	Intent intent = new Intent(context, MetaWatchService.class);
+	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.SEND_BYTE_ARRAY);
+	intent.putExtra(MetaWatchService.BYTE_ARRAY, bytes);
 	context.startService(intent);
     }
 
@@ -525,7 +532,7 @@ public class MetaWatchService extends Service {
     }
 
     @Override
-    public int onStartCommand(final Intent intent, int flags, int startId) {
+    public synchronized int onStartCommand(final Intent intent, int flags, int startId) {
 	if (intent != null) {
 	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
 	    case SILENT_MODE_ENABLE:
@@ -538,7 +545,7 @@ public class MetaWatchService extends Service {
 		setSilentMode(!silentMode);
 		break;
 	    case SEND_BYTE_ARRAY:
-		mExecutor.execute(new Runnable() {
+		watchTransmitThread.execute(new Runnable() {
 		    @Override
 		    public void run() {
 			try {
@@ -552,7 +559,12 @@ public class MetaWatchService extends Service {
 		});
 		break;
 	    case NOTIFY_CLIENTS:
-		notifyClients();
+		watchTransmitThread.execute(new Runnable() {
+		    @Override
+		    public void run() {
+			notifyClients();
+		    }
+		});
 		break;
 	    }
 	}
@@ -574,7 +586,7 @@ public class MetaWatchService extends Service {
     public void onDestroy() {
 	disconnectExit();
 	super.onDestroy();
-	serviceThread.quit();
+	watchReceiverThread.quit();
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onDestroy()");
@@ -726,7 +738,6 @@ public class MetaWatchService extends Service {
 		super.handleMessage(msg);
 	    }
 	}
-
     };
 
     /**
@@ -735,7 +746,7 @@ public class MetaWatchService extends Service {
     final Messenger mMessenger = new Messenger(messageHandler);
 
     private void notifyClients() {
-	synchronized (mClients) {
+	if (mClients.size() > 0) {
 	    for (int i = mClients.size() - 1; i >= 0; i--) {
 		try {
 		    mClients.get(i).send(Message.obtain(null, Msg.UPDATE_STATUS, 0, 0));
@@ -779,11 +790,11 @@ public class MetaWatchService extends Service {
 	disconnect();
     }
 
-    private class ServiceThread extends Thread {
+    private class WatchReceiverThread extends Thread {
 	private Handler handler;
 	private Looper looper;
 
-	public ServiceThread(String name) {
+	public WatchReceiverThread(String name) {
 	    super(name);
 	}
 
@@ -866,8 +877,8 @@ public class MetaWatchService extends Service {
 
     void start() {
 
-	serviceThread = new ServiceThread("MetaWatch Service Thread");
-	serviceThread.start();
+	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
+	watchReceiverThread.start();
 
 	/* DEBUG */
 	String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(this).getString("collectWatchVoltage", "0");
