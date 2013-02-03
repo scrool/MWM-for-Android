@@ -82,6 +82,7 @@ public class MetaWatchService extends Service {
     private Executor watchTransmitThread = Executors.newSingleThreadExecutor();
 
     private PowerManager powerManager;
+    public static PowerManager.WakeLock wakeLock;
 
     public static volatile int connectionState;
     public static int watchType = WatchType.UNKNOWN;
@@ -521,6 +522,7 @@ public class MetaWatchService extends Service {
 	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
 
 	Monitors.start(this/* , telephonyManager */);
 
@@ -534,38 +536,44 @@ public class MetaWatchService extends Service {
     @Override
     public synchronized int onStartCommand(final Intent intent, int flags, int startId) {
 	if (intent != null) {
-	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
-	    case SILENT_MODE_ENABLE:
-		setSilentMode(false);
-		break;
-	    case SILENT_MODE_DISABLE:
-		setSilentMode(false);
-		break;
-	    case INVERT_SILENT_MODE:
-		setSilentMode(!silentMode);
-		break;
-	    case SEND_BYTE_ARRAY:
-		watchTransmitThread.execute(new Runnable() {
-		    @Override
-		    public void run() {
-			try {
-			    outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
-			    outputStream.flush();
-			} catch (Exception e) {
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
+	    try {
+		wakeLock.acquire();
+		switch (intent.getIntExtra(COMMAND_KEY, 0)) {
+		case SILENT_MODE_ENABLE:
+		    setSilentMode(false);
+		    break;
+		case SILENT_MODE_DISABLE:
+		    setSilentMode(false);
+		    break;
+		case INVERT_SILENT_MODE:
+		    setSilentMode(!silentMode);
+		    break;
+		case SEND_BYTE_ARRAY:
+		    watchTransmitThread.execute(new Runnable() {
+			@Override
+			public void run() {
+			    try {
+				outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
+				outputStream.flush();
+			    } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			    }
 			}
-		    }
-		});
-		break;
-	    case NOTIFY_CLIENTS:
-		watchTransmitThread.execute(new Runnable() {
-		    @Override
-		    public void run() {
-			notifyClients();
-		    }
-		});
-		break;
+		    });
+		    break;
+		case NOTIFY_CLIENTS:
+		    watchTransmitThread.execute(new Runnable() {
+			@Override
+			public void run() {
+			    notifyClients();
+			}
+		    });
+		    break;
+		}
+	    } finally {
+		if (wakeLock != null && wakeLock.isHeld())
+		    wakeLock.release();
 	    }
 	}
 
@@ -632,6 +640,8 @@ public class MetaWatchService extends Service {
 		    return;
 		}
 
+		wakeLock.acquire();
+		
 		BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(Preferences.watchMacAddress);
 
 		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
@@ -703,6 +713,8 @@ public class MetaWatchService extends Service {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, e.toString());
 	} finally {
+	    if(wakeLock != null && wakeLock.isHeld()) 
+		wakeLock.release();
 	}
 
 	return;
@@ -915,6 +927,12 @@ public class MetaWatchService extends Service {
 	}
 
 	try {
+	    if (inputStream.available() > 0) {
+		wakeLock.acquire();
+	    } else {
+		return;
+	    }
+	    
 	    byte[] bytes = new byte[256];
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "before blocking read");
@@ -1110,6 +1128,8 @@ public class MetaWatchService extends Service {
 		Log.d(MetaWatchStatus.TAG, e.toString());
 	    resetConnection();
 	} finally {
+	    if(wakeLock != null && wakeLock.isHeld())
+		wakeLock.release();
 	}
     }
 
