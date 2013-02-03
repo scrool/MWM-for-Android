@@ -28,6 +28,7 @@
 
 package org.metawatch.manager;
 
+import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Notification.VibratePattern;
 

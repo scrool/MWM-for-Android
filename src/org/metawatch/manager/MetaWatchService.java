@@ -119,7 +119,7 @@ public class MetaWatchService extends Service {
 	editor.commit();
     }
     
-    public static synchronized void sendNotifyClientsRequest(Context context) {
+    public static void sendNotifyClientsRequest(Context context) {
 	Intent intent = new Intent(context, MetaWatchService.class);
 	intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
 	context.startService(intent);
