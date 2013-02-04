@@ -446,7 +446,7 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("discover_apps").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference preference) {
-		AppManager.sendDiscoveryBroadcast(context);
+		AppManager.getInstance(context).sendDiscoveryBroadcast(context);
 		return true;
 	    }
 	});

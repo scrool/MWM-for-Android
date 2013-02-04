@@ -23,18 +23,35 @@ import org.metawatch.manager.Log;
 import android.widget.Toast;
 
 public class WidgetManager {
-    static List<InternalWidget> widgets = new ArrayList<InternalWidget>();
-    static Map<String, WidgetData> dataCache;
-    static Object lock = new Object();
+    List<InternalWidget> widgets = new ArrayList<InternalWidget>();
+    Map<String, WidgetData> dataCache;
+    Object lock = new Object();
 
-    static long lastWidgetBroadcast = 0;
+    long lastWidgetBroadcast = 0;
 
-    public static String defaultWidgetsDigital = "weather_96_32|missedCalls_24_32,unreadSms_24_32,unreadGmail_24_32";
-    public static String defaultWidgetsAnalog = "weather_80_16|missedCalls_16_16,unreadSms_16_16,unreadGmail_16_16";
+    public String defaultWidgetsDigital = "weather_96_32|missedCalls_24_32,unreadSms_24_32,unreadGmail_24_32";
+    public String defaultWidgetsAnalog = "weather_80_16|missedCalls_16_16,unreadSms_16_16,unreadGmail_16_16";
 
-    private final static int TIME_ONE_MINUTE = 60 * 1000;
+    private final int TIME_ONE_MINUTE = 60 * 1000;
+    
+    private static WidgetManager mInstance;
+    
+    private WidgetManager(Context context) {
+	initWidgets(context, null);
+    }
+    
+    public static WidgetManager getInstance(Context context) {
+	if (mInstance == null)
+	    mInstance = new WidgetManager(context);
+	return mInstance;
+    }
+    
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
 
-    public static void initWidgets(Context context, ArrayList<CharSequence> widgetsDesired) {
+    public void initWidgets(Context context, ArrayList<CharSequence> widgetsDesired) {
 
 	if (widgets.size() == 0) {
 	    widgets.add(new MissedCallsWidget());
@@ -60,7 +77,7 @@ public class WidgetManager {
 	refreshWidgets(context, null);
     }
 
-    public static Map<String, WidgetData> refreshWidgets(Context context, ArrayList<CharSequence> widgetsDesired) {
+    public Map<String, WidgetData> refreshWidgets(Context context, ArrayList<CharSequence> widgetsDesired) {
 	synchronized (lock) {
 
 	    if (dataCache == null)
@@ -92,14 +109,14 @@ public class WidgetManager {
 	}
     }
 
-    public static Map<String, WidgetData> getCachedWidgets(Context context, ArrayList<CharSequence> widgetsDesired) {
+    public Map<String, WidgetData> getCachedWidgets(Context context, ArrayList<CharSequence> widgetsDesired) {
 	if (dataCache == null)
 	    return refreshWidgets(context, widgetsDesired);
 
 	return dataCache;
     }
 
-    public static List<WidgetRow> getDesiredWidgetsFromPrefs(Context context) {
+    public List<WidgetRow> getDesiredWidgetsFromPrefs(Context context) {
 
 	String[] rows = MetaWatchService.getWidgets(context).split("\\|");
 
@@ -117,7 +134,7 @@ public class WidgetManager {
 	return result;
     }
 
-    public static void getFromIntent(Context context, Intent intent) {
+    public void getFromIntent(Context context, Intent intent) {
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "WidgetManager.getFromIntent()");
@@ -159,15 +176,15 @@ public class WidgetManager {
 	}
     }
 
-    public static void resetWidgetsToDefaults(Context context) {
+    public void resetWidgetsToDefaults(Context context) {
 
 	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 	Editor editor = sharedPreferences.edit();
 
 	if (MetaWatchService.watchType == WatchType.ANALOG) {
-	    editor.putString("widgetsAnalog", WidgetManager.defaultWidgetsAnalog);
+	    editor.putString("widgetsAnalog", defaultWidgetsAnalog);
 	} else {
-	    editor.putString("widgets", WidgetManager.defaultWidgetsDigital);
+	    editor.putString("widgets", defaultWidgetsDigital);
 	}
 	editor.commit();
 

@@ -150,7 +150,7 @@ public class ThemePicker extends SherlockFragment implements OnItemClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 	View view = inflater.inflate(R.layout.theme_picker, null);
 	themeList = new ArrayList<ThemeDescription>();
-	addTheme(BitmapCache.getInternalTheme(getActivity()));
+	addTheme(BitmapCache.getInstance().getInternalTheme(getActivity()));
 	File searchDir = Utils.getExternalFilesDir(getActivity(), "Themes");
 	if (searchDir != null) {
 	    File[] themeFiles = searchDir.listFiles();
@@ -158,7 +158,7 @@ public class ThemePicker extends SherlockFragment implements OnItemClickListener
 		String themeName = file.getName().replace(".zip", "");
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "Found theme " + themeName);
-		addTheme(BitmapCache.loadTheme(getActivity(), themeName));
+		addTheme(BitmapCache.getInstance().loadTheme(getActivity(), themeName));
 	    }
 	}
 

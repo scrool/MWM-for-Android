@@ -34,7 +34,6 @@ import java.io.InputStream;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
-import org.metawatch.manager.apps.AppManager;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -99,7 +98,6 @@ public class MetaWatchStatus extends SherlockFragment {
 	mStatisticsDialog = builder.create();
 	configureBugSense();
 	MetaWatchService.loadPreferences(context);
-	AppManager.initApps(context);
 
 	startupTime = System.currentTimeMillis();
 

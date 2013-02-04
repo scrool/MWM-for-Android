@@ -217,7 +217,7 @@ public class MediaControl {
 
 	Idle.getInstance().updateIdle(context, true);
 
-	int mediaPlayerState = AppManager.getAppState(MediaPlayerApp.APP_ID);
+	int mediaPlayerState = AppManager.getInstance(context).getAppState(MediaPlayerApp.APP_ID);
 	if (mediaPlayerState == ApplicationBase.ACTIVE_POPUP)
 	    Application.updateAppMode(context);
 

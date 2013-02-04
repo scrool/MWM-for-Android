@@ -319,7 +319,7 @@ public class NotificationBuilder {
 
     static Bitmap smartLines(Context context, Bitmap icon, String header, String[] lines, FontCache.FontSize size) {
 
-	Properties props = BitmapCache.getProperties(context, "notification.xml");
+	Properties props = BitmapCache.getInstance().getProperties(context, "notification.xml");
 
 	final int textTop = Integer.parseInt(props.getProperty("textTop", "24"));
 	final int textLeft = Integer.parseInt(props.getProperty("textLeft", "3"));
@@ -388,7 +388,7 @@ public class NotificationBuilder {
 
     static Bitmap[] smartNotify(Context context, Bitmap icon, String header, String body) {
 
-	Properties props = BitmapCache.getProperties(context, "notification_sticky.xml");
+	Properties props = BitmapCache.getInstance().getProperties(context, "notification_sticky.xml");
 
 	final int textTop = Integer.parseInt(props.getProperty("textTop", "24"));
 	final int textLeft = Integer.parseInt(props.getProperty("textLeft", "3"));

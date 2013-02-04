@@ -88,7 +88,7 @@ class CallStateListener extends PhoneStateListener {
 	    break;
 	case TelephonyManager.CALL_STATE_OFFHOOK:
 	    if (Preferences.showActionsInCall) {
-		ActionManager.displayCallActions(context);
+		ActionManager.getInstance(context).displayCallActions(context);
 	    } else {
 		Call.endRinging(context);
 	    }

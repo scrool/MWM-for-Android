@@ -43,6 +43,7 @@ import java.util.concurrent.Executors;
 
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.actions.ActionManager;
+import org.metawatch.manager.apps.AppManager;
 import org.metawatch.manager.apps.ApplicationBase;
 import org.metawatch.manager.widgets.WidgetManager;
 
@@ -413,9 +414,9 @@ public class MetaWatchService extends Service {
 	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
 	if (watchType == WatchType.DIGITAL) {
-	    return sharedPreferences.getString("widgets", WidgetManager.defaultWidgetsDigital);
+	    return sharedPreferences.getString("widgets", WidgetManager.getInstance(context).defaultWidgetsDigital);
 	} else if (watchType == WatchType.ANALOG) {
-	    return sharedPreferences.getString("widgetsAnalog", WidgetManager.defaultWidgetsAnalog);
+	    return sharedPreferences.getString("widgetsAnalog", WidgetManager.getInstance(context).defaultWidgetsAnalog);
 	}
 
 	return "";
@@ -529,7 +530,7 @@ public class MetaWatchService extends Service {
 	Monitors.getInstance().start(this/* , telephonyManager */);
 
 	// Initialise theme
-	BitmapCache.getBitmap(MetaWatchService.this, "");
+	BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
 
 	start();
 
@@ -550,6 +551,9 @@ public class MetaWatchService extends Service {
 		case INVERT_SILENT_MODE:
 		    setSilentMode(!silentMode);
 		    break;
+		case NOTIFY_CLIENTS:
+		    notifyClients();
+		    break;
 		case SEND_BYTE_ARRAY:
 		    watchTransmitThread.execute(new Runnable() {
 			@Override
@@ -561,14 +565,6 @@ public class MetaWatchService extends Service {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			    }
-			}
-		    });
-		    break;
-		case NOTIFY_CLIENTS:
-		    watchTransmitThread.execute(new Runnable() {
-			@Override
-			public void run() {
-			    notifyClients();
 			}
 		    });
 		    break;
@@ -612,6 +608,11 @@ public class MetaWatchService extends Service {
 	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
 	Monitors.getInstance().stop(this);
 	Monitors.getInstance().destroy();
+	BitmapCache.getInstance().destroy();
+	
+	AppManager.getInstance(this).destroy();
+	ActionManager.getInstance(this).destroy();
+	WidgetManager.getInstance(this).destroy();
 	
 	notifyClients();
 	mClients.clear();
@@ -895,6 +896,7 @@ public class MetaWatchService extends Service {
     private void start() {
 
 	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
+	watchReceiverThread.setPriority(7);
 	watchReceiverThread.start();
 
 	/* DEBUG */
@@ -1228,7 +1230,7 @@ public class MetaWatchService extends Service {
 		    MediaControl.getInstance().ignoreCall(this);
 		    break;
 		case Call.CALL_MENU:
-		    ActionManager.displayCallActions(this);
+		    ActionManager.getInstance(this).displayCallActions(this);
 		    break;
 		default:
 		    Notification.getInstance().buttonPressed(button);

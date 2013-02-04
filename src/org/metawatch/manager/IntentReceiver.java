@@ -128,7 +128,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		    return;
 		}
 	    } else if (action.equals("android.intent.action.PACKAGE_ADDED") || action.equals("android.intent.action.PACKAGE_CHANGED")) {
-		AppManager.sendDiscoveryBroadcast(context);
+		AppManager.getInstance(context).sendDiscoveryBroadcast(context);
 	    } else if (action.equals("android.provider.Telephony.SMS_RECEIVED")) {
 		if (!MetaWatchService.Preferences.notifySMS)
 		    return;

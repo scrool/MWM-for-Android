@@ -112,7 +112,7 @@ public class Settings extends SherlockPreferenceActivity {
 	Preference resetWidgets = findPreference("ResetWidgets");
 	resetWidgets.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		WidgetManager.resetWidgetsToDefaults(Settings.this);
+		WidgetManager.getInstance(Settings.this).resetWidgetsToDefaults(Settings.this);
 		return false;
 	    }
 	});
@@ -178,7 +178,7 @@ public class Settings extends SherlockPreferenceActivity {
 
 	appGroup.removeAll();
 
-	AppData[] data = AppManager.getAppInfos();
+	AppData[] data = AppManager.getInstance(this).getAppInfos();
 	for (AppData appEntry : data) {
 
 	    if (Preferences.logging)
@@ -220,7 +220,7 @@ public class Settings extends SherlockPreferenceActivity {
     }
 
     private void setQuickButtonPreferences() {
-	List<Action> actions = ActionManager.getBindableActions(this);
+	List<Action> actions = ActionManager.getInstance(this).getBindableActions(this);
 
 	final int items = actions.size();
 

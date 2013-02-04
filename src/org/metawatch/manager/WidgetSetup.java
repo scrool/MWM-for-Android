@@ -62,7 +62,7 @@ public class WidgetSetup extends SherlockFragment {
 
 	public void init(Context context) {
 
-	    widgetMap = WidgetManager.getCachedWidgets(context, null);
+	    widgetMap = WidgetManager.getInstance(context).getCachedWidgets(context, null);
 
 	    ArrayList<String> rows = new ArrayList<String>(Arrays.asList(MetaWatchService.getWidgets(context).split("\\|")));
 	    final ArrayList<List<String>> pGroups = new ArrayList<List<String>>();

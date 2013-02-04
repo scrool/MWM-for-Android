@@ -68,7 +68,6 @@ public class Idle {
     private Object busyObj = new Object();
     
     int currentPage = 0;
-    boolean initialised = false;
 
     Bitmap oledIdle = null;
     
@@ -367,16 +366,9 @@ public class Idle {
 	try {
 	    setBusy(true);
 
-	    if (!initialised) {
-		AppManager.initApps(context);
-		WidgetManager.initWidgets(context, null);
-		ActionManager.initActions(context);
-		initialised = true;
-	    }
-
 	    ArrayList<IdlePage> prevList = idlePages;
 
-	    List<WidgetRow> rows = WidgetManager.getDesiredWidgetsFromPrefs(context);
+	    List<WidgetRow> rows = WidgetManager.getInstance(context).getDesiredWidgetsFromPrefs(context);
 
 	    ArrayList<CharSequence> widgetsDesired = new ArrayList<CharSequence>();
 	    for (WidgetRow row : rows) {
@@ -384,9 +376,9 @@ public class Idle {
 	    }
 
 	    if (refresh)
-		widgetData = WidgetManager.refreshWidgets(context, widgetsDesired);
+		widgetData =  WidgetManager.getInstance(context).refreshWidgets(context, widgetsDesired);
 	    else
-		widgetData = WidgetManager.getCachedWidgets(context, widgetsDesired);
+		widgetData =  WidgetManager.getInstance(context).getCachedWidgets(context, widgetsDesired);
 
 	    for (WidgetRow row : rows) {
 		row.doLayout(widgetData);
@@ -427,10 +419,10 @@ public class Idle {
 	    if (prevList == null) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-		AppData[] data = AppManager.getAppInfos();
+		AppData[] data = AppManager.getInstance(context).getAppInfos();
 		for (AppData appEntry : data) {
 		    if (sharedPreferences.getBoolean(appEntry.getPageSettingName(), false)) {
-			screens.add(new AppPage(AppManager.getApp(appEntry.id)));
+			screens.add(new AppPage(AppManager.getInstance(context).getApp(appEntry.id)));
 		    }
 		}
 
@@ -670,15 +662,15 @@ public class Idle {
 	    String appId = actionId.replace(AppManagerAction.appManagerPrefix, "");
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Idle.quickButtonAction() app: " + appId);
-	    AppManager.getApp(appId).open(context, true);
+	    AppManager.getInstance(context).getApp(appId).open(context, true);
 	} else {
-	    Action action = ActionManager.getAction(actionId);
+	    Action action = ActionManager.getInstance(context).getAction(actionId);
 	    if (action != null) {
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "Idle.quickButtonAction() " + action.getName());
 
 		if (action instanceof ContainerAction) {
-		    ActionManager.displayAction(context, (ContainerAction) action);
+		    ActionManager.getInstance(context).displayAction(context, (ContainerAction) action);
 		} else {
 		    action.performAction(context);
 		}

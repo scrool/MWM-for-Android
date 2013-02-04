@@ -133,7 +133,7 @@ public class WidgetPicker extends ListActivity {
 
 	setTitle(getResources().getString(R.string.widget_picker_title));
 
-	Map<String, WidgetData> widgetMap = WidgetManager.refreshWidgets(this, null);
+	Map<String, WidgetData> widgetMap = WidgetManager.getInstance(this).refreshWidgets(this, null);
 	widgetList = new ArrayList<WidgetData>();
 
 	WidgetData dummy = new WidgetData();

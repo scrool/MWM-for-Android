@@ -25,7 +25,7 @@ public class QuickDialAction extends ContainerAction {
     public void refreshSubActions(Context context) {
 	subActions.clear();
 
-	subActions.add(ActionManager.getAction(InternalActions.SpeakerphoneAction.id));
+	subActions.add(ActionManager.getInstance(context).getAction(InternalActions.SpeakerphoneAction.id));
 
 	subActions.add(new Action() {
 

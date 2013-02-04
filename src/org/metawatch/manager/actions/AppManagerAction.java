@@ -25,7 +25,7 @@ public class AppManagerAction extends ContainerAction {
     public void refreshSubActions(Context context) {
 	subActions.clear();
 
-	for (final AppData a : AppManager.getAppInfos()) {
+	for (final AppData a : AppManager.getInstance(context).getAppInfos()) {
 
 	    int watchType = MetaWatchService.watchType;
 	    if ((watchType == MetaWatchService.WatchType.ANALOG && !a.supportsAnalog) || (watchType == MetaWatchService.WatchType.DIGITAL && !a.supportsDigital))
@@ -50,7 +50,7 @@ public class AppManagerAction extends ContainerAction {
 		}
 
 		public int performAction(Context context) {
-		    AppManager.getApp(a.id).open(context, false);
+		    AppManager.getInstance(context).getApp(a.id).open(context, false);
 		    return ApplicationBase.BUTTON_USED_DONT_UPDATE;
 		}
 
@@ -60,7 +60,7 @@ public class AppManagerAction extends ContainerAction {
 
 		public int performSecondary(Context context) {
 		    if (isRunning()) {
-			Idle.getInstance().removeAppPage(context, AppManager.getApp(a.id));
+			Idle.getInstance().removeAppPage(context, AppManager.getInstance(context).getApp(a.id));
 			return ApplicationBase.BUTTON_USED;
 		    }
 

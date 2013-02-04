@@ -27,7 +27,22 @@ import android.widget.Toast;
 
 public class BitmapCache {
 
-    public static class ThemeData {
+    private static BitmapCache mInstance;
+    
+    private BitmapCache(){}
+    
+    public static BitmapCache getInstance() {
+	if (mInstance == null)
+	    mInstance = new BitmapCache();
+	return mInstance;
+    }
+    
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
+    
+    public class ThemeData {
 	public ThemeData(String name) {
 	    themeName = name;
 	}
@@ -133,7 +148,7 @@ public class BitmapCache {
 
     }
 
-    private static class DefaultTheme extends ThemeData {
+    private class DefaultTheme extends ThemeData {
 	public DefaultTheme(Context context) {
 	    super("");
 	    this.context = context;
@@ -201,14 +216,14 @@ public class BitmapCache {
 	}
     }
 
-    private static DefaultTheme internalTheme = null;
-    private static ThemeData currentTheme = null;
+    private DefaultTheme internalTheme = null;
+    private ThemeData currentTheme = null;
 
     private static File getThemeFile(Context context, String themeName) {
 	return new File(Utils.getExternalFilesDir(context, "Themes"), themeName + ".zip");
     }
 
-    public static synchronized Bitmap getBitmap(Context context, String path) {
+    public synchronized Bitmap getBitmap(Context context, String path) {
 
 	updateCache(context);
 
@@ -224,7 +239,7 @@ public class BitmapCache {
 
     }
 
-    public static synchronized Properties getProperties(Context context, String path) {
+    public synchronized Properties getProperties(Context context, String path) {
 
 	updateCache(context);
 
@@ -239,11 +254,11 @@ public class BitmapCache {
 	return new Properties();
     }
 
-    public static Bitmap getDefaultThemeBanner(Context context) {
+    public Bitmap getDefaultThemeBanner(Context context) {
 	return internalTheme.getBanner();
     }
 
-    private static void updateCache(Context context) {
+    private void updateCache(Context context) {
 
 	if (internalTheme == null) {
 	    internalTheme = new DefaultTheme(context);
@@ -256,18 +271,18 @@ public class BitmapCache {
 	}
     }
 
-    public static ThemeData getInternalTheme(Context context) {
+    public ThemeData getInternalTheme(Context context) {
 	updateCache(context);
 	return internalTheme;
     }
 
-    public static ThemeData loadTheme(Context context, String themeName) {
+    public ThemeData loadTheme(Context context, String themeName) {
 	File themeFile = getThemeFile(context, themeName);
 
 	return loadTheme(context, themeName, themeFile);
     }
 
-    private static ThemeData loadTheme(Context context, String themeName, File themeFile) {
+    private ThemeData loadTheme(Context context, String themeName, File themeFile) {
 
 	ThemeData theme = new ThemeData(themeName);
 
@@ -278,12 +293,12 @@ public class BitmapCache {
 	return theme;
     }
 
-    private static String getThemeName(String uri) {
+    private String getThemeName(String uri) {
 	String filename = uri.substring(uri.lastIndexOf('/') + 1, uri.length());
 	return filename.substring(0, filename.lastIndexOf('.'));
     }
 
-    public static void downloadAndInstallTheme(final ThemeContainer themeContainer, final String uri) {
+    public void downloadAndInstallTheme(final ThemeContainer themeContainer, final String uri) {
 
 	Thread thread = new Thread("ThemeInstaller") {
 
@@ -340,9 +355,11 @@ public class BitmapCache {
 		} finally {
 		    themeContainer.runOnUiThread(new Runnable() {
 			public void run() {
-			    themeContainer.setProgressBarIndeterminateVisibility(Boolean.FALSE);
-			    Toast.makeText(themeContainer, R.string.downloaded_and_applied, Toast.LENGTH_SHORT).show();
-			    themeContainer.setDownloadedTabSelected();
+			    if (themeContainer != null && !themeContainer.isFinishing() && !themeContainer.isDestroyed()) {
+				themeContainer.setProgressBarIndeterminateVisibility(Boolean.FALSE);
+				Toast.makeText(themeContainer, R.string.downloaded_and_applied, Toast.LENGTH_SHORT).show();
+				themeContainer.setDownloadedTabSelected();
+			    }
 			}
 		    });
 		}

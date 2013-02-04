@@ -21,16 +21,33 @@ import android.content.pm.PackageManager;
 
 public class ActionManager {
 
-    static Map<String, Action> actions = new HashMap<String, Action>();
+    Map<String, Action> actions = new HashMap<String, Action>();
 
-    static NotificationsAction notificationsAction = null;
-    static PhoneSettingsAction phoneSettingsAction = null;
-    static PhoneCallAction phoneCallAction = null;
-    static AppManagerAction appManagerAction = null;
-    static QuickDialAction quickDialAction = null;
-    static Action lastNotificationAction = null;
+    NotificationsAction notificationsAction = null;
+    PhoneSettingsAction phoneSettingsAction = null;
+    PhoneCallAction phoneCallAction = null;
+    AppManagerAction appManagerAction = null;
+    QuickDialAction quickDialAction = null;
+    Action lastNotificationAction = null;
+    
+    private static ActionManager mInstance;
+    
+    private ActionManager(Context context) {
+	initActions(context);
+    }
+    
+    public static ActionManager getInstance(Context context) {
+	if (mInstance == null)
+	    mInstance = new ActionManager(context);
+	return mInstance;
+    }
+    
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
 
-    public static void initActions(final Context context) {
+    private void initActions(final Context context) {
 	if (actions.size() == 0) {
 
 	    notificationsAction = new NotificationsAction();
@@ -95,7 +112,7 @@ public class ActionManager {
 		@Override
 		public int performAction(Context context) {
 		    MediaControl.getInstance().dismissCall(context);
-		    ActionManager.toRoot(context);
+		    toRoot(context);
 		    return ApplicationBase.BUTTON_USED;
 		}
 
@@ -120,7 +137,7 @@ public class ActionManager {
 		@Override
 		public int performAction(Context context) {
 		    MediaControl.getInstance().dismissCall(context);
-		    ActionManager.toRoot(context);
+		    toRoot(context);
 		    return ApplicationBase.BUTTON_USED;
 		}
 
@@ -164,13 +181,13 @@ public class ActionManager {
 	}
     }
 
-    public static void addAction(Action action) {
+    public void addAction(Action action) {
 	if (action.getId() != null) {
 	    actions.put(action.getId(), action);
 	}
     }
 
-    public static void addAction(Action action, ContainerAction parent) {
+    public void addAction(Action action, ContainerAction parent) {
 	if (action.getId() != null) {
 	    actions.put(action.getId(), action);
 	}
@@ -178,7 +195,7 @@ public class ActionManager {
 	parent.addSubAction(action);
     }
 
-    public static void addAction(Action action, String parentId) {
+    public void addAction(Action action, String parentId) {
 	if (actions.containsKey(parentId)) {
 	    Action parent = actions.get(parentId);
 	    addAction(action, (ContainerAction) parent);
@@ -187,13 +204,13 @@ public class ActionManager {
 	}
     }
 
-    public static Action getAction(final String id) {
+    public Action getAction(final String id) {
 	if (!actions.containsKey(id))
 	    return null;
 	return actions.get(id);
     }
 
-    public static List<Action> getRootActions(Context context) {
+    public List<Action> getRootActions(Context context) {
 	List<Action> result = new ArrayList<Action>();
 
 	initActions(context);
@@ -231,7 +248,7 @@ public class ActionManager {
 	return result;
     }
 
-    public static List<Action> getBindableActions(final Context context) {
+    public List<Action> getBindableActions(final Context context) {
 	List<Action> result = new ArrayList<Action>();
 
 	initActions(context);
@@ -248,21 +265,21 @@ public class ActionManager {
 	return result;
     }
 
-    public static void displayAction(final Context context, ContainerAction container) {
-	ActionsApp app = (ActionsApp) AppManager.getApp(ActionsApp.APP_ID);
+    public void displayAction(final Context context, ContainerAction container) {
+	ActionsApp app = (ActionsApp) AppManager.getInstance(context).getApp(ActionsApp.APP_ID);
 	if (app != null) {
 	    app.displayContainer(container);
 	    app.open(context, true);
 	}
     }
 
-    public static void displayCallActions(final Context context) {
+    public void displayCallActions(final Context context) {
 	Call.endRinging(context);
 	displayAction(context, phoneCallAction);
     }
 
-    public static void toRoot(final Context context) {
-	ActionsApp app = (ActionsApp) AppManager.getApp(ActionsApp.APP_ID);
+    public void toRoot(final Context context) {
+	ActionsApp app = (ActionsApp) AppManager.getInstance(context).getApp(ActionsApp.APP_ID);
 	app.toRoot();
     }
 

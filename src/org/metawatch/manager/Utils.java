@@ -454,7 +454,7 @@ public class Utils {
     }
 
     public static Bitmap getBitmap(Context context, String path) {
-	return BitmapCache.getBitmap(context, path);
+	return BitmapCache.getInstance().getBitmap(context, path);
     }
 
     public static Bitmap ditherTo1bit(Bitmap input, boolean inverted) {

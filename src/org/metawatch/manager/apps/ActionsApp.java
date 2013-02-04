@@ -194,7 +194,7 @@ public class ActionsApp extends ApplicationBase {
 	currentActions.clear();
 	if (containerStack.isEmpty() || containerStack.peek() == null) {
 	    // At the root.
-	    currentActions = ActionManager.getRootActions(context);
+	    currentActions = ActionManager.getInstance(context).getRootActions(context);
 	} else {
 	    ContainerAction container = containerStack.peek();
 	    container.refreshSubActions(context);

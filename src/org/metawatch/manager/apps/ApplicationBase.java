@@ -209,7 +209,7 @@ public abstract class ApplicationBase {
 
 		    @Override
 		    public int performAction(Context context) {
-			AppManager.getApp(appId).open(context, false);
+			AppManager.getInstance(context).getApp(appId).open(context, false);
 			return BUTTON_USED_DONT_UPDATE;
 		    }
 		};
@@ -229,7 +229,7 @@ public abstract class ApplicationBase {
 	    List<Action> subActions = container.getSubActions();
 	    subActions.addAll(actions);
 
-	    ActionManager.displayAction(context, container);
+	    ActionManager.getInstance(context).displayAction(context, container);
 	}
     }
 

@@ -28,7 +28,7 @@ public class ThemeGallery extends SherlockFragment {
 	@Override
 	public boolean shouldOverrideUrlLoading(WebView view, String url) {
 	    if (url.contains(".zip")) {
-		BitmapCache.downloadAndInstallTheme(activity, url);
+		BitmapCache.getInstance().downloadAndInstallTheme(activity, url);
 		return true;
 	    } else if (Uri.parse(url).getHost().equals("grapefruitopia.com")) {
 		return false;

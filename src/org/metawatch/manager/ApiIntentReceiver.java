@@ -66,7 +66,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		    bmp = Utils.invertBitmap(bmp);
 		}
 
-		ApplicationBase app = AppManager.getApp(id);
+		ApplicationBase app = AppManager.getInstance(context).getApp(id);
 		if (app != null && app instanceof ExternalApp) {
 		    ((ExternalApp) app).setBuffer(bmp);
 
@@ -83,7 +83,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 	else if (action.equals("org.metawatch.manager.WIDGET_UPDATE")) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "WIDGET_UPDATE received");
-	    WidgetManager.getFromIntent(context, intent);
+	    WidgetManager.getInstance(context).getFromIntent(context, intent);
 	    return;
 	}
 
@@ -91,10 +91,10 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 	    String id = intent.hasExtra("id") ? intent.getStringExtra("id") : "anonymous";
 	    String name = intent.hasExtra("name") ? intent.getStringExtra("name") : "External App";
 
-	    ApplicationBase app = AppManager.getApp(id);
+	    ApplicationBase app = AppManager.getInstance(context).getApp(id);
 	    if (app == null) {
 		app = new ExternalApp(id, name);
-		AppManager.addApp(app);
+		AppManager.getInstance(context).addApp(app);
 	    }
 
 	    if (MetaWatchService.connectionState == ConnectionState.CONNECTED) {
@@ -117,7 +117,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 	else if (action.equals("org.metawatch.manager.APPLICATION_STOP")) {
 	    String id = intent.hasExtra("id") ? intent.getStringExtra("id") : "anonymous";
 
-	    ApplicationBase app = AppManager.getApp(id);
+	    ApplicationBase app = AppManager.getInstance(context).getApp(id);
 	    if (app != null) {
 		Idle.getInstance().removeAppPage(context, app);
 		Idle.getInstance().updateIdle(context, true);
