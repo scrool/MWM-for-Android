@@ -354,7 +354,7 @@ public class BitmapCache {
 		} finally {
 		    themeContainer.runOnUiThread(new Runnable() {
 			public void run() {
-			    if (themeContainer != null && !themeContainer.isFinishing() && !themeContainer.isDestroyed()) {
+			    if (themeContainer != null && !themeContainer.isFinishing()) {
 				themeContainer.setProgressBarIndeterminateVisibility(Boolean.FALSE);
 				Toast.makeText(themeContainer, R.string.downloaded_and_applied, Toast.LENGTH_SHORT).show();
 				themeContainer.setDownloadedTabSelected();
