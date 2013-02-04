@@ -48,7 +48,6 @@ public class WidgetManager {
     
     public void destroy() {
 	mInstance = null;
-	System.gc();
     }
 
     public void initWidgets(Context context, ArrayList<CharSequence> widgetsDesired) {

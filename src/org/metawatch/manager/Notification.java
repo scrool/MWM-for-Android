@@ -70,8 +70,8 @@ public class Notification {
     }
     
     public void destroy() {
+	stopNotificationSender();
 	mInstance = null;
-	System.gc();
     }
     
     private void addToNotificationQueue(Context context, NotificationType notification, boolean forceShow) {
@@ -335,7 +335,6 @@ public class Notification {
 	    /* Thread is dead, we can mark it for garbage collection. */
 	    notificationSenderThread = null;
 	    mInstance = null;
-	    System.gc();
 	}
     }
 

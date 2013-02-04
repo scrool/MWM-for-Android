@@ -83,7 +83,6 @@ public class Protocol {
     public void destroy() {
 	mInstance = null;
 	stopProtocolSender();
-	System.gc();
     }
 
     private Protocol(Context context) {

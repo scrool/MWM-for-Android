@@ -61,7 +61,6 @@ public class MediaControl {
     
     public void destroy() {
 	mInstance = null;
-	System.gc();
     }
     
     public class TrackInfo {

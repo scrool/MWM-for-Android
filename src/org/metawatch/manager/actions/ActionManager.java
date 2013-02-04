@@ -44,7 +44,6 @@ public class ActionManager {
     
     public void destroy() {
 	mInstance = null;
-	System.gc();
     }
 
     private void initActions(final Context context) {

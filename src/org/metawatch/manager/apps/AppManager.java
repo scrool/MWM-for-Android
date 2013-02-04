@@ -30,7 +30,6 @@ public class AppManager {
     
     public void destroy() {
 	mInstance = null;
-	System.gc();
     }
     
     private void initApps(Context context) {

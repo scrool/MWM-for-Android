@@ -84,7 +84,6 @@ public class Idle {
     
     public void destroy() {
 	mInstance = null;
-	System.gc();
     }
     
     private Idle(){}

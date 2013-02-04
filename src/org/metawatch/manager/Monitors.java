@@ -90,9 +90,9 @@ public class Monitors {
 	return mInstance;
     }
     
-    public void destroy() {
+    public void destroy(Context context) {
+	stop(context);
 	mInstance = null;
-	System.gc();
     }
     
     public LocationData mLocationData = new LocationData();

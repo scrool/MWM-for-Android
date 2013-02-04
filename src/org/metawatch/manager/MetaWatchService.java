@@ -606,8 +606,7 @@ public class MetaWatchService extends Service {
 	cleanup();
 	
 	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
-	Monitors.getInstance().stop(this);
-	Monitors.getInstance().destroy();
+	Monitors.getInstance().destroy(this);
 	BitmapCache.getInstance().destroy();
 	
 	AppManager.getInstance(this).destroy();
@@ -803,7 +802,6 @@ public class MetaWatchService extends Service {
 	Protocol.getInstance(this).destroy();
 	Idle.getInstance().destroy();
 	removeNotification();
-	Notification.getInstance().stopNotificationSender();
 	Notification.getInstance().destroy();
 	MediaControl.getInstance().destroy();
     }

@@ -39,7 +39,6 @@ public class BitmapCache {
     
     public void destroy() {
 	mInstance = null;
-	System.gc();
     }
     
     public class ThemeData {
