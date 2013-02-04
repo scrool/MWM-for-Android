@@ -15,15 +15,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.metawatch.manager.Idle;
+import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchStatus;
-import org.metawatch.manager.Monitors.LocationData;
+import org.metawatch.manager.Monitors;
 import org.metawatch.manager.Utils;
 
 import android.content.Context;
-import org.metawatch.manager.Log;
 
 public class WunderWeatherEngine extends AbstractWeatherEngine {
 
@@ -87,15 +87,15 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		    break;
 
 		case GeolocationMode.ALWAYSGOOGLE: {
-		    GoogleGeoCoderLocationData locationData = reverseLookupGeoLocation(context, LocationData.latitude, LocationData.longitude);
+		    GoogleGeoCoderLocationData locationData = reverseLookupGeoLocation(context, Monitors.getInstance().mLocationData.latitude, Monitors.getInstance().mLocationData.longitude);
 		    weatherData.locationName = locationData.getLocationName();
-		    String weatherLocation = Double.toString(LocationData.latitude) + "," + Double.toString(LocationData.longitude);
+		    String weatherLocation = Double.toString(Monitors.getInstance().mLocationData.latitude) + "," + Double.toString(Monitors.getInstance().mLocationData.longitude);
 		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/conditions/" + forecastQuery + "q/" + weatherLocation + ".json";
 		}
 		    break;
 
 		case GeolocationMode.USEPROVIDER: {
-		    String weatherLocation = Double.toString(LocationData.latitude) + "," + Double.toString(LocationData.longitude);
+		    String weatherLocation = Double.toString(Monitors.getInstance().mLocationData.latitude) + "," + Double.toString(Monitors.getInstance().mLocationData.longitude);
 		    requestUrl = "http://api.wunderground.com/api/" + Preferences.wundergroundKey + "/geolookup/conditions/" + forecastQuery + "q/" + weatherLocation + ".json";
 		}
 		    break;

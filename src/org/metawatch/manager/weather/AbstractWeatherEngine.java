@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchStatus;
-import org.metawatch.manager.Monitors.LocationData;
+import org.metawatch.manager.Monitors;
 
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
-import org.metawatch.manager.Log;
 
 public abstract class AbstractWeatherEngine implements WeatherEngine {
 
@@ -37,7 +37,7 @@ public abstract class AbstractWeatherEngine implements WeatherEngine {
 
 		return false;
 	    }
-	} else if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL && LocationData.received == false) {
+	} else if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL && Monitors.getInstance().mLocationData.received == false) {
 	    // Don't refresh the weather if the user has enabled geolocation,
 	    // but we don't have a location yet
 	    return false;
@@ -47,7 +47,7 @@ public abstract class AbstractWeatherEngine implements WeatherEngine {
     }
 
     protected boolean isGeolocationDataUsed() {
-	return Preferences.weatherGeolocationMode != GeolocationMode.MANUAL && LocationData.received;
+	return Preferences.weatherGeolocationMode != GeolocationMode.MANUAL && Monitors.getInstance().mLocationData.received;
     }
 
     protected GoogleGeoCoderLocationData reverseLookupGeoLocation(Context context, double latitude, double longitude) throws IOException {

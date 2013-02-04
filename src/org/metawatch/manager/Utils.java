@@ -574,7 +574,7 @@ public class Utils {
 	}
 
 	// Fallback to our own counter (based on notifications).
-	return Monitors.getGmailUnreadCount();
+	return Monitors.getInstance().getGmailUnreadCount();
     }
 
     public static String getGoogleAccountName(Context context) {

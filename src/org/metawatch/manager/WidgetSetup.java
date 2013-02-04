@@ -364,7 +364,7 @@ public class WidgetSetup extends SherlockFragment {
 		    });
 		    mIdlePreviews.addView(view);
 		    if (MetaWatchService.isRunning())
-			downFromTop(view).start();
+			fadeIn(view).start();
 		} else {
 		    imageView = (ImageView) view.findViewById(R.id.image);
 		}
@@ -377,7 +377,7 @@ public class WidgetSetup extends SherlockFragment {
 		if (tmpDrawable != null)
 		    currentBitmap = ((BitmapDrawable) tmpDrawable).getBitmap();
 		if (currentBitmap != null && !bitmapCompare(currentBitmap, bmp)) {
-		    ObjectAnimator upToTop = ObjectAnimator.ofFloat(imageView, "translationY", 0, -1000);
+		    ObjectAnimator upToTop = ObjectAnimator.ofFloat(imageView, "alpha", 1, 0);
 		    upToTop.setDuration(750);
 		    upToTop.addListener(new MyAnimatorListener(imageView, bmp));
 		    upToTop.start();
@@ -390,8 +390,8 @@ public class WidgetSetup extends SherlockFragment {
 	    Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() end");
     }
 
-    private ObjectAnimator downFromTop(final View view) {
-	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "translationY", -1000, 0);
+    private ObjectAnimator fadeIn(final View view) {
+	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "alpha", 0, 1);
 	downFromTop.setDuration(750);
 	return downFromTop;
     }
@@ -447,7 +447,7 @@ public class WidgetSetup extends SherlockFragment {
 	    iv.setImageBitmap(bmp);
 	    iv.requestLayout();
 	    iv.invalidate();
-	    downFromTop(iv).start();
+	    fadeIn(iv).start();
 	}
 
 	@Override

@@ -76,7 +76,7 @@ public class NowPlayingWidget implements InternalWidget {
 	    widget.height = 16;
 	}
 
-	MediaControl.TrackInfo info = MediaControl.getLastTrack();
+	MediaControl.TrackInfo info = MediaControl.getInstance().getLastTrack();
 	widget.priority = info.isEmpty() ? -1 : 10;
 
 	String trackInfoText;

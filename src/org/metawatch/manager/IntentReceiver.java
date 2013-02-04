@@ -119,9 +119,9 @@ public class IntentReceiver extends BroadcastReceiver {
 			    Log.d(MetaWatchStatus.TAG, "Unknown Gmail notification: tagLabel is '" + tagLabel + "'");
 		    }
 
-		    Monitors.updateGmailUnreadCount(recipient, count);
+		    Monitors.getInstance().updateGmailUnreadCount(recipient, count);
 		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Cached Gmail unread count for account '" + recipient + "' is " + Monitors.getGmailUnreadCount(recipient));
+			Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Cached Gmail unread count for account '" + recipient + "' is " + Monitors.getInstance().getGmailUnreadCount(recipient));
 
 		    Idle.getInstance().updateIdle(context, true);
 
@@ -234,7 +234,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		}
 
 		if (bundle.containsKey("windroid.extra.SMARTWATCH_COUNT")) {
-		    Monitors.TouchDownData.unreadMailCount = bundle.getInt("windroid.extra.SMARTWATCH_COUNT");
+		    Monitors.getInstance().mTouchDownData.unreadMailCount = bundle.getInt("windroid.extra.SMARTWATCH_COUNT");
 		    Idle.getInstance().updateIdle(context, true);
 		}
 
@@ -301,7 +301,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		if (intent.hasExtra("playing")) {
 		    boolean playing = intent.getBooleanExtra("playing", false);
 		    if (playing == false) {
-			MediaControl.stopPlaying(context);
+			MediaControl.getInstance().stopPlaying(context);
 			return;
 		    }
 		}
@@ -338,7 +338,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		if (track == null)
 		    track = "";
 
-		MediaControl.updateNowPlaying(context, artist, album, track, intent.getAction());
+		MediaControl.getInstance().updateNowPlaying(context, artist, album, track, intent.getAction());
 
 	    } else if (intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")) {
 		boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
@@ -350,7 +350,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): Data connectivity available.");
 
-		    Monitors.updateWeatherData(context);
+		    Monitors.getInstance().updateWeatherData(context);
 		}
 	    } else if (intent.getAction().equals("com.usk.app.notifymyandroid.NEW_NOTIFICATION")) {
 

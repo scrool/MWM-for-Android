@@ -51,52 +51,73 @@ import android.telephony.TelephonyManager;
 
 public class Monitors {
 
-    public static AlarmManager alarmManager;
-    public static Intent intent;
-    public static PendingIntent sender;
+    public AlarmManager alarmManager;
+    public Intent intent;
+    public PendingIntent sender;
 
-    static GmailMonitor gmailMonitor;
+    GmailMonitor gmailMonitor;
 
-    private static ContentObserverMessages contentObserverMessages;
-    static ContentResolver contentResolverMessages;
+    private ContentObserverMessages contentObserverMessages;
+    ContentResolver contentResolverMessages;
 
-    private static ContentObserverCalls contentObserverCalls;
-    static ContentResolver contentResolverCalls;
+    private ContentObserverCalls contentObserverCalls;
+    ContentResolver contentResolverCalls;
 
-    private static ContentObserverAppointments contentObserverAppointments;
-    static ContentResolver contentResolverAppointments;
+    private ContentObserverAppointments contentObserverAppointments;
+    ContentResolver contentResolverAppointments;
 
-    static Hashtable<String, Integer> gmailUnreadCounts = new Hashtable<String, Integer>();
+    Hashtable<String, Integer> gmailUnreadCounts = new Hashtable<String, Integer>();
 
-    private static LocationFinder locationFinder;
-    private static BroadcastReceiver locationReceiver;
+    private LocationFinder locationFinder;
+    private BroadcastReceiver locationReceiver;
 
-    private static BroadcastReceiver batteryLevelReceiver;
+    private BroadcastReceiver batteryLevelReceiver;
 
-    public static long calendarChangedTimestamp = 0;
-    public static long getRTCTimestamp = 0;
-    public static int rtcOffset = 0; // Offset in seconds to add to the RTC to
+    public long calendarChangedTimestamp = 0;
+    public long getRTCTimestamp = 0;
+    public int rtcOffset = 0; // Offset in seconds to add to the RTC to
 				     // allow for latency
 
-    public static WeatherData weatherData = new WeatherData();
+    public WeatherData weatherData = new WeatherData();
 
-    public static class LocationData {
-	public static boolean received = false;
-	public static double latitude;
-	public static double longitude;
-
-	public static long timeStamp = 0;
+    private static Monitors mInstance;
+    
+    private Monitors(){}
+    
+    public static Monitors getInstance() {
+	if (mInstance == null)
+	    mInstance = new Monitors();
+	return mInstance;
     }
+    
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
+    
+    public LocationData mLocationData = new LocationData();
+    
+    public class LocationData {
+	public boolean received = false;
+	public double latitude;
+	public double longitude;
+
+	public long timeStamp = 0;
+    }
+    
+    public BatteryData mBatteryData = new BatteryData();
 
     public static class BatteryData {
-	public static int level = -1;
+	public int level = -1;
+    }
+    
+    public TouchDownData mTouchDownData = new TouchDownData();
+
+    public class TouchDownData {
+	public int unreadMailCount = -1;
     }
 
-    public static class TouchDownData {
-	public static int unreadMailCount = -1;
-    }
-
-    public static void updateGmailUnreadCount(String account, int count) {
+    public void updateGmailUnreadCount(String account, int count) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Monitors.updateGmailUnreadCount(): account='" + account + "' count='" + count + "'");
 	gmailUnreadCounts.put(account, count);
@@ -104,7 +125,7 @@ public class Monitors {
 	    Log.d(MetaWatchStatus.TAG, "Monitors.updateGmailUnreadCount(): new unread count is: " + gmailUnreadCounts.get(account));
     }
 
-    public static int getGmailUnreadCount() {
+    public int getGmailUnreadCount() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Monitors.getGmailUnreadCount()");
 	int totalCount = 0;
@@ -117,14 +138,14 @@ public class Monitors {
 	return totalCount;
     }
 
-    public static int getGmailUnreadCount(String account) {
+    public int getGmailUnreadCount(String account) {
 	int count = gmailUnreadCounts.get(account);
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Monitors.getGmailUnreadCount('" + account + "') returning " + count);
 	return count;
     }
 
-    public static void start(Context context/*
+    public void start(Context context/*
 					     * , TelephonyManager telephonyManager
 					     */) {
 	// start weather updater
@@ -192,7 +213,7 @@ public class Monitors {
 	startAlarmTicker(context);
     }
 
-    public static void RefreshLocation() {
+    public void RefreshLocation() {
 	if (locationFinder == null)
 	    return;
 
@@ -206,16 +227,16 @@ public class Monitors {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Updated location");
 
-	    LocationData.latitude = location.getLatitude();
-	    LocationData.longitude = location.getLongitude();
+	    mLocationData.latitude = location.getLatitude();
+	    mLocationData.longitude = location.getLongitude();
 
-	    LocationData.timeStamp = location.getTime();
+	    mLocationData.timeStamp = location.getTime();
 
-	    LocationData.received = true;
+	    mLocationData.received = true;
 	}
     }
 
-    public static void stop(Context context) {
+    public void stop(Context context) {
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Monitors.stop()");
@@ -234,12 +255,12 @@ public class Monitors {
 	}
     }
 
-    public static void restart(final Context context) {
+    public void restart(final Context context) {
 	stop(context);
 	start(context);
     }
 
-    public static void updateWeatherData(final Context context) {
+    public void updateWeatherData(final Context context) {
 	// Ask the location manager for the most recent location
 	// as often it seems to know, without actually notifying us!
 	RefreshLocation();
@@ -255,14 +276,14 @@ public class Monitors {
     }
 
     // Force the update, by clearing the timestamps
-    public static void updateWeatherDataForced(final Context context) {
+    public void updateWeatherDataForced(final Context context) {
 	weatherData.received = false;
 	weatherData.timeStamp = 0;
 	weatherData.forecastTimeStamp = 0;
 	updateWeatherData(context);
     }
 
-    static void startAlarmTicker(Context context) {
+    void startAlarmTicker(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "startAlarmTicker()");
 	alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -273,11 +294,11 @@ public class Monitors {
 	alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, 0, AlarmManager.INTERVAL_HALF_HOUR, sender);
     }
 
-    static void stopAlarmTicker() {
+    void stopAlarmTicker() {
 	alarmManager.cancel(sender);
     }
 
-    private static class ContentObserverMessages extends ContentObserver {
+    private class ContentObserverMessages extends ContentObserver {
 
 	Context context;
 
@@ -313,7 +334,7 @@ public class Monitors {
 	}
     }
 
-    private static class ContentObserverAppointments extends ContentObserver {
+    private class ContentObserverAppointments extends ContentObserver {
 
 	Context context;
 
@@ -333,7 +354,7 @@ public class Monitors {
 	}
     }
 
-    private static void createLocationReceiver(Context context) {
+    private void createLocationReceiver(Context context) {
 	if (locationFinder == null)
 	    return;
 
@@ -348,22 +369,22 @@ public class Monitors {
 		    Location location = (Location) intent.getExtras().get(LocationFinder.KEY_LOCATION_CHANGED);
 
 		    if (location != null) {
-			LocationData.latitude = location.getLatitude();
-			LocationData.longitude = location.getLongitude();
+			mLocationData.latitude = location.getLatitude();
+			mLocationData.longitude = location.getLongitude();
 
-			LocationData.timeStamp = location.getTime();
+			mLocationData.timeStamp = location.getTime();
 
 			if (Preferences.logging)
 			    Log.d(MetaWatchStatus.TAG, "location changed " + location.toString());
 
-			LocationData.received = true;
+			mLocationData.received = true;
 			MetaWatchService.sendNotifyClientsRequest(context);
 
 			if (!weatherData.received /* && !WeatherData.updating */) {
 			    if (Preferences.logging)
 				Log.d(MetaWatchStatus.TAG, "First location - getting weather");
 
-			    Monitors.updateWeatherData(context);
+			    updateWeatherData(context);
 			}
 		    }
 		} catch (java.lang.NullPointerException e) {
@@ -377,7 +398,7 @@ public class Monitors {
 	context.registerReceiver(locationReceiver, filter);
     }
 
-    private static void createBatteryLevelReciever(Context context) {
+    private void createBatteryLevelReciever(Context context) {
 	if (batteryLevelReceiver != null)
 	    return;
 
@@ -389,8 +410,8 @@ public class Monitors {
 		if (rawlevel >= 0 && scale > 0) {
 		    level = (rawlevel * 100) / scale;
 		}
-		if (BatteryData.level != level) {
-		    BatteryData.level = level;
+		if (mBatteryData.level != level) {
+		    mBatteryData.level = level;
 		    Idle.getInstance().updateIdle(context, true);
 		}
 	    }

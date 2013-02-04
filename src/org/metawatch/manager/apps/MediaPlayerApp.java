@@ -187,7 +187,7 @@ public class MediaPlayerApp extends ApplicationBase {
 	paintLargeOutline.setTextSize(FontCache.instance(context).Large.size);
 	paintLargeOutline.setTypeface(FontCache.instance(context).Large.face);
 
-	MediaControl.TrackInfo lastTrack = MediaControl.getLastTrack();
+	MediaControl.TrackInfo lastTrack = MediaControl.getInstance().getLastTrack();
 
 	if (watchType == WatchType.DIGITAL) {
 
@@ -345,19 +345,19 @@ public class MediaPlayerApp extends ApplicationBase {
 	switch (id) {
 
 	case MediaPlayerApp.VOLUME_UP:
-	    MediaControl.volumeUp(context);
+	    MediaControl.getInstance().volumeUp(context);
 	    return BUTTON_USED;
 	case MediaPlayerApp.VOLUME_DOWN:
-	    MediaControl.volumeDown(context);
+	    MediaControl.getInstance().volumeDown(context);
 	    return BUTTON_USED;
 	case MediaPlayerApp.NEXT:
-	    MediaControl.next(context);
+	    MediaControl.getInstance().next(context);
 	    return BUTTON_USED;
 	case MediaPlayerApp.PREVIOUS:
-	    MediaControl.previous(context);
+	    MediaControl.getInstance().previous(context);
 	    return BUTTON_USED;
 	case MediaPlayerApp.TOGGLE:
-	    MediaControl.togglePause(context);
+	    MediaControl.getInstance().togglePause(context);
 	    return BUTTON_USED;
 	case MediaPlayerApp.MENU:
 	    showMenu(context);

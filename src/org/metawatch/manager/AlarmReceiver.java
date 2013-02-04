@@ -44,21 +44,14 @@ public class AlarmReceiver extends BroadcastReceiver {
 	    Log.d(MetaWatchStatus.TAG, "AlarmReceiver.onReceive(): received intent: " + intent.toString());
 
 	if (intent.hasExtra("action_update")) {
-
-	    Monitors.updateWeatherData(context);
-
+	    Monitors.getInstance().updateWeatherData(context);
 	    return;
 	}
 
 	if (intent.hasExtra("action_poll_voltage")) {
-
-	    if (MetaWatchService.connectionState == MetaWatchService.ConnectionState.CONNECTED) {
+	    if (MetaWatchService.connectionState == MetaWatchService.ConnectionState.CONNECTED)
 		Protocol.getInstance(context).readBatteryVoltage();
-	    }
-
 	    return;
 	}
-
     }
-
 }

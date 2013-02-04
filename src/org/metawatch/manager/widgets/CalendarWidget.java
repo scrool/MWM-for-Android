@@ -102,7 +102,7 @@ public class CalendarWidget implements InternalWidget {
 
 		boolean readCalendar = false;
 		long time = System.currentTimeMillis();
-		if ((time - lastRefresh > 5 * DateUtils.MINUTE_IN_MILLIS) || (Monitors.calendarChangedTimestamp > lastRefresh)) {
+		if ((time - lastRefresh > 5 * DateUtils.MINUTE_IN_MILLIS) || (Monitors.getInstance().calendarChangedTimestamp > lastRefresh)) {
 		    readCalendar = true;
 		    lastRefresh = System.currentTimeMillis();
 		}

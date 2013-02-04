@@ -123,7 +123,7 @@ public class MetaWatchService extends Service {
 	editor.commit();
     }
     
-    public static void sendNotifyClientsRequest(Context context) {
+    public static synchronized void sendNotifyClientsRequest(Context context) {
 	if (mIsRunning) {
 	    Intent intent = new Intent(context, MetaWatchService.class);
 	    intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
@@ -280,10 +280,10 @@ public class MetaWatchService extends Service {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "onSharedPreferenceChanged " + key);
 
-	    MetaWatchService.loadPreferences(MetaWatchService.this);
+	    loadPreferences(MetaWatchService.this);
 
 	    if (key.contains("Weather")) {
-		Monitors.restart(MetaWatchService.this);
+		Monitors.getInstance().restart(MetaWatchService.this);
 	    }
 
 	    if (key.contains("Idle") || key.contains(".app_enabled")) {
@@ -303,7 +303,7 @@ public class MetaWatchService extends Service {
 	    }
 
 	    if (key.contains("Calendar")) {
-		Monitors.calendarChangedTimestamp = System.currentTimeMillis();
+		Monitors.getInstance().calendarChangedTimestamp = System.currentTimeMillis();
 		Idle.getInstance().updateIdle(MetaWatchService.this, true);
 	    }
 	}
@@ -438,7 +438,7 @@ public class MetaWatchService extends Service {
 	    return;
 
 	if (!Preferences.loaded)
-	    MetaWatchService.loadPreferences(context);
+	    loadPreferences(context);
 
 	if (Preferences.autoConnect && getPreviousConnectionState(context) == true) {
 	    context.startService(new Intent(context, MetaWatchService.class));
@@ -469,13 +469,11 @@ public class MetaWatchService extends Service {
 	case ConnectionState.CONNECTED:
 	    builder.setContentText(getResources().getString(R.string.connection_connected));
 	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.connected));
-	    builder.setProgress(100, 100, false);
 	    broadcastConnection(true);
 	    break;
 	default:
 	    builder.setContentText(getResources().getString(R.string.connection_disconnected));
 	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
-	    builder.setProgress(100, 50, false);
 	    broadcastConnection(false);
 	    break;
 	}
@@ -520,7 +518,7 @@ public class MetaWatchService extends Service {
 	watchState = WatchStates.OFF;
 	watchType = WatchType.UNKNOWN;
 	watchGen = WatchGen.UNKNOWN;
-	Monitors.getRTCTimestamp = 0;
+	Monitors.getInstance().getRTCTimestamp = 0;
 
 	if (bluetoothAdapter == null)
 	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -528,7 +526,7 @@ public class MetaWatchService extends Service {
 	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
 
-	Monitors.start(this/* , telephonyManager */);
+	Monitors.getInstance().start(this/* , telephonyManager */);
 
 	// Initialise theme
 	BitmapCache.getBitmap(MetaWatchService.this, "");
@@ -575,6 +573,10 @@ public class MetaWatchService extends Service {
 		    });
 		    break;
 		}
+	    } catch (Exception e) {
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, e.toString());
+		resetConnection();
 	    } finally {
 		if (wakeLock != null && wakeLock.isHeld())
 		    wakeLock.release();
@@ -596,30 +598,33 @@ public class MetaWatchService extends Service {
 
     @Override
     public void onDestroy() {
-	disconnectExit();
 	super.onDestroy();
-	watchReceiverThread.quit();
-
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onDestroy()");
-	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+	
+	connectionState = ConnectionState.DISCONNECTING;
+	setPreviousConnectionState(MetaWatchService.this, false);
+	
+	watchReceiverThread.quit();
 
-	Monitors.stop(this);
-	removeNotification();
+	cleanup();
+	
+	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+	Monitors.getInstance().stop(this);
+	Monitors.getInstance().destroy();
+	
 	notifyClients();
 	mClients.clear();
-	Protocol.getInstance(this).destroy();
-	Idle.getInstance().destroy();
 	mIsRunning = false;
     }
 
     @TargetApi(10)
-    void connect(Context context) {
+    private void connect() {
 
 	try {
 
 	    if (!Preferences.loaded)
-		loadPreferences(context);
+		loadPreferences(this);
 
 	    MetaWatchService.fakeWatch = false;
 	    if (Preferences.watchMacAddress.equals("DIGITAL")) {
@@ -676,7 +681,7 @@ public class MetaWatchService extends Service {
 	    }
 
 	    connectionState = ConnectionState.CONNECTED;
-	    setPreviousConnectionState(context, true);
+	    setPreviousConnectionState(this, true);
 	    updateNotification();
 
 	    Protocol.getInstance(MetaWatchService.this).startProtocolSender();
@@ -691,9 +696,9 @@ public class MetaWatchService extends Service {
 
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
 	    
-	    Protocol.getInstance(context).setTimeDateFormat(context);
+	    Protocol.getInstance(this).setTimeDateFormat(this);
 
-	    Notification.startNotificationSender(this);
+	    Notification.getInstance().startNotificationSender(this);
 
 	} catch (IOException ioexception) {
 	    if (Preferences.logging)
@@ -720,8 +725,6 @@ public class MetaWatchService extends Service {
 	    if(wakeLock != null && wakeLock.isHeld()) 
 		wakeLock.release();
 	}
-
-	return;
     }
 
     public void sendToast(String text) {
@@ -732,7 +735,7 @@ public class MetaWatchService extends Service {
     }
 
     /** Keeps track of all current registered clients. */
-    static ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+    private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
     private Handler messageHandler = new Handler() {
 
@@ -771,16 +774,14 @@ public class MetaWatchService extends Service {
 		    // we are going through the list from back to front
 		    // so this is safe to do inside the loop.
 		    mClients.remove(i);
-		} catch (NullPointerException e) {
+		} catch (Exception e) {
 		    mClients.remove(i);
 		}
 	    }
 	}
     }
 
-    void disconnect() {
-	Protocol.getInstance(MetaWatchService.this).stopProtocolSender();
-	Notification.stopNotificationSender();
+    void cleanup() {
 	try {
 	    if (outputStream != null)
 		outputStream.close();
@@ -797,13 +798,13 @@ public class MetaWatchService extends Service {
 	} catch (IOException e) {
 	}
 	broadcastConnection(false);
-    }
-
-    void disconnectExit() {
-	connectionState = ConnectionState.DISCONNECTING;
-	setPreviousConnectionState(MetaWatchService.this, false);
-	updateNotification();
-	disconnect();
+	
+	Protocol.getInstance(this).destroy();
+	Idle.getInstance().destroy();
+	removeNotification();
+	Notification.getInstance().stopNotificationSender();
+	Notification.getInstance().destroy();
+	MediaControl.getInstance().destroy();
     }
 
     private class WatchReceiverThread extends Thread {
@@ -867,11 +868,11 @@ public class MetaWatchService extends Service {
 		Log.d(MetaWatchStatus.TAG, "state: connecting");
 	    // create initial connection or reconnect
 	    updateNotification();
-	    connect(MetaWatchService.this);
+	    connect();
 	    if (powerManager.isScreenOn()) {
-		result = 10000; // try to reconnect in 10s
+		result = 1000; // try to reconnect in 10s
 	    } else {
-		result = 30000; // try to reconnect in 30s
+		result = 5000; // try to reconnect in 30s
 	    }
 	    break;
 	case ConnectionState.CONNECTED:
@@ -931,8 +932,6 @@ public class MetaWatchService extends Service {
 	}
 
 	try {
-	    wakeLock.acquire();
-	    
 	    byte[] bytes = new byte[256];
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "before blocking read");
@@ -976,15 +975,15 @@ public class MetaWatchService extends Service {
 		if (bytes[4] == 0x01) {
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): mode changed");
-		    synchronized (Notification.modeChanged) {
-			Notification.modeChanged.notify();
+		    synchronized (Notification.getInstance().modeChanged) {
+			Notification.getInstance().modeChanged.notify();
 		    }
 		} else if (bytes[4] == 0x11) {
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): scroll request notification");
 
-		    synchronized (Notification.scrollRequest) {
-			Notification.scrollRequest.notify();
+		    synchronized (Notification.getInstance().scrollRequest) {
+			Notification.getInstance().scrollRequest.notify();
 		    }
 		} else if (bytes[4] == 0x10) {
 		    if (Preferences.logging)
@@ -1057,7 +1056,7 @@ public class MetaWatchService extends Service {
 		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		    boolean displaySplash = sharedPreferences.getBoolean("DisplaySplashScreen", false);
 		    if (displaySplash) {
-			Notification.addBitmapNotification(this, Utils.getBitmap(this, "splash.png"), new VibratePattern(false, 0, 0, 0), 10000, "Splash");
+			Notification.getInstance().addBitmapNotification(this, Utils.getBitmap(this, "splash.png"), new VibratePattern(false, 0, 0, 0), 10000, "Splash");
 		    }
 
 		}
@@ -1105,12 +1104,12 @@ public class MetaWatchService extends Service {
 		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received light sensor response." + " light_sense=" + lightSense + " light_average=" + lightAverage);
 	    } else if (bytes[2] == eMessageType.GetRealTimeClockResponse.msg) {
 		long timeNow = System.currentTimeMillis();
-		long roundTrip = timeNow - Monitors.getRTCTimestamp;
+		long roundTrip = timeNow - Monitors.getInstance().getRTCTimestamp;
 
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received rtc response." + " round trip= " + roundTrip);
 
-		Monitors.rtcOffset = (int) (roundTrip / 2000);
+		Monitors.getInstance().rtcOffset = (int) (roundTrip / 2000);
 
 		Protocol.getInstance(MetaWatchService.this).setRealTimeClock(MetaWatchService.this);
 
@@ -1123,26 +1122,18 @@ public class MetaWatchService extends Service {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, e.toString());
 	    resetConnection();
-	} catch (ArrayIndexOutOfBoundsException e) {
+	} catch (Exception e) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, e.toString());
 	    resetConnection();
-	} finally {
-	    if(wakeLock != null && wakeLock.isHeld())
-		wakeLock.release();
 	}
     }
 
     private void resetConnection() {
-	Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
-
-	try {
-	    if (connectionState != ConnectionState.DISCONNECTING) {
-		connectionState = ConnectionState.CONNECTING;
-		disconnect();
-	    }
-	} finally {
-	}
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
+	connectionState = ConnectionState.CONNECTING;
+	cleanup();
     }
 
     private void broadcastConnection(boolean connected) {
@@ -1231,16 +1222,16 @@ public class MetaWatchService extends Service {
 
 		switch (button) {
 		case Call.CALL_ANSWER:
-		    MediaControl.answerCall(this);
+		    MediaControl.getInstance().answerCall(this);
 		    break;
 		case Call.CALL_DISMISS:
-		    MediaControl.ignoreCall(this);
+		    MediaControl.getInstance().ignoreCall(this);
 		    break;
 		case Call.CALL_MENU:
 		    ActionManager.displayCallActions(this);
 		    break;
 		default:
-		    Notification.buttonPressed(button);
+		    Notification.getInstance().buttonPressed(button);
 		    break;
 		}
 		break;

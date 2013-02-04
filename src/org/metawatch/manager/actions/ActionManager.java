@@ -71,7 +71,7 @@ public class ActionManager {
 
 		@Override
 		public int performAction(Context context) {
-		    MediaControl.answerCall(context);
+		    MediaControl.getInstance().answerCall(context);
 		    return ApplicationBase.BUTTON_USED;
 		}
 
@@ -94,7 +94,7 @@ public class ActionManager {
 
 		@Override
 		public int performAction(Context context) {
-		    MediaControl.dismissCall(context);
+		    MediaControl.getInstance().dismissCall(context);
 		    ActionManager.toRoot(context);
 		    return ApplicationBase.BUTTON_USED;
 		}
@@ -119,7 +119,7 @@ public class ActionManager {
 
 		@Override
 		public int performAction(Context context) {
-		    MediaControl.dismissCall(context);
+		    MediaControl.getInstance().dismissCall(context);
 		    ActionManager.toRoot(context);
 		    return ApplicationBase.BUTTON_USED;
 		}
@@ -152,7 +152,7 @@ public class ActionManager {
 		}
 
 		public int performAction(Context context) {
-		    Notification.replay(context);
+		    Notification.getInstance().replay(context);
 		    // DONT_UPDATE since the idle screen overwrites the
 		    // notification otherwise.
 		    return ApplicationBase.BUTTON_USED_DONT_UPDATE;

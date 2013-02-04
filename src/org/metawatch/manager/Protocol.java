@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.metawatch.manager.MetaWatchService.ConnectionState;
@@ -57,6 +59,8 @@ import android.text.format.DateFormat;
 public class Protocol {
 
     private volatile BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
+    
+    private Executor mSerialExecutor = Executors.newSingleThreadExecutor();
 
     private boolean idleShowClock = true;
 
@@ -64,8 +68,9 @@ public class Protocol {
 
     private Context mContext;
 
-    private static int sentPackets = 0;
+    private int sentPackets = 0;
     private Thread protocolWatchdogThread = null;
+    private volatile boolean protocolSenderRunning = false;
 
     private static Protocol mInstance;
 
@@ -77,6 +82,7 @@ public class Protocol {
 
     public void destroy() {
 	mInstance = null;
+	stopProtocolSender();
 	System.gc();
     }
 
@@ -88,7 +94,6 @@ public class Protocol {
 	LCDDiffBuffer = new byte[3][48][30];
     }
 
-    private static volatile boolean protocolSenderRunning = false;
     private Runnable protocolSender = new Runnable() {
 	public void run() {
 	    while (protocolSenderRunning) {
@@ -256,59 +261,78 @@ public class Protocol {
 
     }
 
-    public void enqueue(byte[] bytes) {
+    public synchronized void enqueue(final byte[] bytes) {
+	mSerialExecutor.execute(new Runnable() {
+	    @Override
+	    public void run() {
+		
+		if (MetaWatchService.fakeWatch)
+		    return;
 
-	if (MetaWatchService.fakeWatch)
-	    return;
+		sendQueue.add(bytes);
 
-	sendQueue.add(bytes);
-
-	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.sendNotifyClientsRequest(mContext);
+		if (sendQueue.size() % 10 == 0)
+		    MetaWatchService.sendNotifyClientsRequest(mContext);
+	    }
+	});
     }
 
     // Force the message packet to the head of the queue
     // this should only be used when really necessary / time critical
-    public void pushhead(byte[] bytes) {
+    public synchronized void pushhead(final byte[] bytes) {
+	mSerialExecutor.execute(new Runnable() {
+	    @Override
+	    public void run() {
+		if (MetaWatchService.fakeWatch)
+		    return;
 
-	if (MetaWatchService.fakeWatch)
-	    return;
+		ArrayList<byte[]> temp = new ArrayList<byte[]>();
+		sendQueue.drainTo(temp);
+		sendQueue.add(bytes);
+		sendQueue.addAll(temp);
 
-	ArrayList<byte[]> temp = new ArrayList<byte[]>();
-	sendQueue.drainTo(temp);
-	sendQueue.add(bytes);
-	sendQueue.addAll(temp);
-
-	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.sendNotifyClientsRequest(mContext);
+		if (sendQueue.size() % 10 == 0)
+		    MetaWatchService.sendNotifyClientsRequest(mContext);		
+	    }
+	});
     }
 
-    public void send(byte[] bytes) throws IOException {
-	if (bytes == null)
-	    return;
+    public synchronized void send(final byte[] bytes) throws IOException {
+	mSerialExecutor.execute(new Runnable() {
+	    @Override
+	    public void run() {
+		if (bytes == null)
+		    return;
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		try {
+		    byteArrayOutputStream.write(bytes);
+		    byteArrayOutputStream.write(crc(bytes));
+		} catch (IOException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		    return;
+		}
 
-	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-	byteArrayOutputStream.write(bytes);
-	byteArrayOutputStream.write(crc(bytes));
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		if (sharedPreferences.getBoolean("logPacketDetails", false)) {
+		    String str = "sending: ";
+		    byte[] b = byteArrayOutputStream.toByteArray();
+		    for (int i = 0; i < b.length; i++) {
+			str += "0x" + Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1) + ", ";
+		    }
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, str);
+		}
 
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-	if (sharedPreferences.getBoolean("logPacketDetails", false)) {
-	    String str = "sending: ";
-	    byte[] b = byteArrayOutputStream.toByteArray();
-	    for (int i = 0; i < b.length; i++) {
-		str += "0x" + Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1) + ", ";
+		MetaWatchService.sentBytes(mContext, byteArrayOutputStream.toByteArray());
+		sentPackets++;
+		if (sentPackets < 0)
+		    sentPackets = 1;
+
+		if (sendQueue.size() % 10 == 0)
+		    MetaWatchService.sendNotifyClientsRequest(mContext);		
 	    }
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, str);
-	}
-
-	MetaWatchService.sentBytes(mContext, byteArrayOutputStream.toByteArray());
-	sentPackets++;
-	if (sentPackets < 0)
-	    sentPackets = 1;
-
-	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.sendNotifyClientsRequest(mContext);
+	});
     }
 
     public void sendAdvanceHands(int hour, int minute, int second) {
@@ -358,7 +382,7 @@ public class Protocol {
 	    bytes[8] = (byte) (calendar.get(Calendar.DAY_OF_WEEK) - 1);
 	    bytes[9] = (byte) calendar.get(Calendar.HOUR_OF_DAY);
 	    bytes[10] = (byte) calendar.get(Calendar.MINUTE);
-	    bytes[11] = (byte) (calendar.get(Calendar.SECOND) + Monitors.rtcOffset);
+	    bytes[11] = (byte) (calendar.get(Calendar.SECOND) + Monitors.getInstance().rtcOffset);
 
 	    pushhead(bytes);
 
@@ -376,11 +400,11 @@ public class Protocol {
 	bytes[2] = eMessageType.GetRealTimeClock.msg;
 	bytes[3] = 0;
 
-	Monitors.getRTCTimestamp = System.currentTimeMillis();
+	Monitors.getInstance().getRTCTimestamp = System.currentTimeMillis();
 	pushhead(bytes);
     }
 
-    public static byte[] crc(byte[] bytes) {
+    public byte[] crc(byte[] bytes) {
 	byte[] result = new byte[2];
 	short crc = (short) 0xFFFF;
 	for (int j = 0; j < bytes.length; j++) {
@@ -420,7 +444,7 @@ public class Protocol {
 	return bitmap;
     }
 
-    public static Canvas breakText(Canvas canvas, String text, Paint pen, int x, int y) {
+    public Canvas breakText(Canvas canvas, String text, Paint pen, int x, int y) {
 	TextPaint textPaint = new TextPaint(pen);
 	StaticLayout staticLayout = new StaticLayout(text, textPaint, 94, android.text.Layout.Alignment.ALIGN_NORMAL, 1.3f, 0, false);
 
@@ -789,7 +813,7 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public static byte[] createOled1line(Context context, Bitmap icon, String line) {
+    public byte[] createOled1line(Context context, Bitmap icon, String line) {
 	int offset = 0;
 
 	if (icon != null)
@@ -837,7 +861,7 @@ public class Protocol {
 	return display;
     }
 
-    public static byte[] createOled2lines(Context context, String line1, String line2) {
+    public byte[] createOled2lines(Context context, String line1, String line2) {
 	int offset = 0;
 
 	/* Convert newlines to spaces */
@@ -883,7 +907,7 @@ public class Protocol {
 	return display;
     }
 
-    public static int createOled2linesLong(Context context, String line, byte[] display) {
+    public int createOled2linesLong(Context context, String line, byte[] display) {
 	int offset = 0 - 79;
 
 	/* Replace newlines with spaces */

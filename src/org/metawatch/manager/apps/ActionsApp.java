@@ -316,7 +316,7 @@ public class ActionsApp extends ApplicationBase {
 
 		    if (i == currentActions.size() - 1) {
 			// Mark the end of the list.
-			Idle.drawLine(canvas, 96 - textHeight / 2 - 1);
+			Idle.getInstance().drawLine(canvas, 96 - textHeight / 2 - 1);
 		    }
 		    scrolled = true;
 		}

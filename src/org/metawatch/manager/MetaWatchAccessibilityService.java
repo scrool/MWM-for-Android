@@ -130,7 +130,7 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 		    String artist = text.substring(0, truncatePos);
 		    String track = text.substring(truncatePos + 3);
 
-		    MediaControl.updateNowPlaying(this, artist, "", track, packageName);
+		    MediaControl.getInstance().updateNowPlaying(this, artist, "", track, packageName);
 
 		    return;
 		}

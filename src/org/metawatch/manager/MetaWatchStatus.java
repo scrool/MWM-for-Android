@@ -34,7 +34,6 @@ import java.io.InputStream;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
-import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.apps.AppManager;
 
 import android.app.AlertDialog;
@@ -214,21 +213,21 @@ public class MetaWatchStatus extends SherlockFragment {
 	mStatisticsText.setText("");
 	mStatisticsText.append("\n");
 	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
-	    if (Monitors.weatherData.error) {
+	    if (Monitors.getInstance().weatherData.error) {
 		Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
-		Utils.appendColoredText(mStatisticsText, Monitors.weatherData.errorString, Color.RED);
+		Utils.appendColoredText(mStatisticsText, Monitors.getInstance().weatherData.errorString, Color.RED);
 		mStatisticsText.append("\n\n");
 	    }
-	    if (Monitors.weatherData.received) {
+	    if (Monitors.getInstance().weatherData.received) {
 		mStatisticsText.append(res.getString(R.string.status_weather_last_updated));
 		mStatisticsText.append("\n");
 		mStatisticsText.append(res.getString(R.string.status_weather_forecast));
 		mStatisticsText.append("\n");
-		printDate(mStatisticsText, Monitors.weatherData.forecastTimeStamp);
+		printDate(mStatisticsText, Monitors.getInstance().weatherData.forecastTimeStamp);
 		mStatisticsText.append("  ");
 		mStatisticsText.append(res.getString(R.string.status_weather_observation));
 		mStatisticsText.append("\n");
-		printDate(mStatisticsText, Monitors.weatherData.timeStamp);
+		printDate(mStatisticsText, Monitors.getInstance().weatherData.timeStamp);
 	    } else {
 		mStatisticsText.append(res.getString(R.string.status_weather_waiting));
 	    }
@@ -236,10 +235,10 @@ public class MetaWatchStatus extends SherlockFragment {
 
 	if (Preferences.weatherGeolocationMode != GeolocationMode.MANUAL) {
 	    mStatisticsText.append("\n");
-	    if (LocationData.received) {
+	    if (Monitors.getInstance().mLocationData.received) {
 		mStatisticsText.append(res.getString(R.string.status_location_updated));
 		mStatisticsText.append("\n");
-		printDate(mStatisticsText, LocationData.timeStamp);
+		printDate(mStatisticsText, Monitors.getInstance().mLocationData.timeStamp);
 	    } else {
 		mStatisticsText.append(res.getString(R.string.status_location_waiting));
 		mStatisticsText.append("\n");
@@ -263,10 +262,10 @@ public class MetaWatchStatus extends SherlockFragment {
 	mStatisticsText.append("\n");
 
 	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getInstance(context).getQueueLength());
-	mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getQueueLength() + "\n");
+	mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getInstance().getQueueLength() + "\n");
 
 	if (Preferences.showNotificationQueue) {
-	    mStatisticsText.append(Notification.dumpQueue());
+	    mStatisticsText.append(Notification.getInstance().dumpQueue());
 	}
 
 	mStatisticsText.append("\nStatus updated at ");

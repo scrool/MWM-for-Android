@@ -115,7 +115,7 @@ public class Call {
 	    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
 	} else {
 	    Bitmap icon = Utils.getBitmap(context, "phone.bmp");
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Call from"), Protocol.createOled1line(context, null, name), null, 0, new VibratePattern(true, 500, 500, 3), "Phonecall");
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "Call from"), Protocol.getInstance(context).createOled1line(context, null, name), null, 0, new VibratePattern(true, 500, 500, 3), "Phonecall");
 	}
 
 	Thread ringer = new Thread(new CallVibrate(context));
@@ -156,7 +156,7 @@ public class Call {
 	MetaWatchService.WatchModes.CALL = false;
 
 	if (MetaWatchService.WatchModes.NOTIFICATION == true)
-	    Notification.replay(context);
+	    Notification.getInstance().replay(context);
 	else if (MetaWatchService.WatchModes.APPLICATION == true)
 	    Application.toApp(context);
 	else if (MetaWatchService.WatchModes.IDLE == true)

@@ -8,7 +8,7 @@ public class TouchDownWidget extends SimpleIconWidget {
 
     @Override
     protected int getCount() {
-	return Monitors.TouchDownData.unreadMailCount;
+	return Monitors.getInstance().mTouchDownData.unreadMailCount;
     }
 
     @Override

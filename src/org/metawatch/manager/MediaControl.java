@@ -49,7 +49,22 @@ public class MediaControl {
 
     private final static int TIME_TEN_MINUTES = 10 * 60 * 1000;
 
-    public static class TrackInfo {
+    private static MediaControl mInstance;
+    
+    private MediaControl(){}
+    
+    public static MediaControl getInstance() {
+	if (mInstance == null)
+	    mInstance = new MediaControl();
+	return mInstance;
+    }
+    
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
+    
+    public class TrackInfo {
 	public String artist = "";
 	public String album = "";
 	public String track = "";
@@ -71,16 +86,16 @@ public class MediaControl {
 	}
     }
 
-    private static TrackInfo lastTrack = new TrackInfo();
-    private static long lastTimeUpdate = 0;
+    private TrackInfo lastTrack = new TrackInfo();
+    private long lastTimeUpdate = 0;
 
-    public static TrackInfo getLastTrack() {
+    public TrackInfo getLastTrack() {
 	if (!lastTrack.isEmpty() && System.currentTimeMillis() - lastTimeUpdate > TIME_TEN_MINUTES)
 	    lastTrack = new TrackInfo();
 	return lastTrack;
     }
 
-    public static void next(Context context) {
+    public void next(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.next()");
 	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
@@ -90,7 +105,7 @@ public class MediaControl {
 	}
     }
 
-    public static void previous(Context context) {
+    public void previous(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.previous()");
 	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
@@ -100,7 +115,7 @@ public class MediaControl {
 	}
     }
 
-    public static void togglePause(Context context) {
+    public void togglePause(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.togglePause()");
 	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
@@ -114,7 +129,7 @@ public class MediaControl {
 	}
     }
 
-    public static void answerCall(Context context) {
+    public void answerCall(Context context) {
 	if (Call.isRinging) {
 	    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 	    if (Preferences.autoSpeakerphone) {
@@ -127,7 +142,7 @@ public class MediaControl {
 	}
     }
 
-    public static void dismissCall(Context context) {
+    public void dismissCall(Context context) {
 	// TODO: Find a way of making this actually work (and properly dismiss
 	// to voicemail)
 	if (Call.isRinging) {
@@ -137,7 +152,7 @@ public class MediaControl {
 	Call.endRinging(context);
     }
 
-    public static void ignoreCall(Context context) {
+    public void ignoreCall(Context context) {
 	if (Call.isRinging) {
 	    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 	    Call.previousRingerMode = audioManager.getRingerMode();
@@ -146,37 +161,37 @@ public class MediaControl {
 	}
     }
 
-    public static void setSpeakerphone(Context context, boolean state) {
+    public void setSpeakerphone(Context context, boolean state) {
 	AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 	audioManager.setMode(AudioManager.MODE_IN_CALL);
 	audioManager.setSpeakerphoneOn(state);
     }
 
-    public static void ToggleSpeakerphone(Context context) {
+    public void ToggleSpeakerphone(Context context) {
 	AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 	audioManager.setMode(AudioManager.MODE_IN_CALL);
 	audioManager.setSpeakerphoneOn(!audioManager.isSpeakerphoneOn());
     }
 
-    public static void volumeDown(Context context) {
+    public void volumeDown(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.volumeDown()");
 	AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 	audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
     }
 
-    public static void volumeUp(Context context) {
+    public void volumeUp(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.volumeUp()");
 	AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 	audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
     }
 
-    private static void sendMediaButtonEvent(Context context, int keyCode) {
+    private void sendMediaButtonEvent(Context context, int keyCode) {
 	sendMediaButtonEvent(context, keyCode, null);
     }
 
-    private static void sendMediaButtonEvent(Context context, int keyCode, String permission) {
+    private void sendMediaButtonEvent(Context context, int keyCode, String permission) {
 	long time = SystemClock.uptimeMillis();
 	Intent downIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null);
 	KeyEvent downEvent = new KeyEvent(time, time, KeyEvent.ACTION_DOWN, keyCode, 0);
@@ -188,7 +203,7 @@ public class MediaControl {
 	context.sendOrderedBroadcast(upIntent, permission);
     }
 
-    public static void updateNowPlaying(Context context, String artist, String album, String track, String sender) {
+    public void updateNowPlaying(Context context, String artist, String album, String track, String sender) {
 
 	/* Ignore if track info hasn't changed. */
 	if (artist.equals(lastTrack.artist) && track.equals(lastTrack.track) && album.equals(lastTrack.album)) {
@@ -235,7 +250,7 @@ public class MediaControl {
 
     }
 
-    public static void stopPlaying(Context context) {
+    public void stopPlaying(Context context) {
 	lastTrack = new TrackInfo();
 	lastTimeUpdate = System.currentTimeMillis();
 

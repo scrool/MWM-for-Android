@@ -133,12 +133,12 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 
 	    if (intent.hasExtra("oled1") || intent.hasExtra("oled1a") || intent.hasExtra("oled1b") || intent.hasExtra("oled2") || intent.hasExtra("oled2a") || intent.hasExtra("oled2b")) {
 
-		byte[] line1 = Protocol.createOled1line(context, null, "");
-		byte[] line2 = Protocol.createOled1line(context, null, "");
+		byte[] line1 = Protocol.getInstance(context).createOled1line(context, null, "");
+		byte[] line2 = Protocol.getInstance(context).createOled1line(context, null, "");
 		byte[] scroll = null;
 		int scrollLen = 0;
 		if (intent.hasExtra("oled1")) {
-		    line1 = Protocol.createOled1line(context, null, intent.getStringExtra("oled1"));
+		    line1 = Protocol.getInstance(context).createOled1line(context, null, intent.getStringExtra("oled1"));
 		} else {
 		    if (intent.hasExtra("oled1a") || intent.hasExtra("oled1b")) {
 			String oled1a = "";
@@ -149,11 +149,11 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 			if (intent.hasExtra("oled1b")) {
 			    oled1b = intent.getStringExtra("oled1b");
 			}
-			line1 = Protocol.createOled2lines(context, oled1a, oled1b);
+			line1 = Protocol.getInstance(context).createOled2lines(context, oled1a, oled1b);
 		    }
 		}
 		if (intent.hasExtra("oled2")) {
-		    line2 = Protocol.createOled1line(context, null, intent.getStringExtra("oled2"));
+		    line2 = Protocol.getInstance(context).createOled1line(context, null, intent.getStringExtra("oled2"));
 		} else {
 		    if (intent.hasExtra("oled2a") || intent.hasExtra("oled2b")) {
 			String oled2a = "";
@@ -165,11 +165,11 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 			    oled2b = intent.getStringExtra("oled2b");
 			}
 			scroll = new byte[800];
-			scrollLen = Protocol.createOled2linesLong(context, oled2b, scroll);
-			line2 = Protocol.createOled2lines(context, oled2a, oled2b);
+			scrollLen = Protocol.getInstance(context).createOled2linesLong(context, oled2b, scroll);
+			line2 = Protocol.getInstance(context).createOled2lines(context, oled2a, oled2b);
 		    }
 		}
-		Notification.addOledNotification(context, line1, line2, scroll, scrollLen, vibrate, "API oled notification");
+		Notification.getInstance().addOledNotification(context, line1, line2, scroll, scrollLen, vibrate, "API oled notification");
 
 	    } else if (intent.hasExtra("text")) {
 		String title = "Notification";
@@ -191,10 +191,10 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		    Log.d(MetaWatchStatus.TAG, "ApiIntentReceiver.onReceive(): sending text notification; text='" + text + "'");
 	    } else if (intent.hasExtra("array")) {
 		int[] array = intent.getIntArrayExtra("array");
-		Notification.addArrayNotification(context, array, vibrate, "API Array notification");
+		Notification.getInstance().addArrayNotification(context, array, vibrate, "API Array notification");
 	    } else if (intent.hasExtra("buffer")) {
 		byte[] buffer = intent.getByteArrayExtra("buffer");
-		Notification.addBufferNotification(context, buffer, vibrate, "API Buffer notification");
+		Notification.getInstance().addBufferNotification(context, buffer, vibrate, "API Buffer notification");
 	    }
 	    return;
 	}

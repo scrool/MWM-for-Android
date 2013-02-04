@@ -82,7 +82,7 @@ public class PhoneStatusWidget implements InternalWidget {
 
 	Bitmap icon = Utils.getBitmap(context, iconFile);
 
-	int level = Monitors.BatteryData.level;
+	int level = Monitors.getInstance().mBatteryData.level;
 	String count = level == -1 ? "-" : level + "%";
 
 	widget.priority = level == -1 ? 0 : 1;

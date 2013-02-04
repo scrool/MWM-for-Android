@@ -72,7 +72,7 @@ class CallStateListener extends PhoneStateListener {
 
 	    if (Call.inCall) {
 		if (Preferences.autoSpeakerphone) {
-		    MediaControl.setSpeakerphone(context, Call.previousSpeakerphoneState);
+		    MediaControl.getInstance().setSpeakerphone(context, Call.previousSpeakerphoneState);
 		}
 		if (Preferences.showActionsInCall) {
 		    Idle.getInstance().toPage(context, 0);

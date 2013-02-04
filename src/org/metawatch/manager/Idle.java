@@ -67,8 +67,8 @@ public class Idle {
     private boolean busy = false;
     private Object busyObj = new Object();
     
-    static int currentPage = 0;
-    static boolean initialised = false;
+    int currentPage = 0;
+    boolean initialised = false;
 
     Bitmap oledIdle = null;
     
@@ -478,7 +478,7 @@ public class Idle {
 	return bitmap;
     }
 
-    public static Canvas drawLine(Canvas canvas, int y) {
+    public Canvas drawLine(Canvas canvas, int y) {
 	Paint paint = new Paint();
 	paint.setColor(Color.BLACK);
 
@@ -545,7 +545,7 @@ public class Idle {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.toIdle()");
 
-	if (Notification.isActive())
+	if (Notification.getInstance().isActive())
 	    return;
 
 	MetaWatchService.WatchModes.IDLE = true;

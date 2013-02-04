@@ -72,16 +72,16 @@ public class NotificationBuilder {
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    if (Preferences.stickyNotifications & !number.equals("Google Chat")) {
 		Bitmap[] bitmaps = smartNotify(context, icon, name, text);
-		Notification.addBitmapNotification(context, bitmaps, vibratePattern, -1, description);
+		Notification.getInstance().addBitmapNotification(context, bitmaps, vibratePattern, -1, description);
 	    } else {
 		Bitmap bitmap = smartLines(context, icon, "SMS from", new String[] { name });
-		Notification.addBitmapNotification(context, bitmap, vibratePattern, 4000, description);
-		Notification.addTextNotification(context, text, Notification.VibratePattern.NO_VIBRATE, Notification.getDefaultNotificationTimeout(context));
+		Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, 4000, description);
+		Notification.getInstance().addTextNotification(context, text, Notification.VibratePattern.NO_VIBRATE, Notification.getInstance().getDefaultNotificationTimeout(context));
 	    }
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, text, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "SMS from"), Protocol.createOled2lines(context, name, text), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, text, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "SMS from"), Protocol.getInstance(context).createOled2lines(context, name, text), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -92,11 +92,11 @@ public class NotificationBuilder {
 	String description = "MMS: " + name;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "MMS from", new String[] { name });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, name, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "MMS from"), Protocol.createOled2lines(context, name, ""), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, name, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "MMS from"), Protocol.getInstance(context).createOled2lines(context, name, ""), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -117,11 +117,11 @@ public class NotificationBuilder {
 	    } else {
 		bitmaps = new Bitmap[] { smartLines(context, icon, title, new String[] { text }) };
 	    }
-	    Notification.addBitmapNotification(context, bitmaps, vibratePattern, -1, description);
+	    Notification.getInstance().addBitmapNotification(context, bitmaps, vibratePattern, -1, description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, text, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, title), Protocol.createOled2lines(context, title, text), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, text, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, title), Protocol.getInstance(context).createOled2lines(context, title, text), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -131,11 +131,11 @@ public class NotificationBuilder {
 	String description = "K9: " + sender;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "K9 mail", new String[] { sender, subject, folder });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, subject, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "K9 mail"), Protocol.createOled2lines(context, sender, subject), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, subject, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "K9 mail"), Protocol.getInstance(context).createOled2lines(context, sender, subject), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -145,12 +145,12 @@ public class NotificationBuilder {
 	String description = "Gmail: " + sender;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Gmail", new String[] { sender, email, subject });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
-	    Notification.addTextNotification(context, snippet, Notification.VibratePattern.NO_VIBRATE, Notification.getDefaultNotificationTimeout(context));
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addTextNotification(context, snippet, Notification.VibratePattern.NO_VIBRATE, Notification.getInstance().getDefaultNotificationTimeout(context));
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, snippet, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled2lines(context, "Gmail from " + sender, email), Protocol.createOled2lines(context, subject, snippet), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, snippet, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled2lines(context, "Gmail from " + sender, email), Protocol.getInstance(context).createOled2lines(context, subject, snippet), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -161,11 +161,11 @@ public class NotificationBuilder {
 	String description = "Gmail: unread " + count;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Gmail", new String[] { messages, recipient });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, recipient, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, " Gmail"), Protocol.createOled2lines(context, messages, recipient), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, recipient, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, " Gmail"), Protocol.getInstance(context).createOled2lines(context, messages, recipient), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -175,11 +175,11 @@ public class NotificationBuilder {
 	String description = "TouchDown: " + title;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "TouchDown", new String[] { title, ticker });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, ticker, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "TouchDown"), Protocol.createOled2lines(context, title, ticker), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, ticker, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "TouchDown"), Protocol.getInstance(context).createOled2lines(context, title, ticker), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -189,11 +189,11 @@ public class NotificationBuilder {
 	String description = "Cal: " + text;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Calendar", new String[] { text });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, text, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "  Calendar"), Protocol.createOled2lines(context, "Event Reminder:", text), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, text, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "  Calendar"), Protocol.getInstance(context).createOled2lines(context, "Event Reminder:", text), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -205,9 +205,9 @@ public class NotificationBuilder {
 	String description = "Alarm";
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Alarm", new String[] { currentTime }, FontCache.FontSize.LARGE);
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Alarm"), Protocol.createOled1line(context, null, currentTime), null, 0, vibratePattern, description);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "Alarm"), Protocol.getInstance(context).createOled1line(context, null, currentTime), null, 0, vibratePattern, description);
 	}
     }
 
@@ -217,11 +217,11 @@ public class NotificationBuilder {
 	String description = "Music: " + track;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Music", new String[] { track, album, artist });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, track, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, artist), Protocol.createOled2lines(context, album, track), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, track, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, artist), Protocol.getInstance(context).createOled2lines(context, album, track), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -232,9 +232,9 @@ public class NotificationBuilder {
 	String description = "Timezone Changed";
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Timezone", new String[] { "Timezone Changed", tz.getDisplayName() });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Timezone"), Protocol.createOled1line(context, null, tz.getDisplayName()), null, 0, vibratePattern, description);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "Timezone"), Protocol.getInstance(context).createOled1line(context, null, tz.getDisplayName()), null, 0, vibratePattern, description);
 	}
     }
 
@@ -251,11 +251,11 @@ public class NotificationBuilder {
 	String description = appName;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, appName, new String[] { notificationText });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, notificationText, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, appName), Protocol.createOled2lines(context, "Notification", notificationText), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, notificationText, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, appName), Protocol.getInstance(context).createOled2lines(context, "Notification", notificationText), scroll, len, vibratePattern, description);
 	}
     }
 
@@ -265,26 +265,26 @@ public class NotificationBuilder {
 	String description = "Winamp: " + track;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Winamp", new String[] { track, album, artist });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, track, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, artist), Protocol.createOled2lines(context, album, track), scroll, len, vibratePattern, description);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, track, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, artist), Protocol.getInstance(context).createOled2lines(context, album, track), scroll, len, vibratePattern, description);
 	}
     }
 
     public static void createBatterylow(Context context) {
 	VibratePattern vibratePattern = createVibratePatternFromPreference(context, "settingsBatteryNumberBuzzes");
 	StringBuilder builder = new StringBuilder();
-	builder.append(Monitors.BatteryData.level);
+	builder.append(Monitors.getInstance().mBatteryData.level);
 	builder.append("%");
 	String description = "Battery low";
 	Bitmap icon = Utils.getBitmap(context, "batterylow.bmp");
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Battery", new String[] { "Phone battery at", builder.toString() });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Warning!"), Protocol.createOled2lines(context, "Phone battery at", builder.toString()), null, 0, vibratePattern, description);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "Warning!"), Protocol.getInstance(context).createOled2lines(context, "Phone battery at", builder.toString()), null, 0, vibratePattern, description);
 	}
     }
 
@@ -293,11 +293,11 @@ public class NotificationBuilder {
 	Bitmap icon = Utils.getBitmap(context, "notifymyandroid.bmp");
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, appName, new String[] { event, desc });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), appName + ": " + event);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), appName + ": " + event);
 	} else {
 	    byte[] scroll = new byte[800];
-	    int len = Protocol.createOled2linesLong(context, desc, scroll);
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, appName), Protocol.createOled2lines(context, event, desc), scroll, len, vibratePattern, appName + ": " + event);
+	    int len = Protocol.getInstance(context).createOled2linesLong(context, desc, scroll);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, appName), Protocol.getInstance(context).createOled2lines(context, event, desc), scroll, len, vibratePattern, appName + ": " + event);
 	}
     }
 
@@ -307,9 +307,9 @@ public class NotificationBuilder {
 	Bitmap icon = Utils.getBitmap(context, "voicemail.bmp");
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Bitmap bitmap = smartLines(context, icon, "Voicemail", new String[] { "You have", "new voicemail" });
-	    Notification.addBitmapNotification(context, bitmap, vibratePattern, Notification.getDefaultNotificationTimeout(context), description);
+	    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
-	    Notification.addOledNotification(context, Protocol.createOled1line(context, icon, "Voicemail"), Protocol.createOled2lines(context, "You have", "new voicemail"), null, 0, vibratePattern, description);
+	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "Voicemail"), Protocol.getInstance(context).createOled2lines(context, "You have", "new voicemail"), null, 0, vibratePattern, description);
 	}
     }
 

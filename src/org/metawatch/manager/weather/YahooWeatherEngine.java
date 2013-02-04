@@ -16,10 +16,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.metawatch.manager.Idle;
+import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchStatus;
-import org.metawatch.manager.Monitors.LocationData;
+import org.metawatch.manager.Monitors;
 import org.metawatch.manager.Utils;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -28,7 +29,6 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.content.Context;
-import org.metawatch.manager.Log;
 
 public class YahooWeatherEngine extends AbstractWeatherEngine {
 
@@ -134,7 +134,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 
 		String placeFinderUrl = null;
 		if (isGeolocationDataUsed()) {
-		    placeFinderUrl = "http://where.yahooapis.com/geocode?q=" + LocationData.latitude + "," + LocationData.longitude + arguments;
+		    placeFinderUrl = "http://where.yahooapis.com/geocode?q=" + Monitors.getInstance().mLocationData.latitude + "," + Monitors.getInstance().mLocationData.longitude + arguments;
 		} else {
 		    String weatherLocation = Preferences.weatherCity.replace(" ", "%20");
 		    placeFinderUrl = "http://where.yahooapis.com/geocode?q=" + weatherLocation + arguments;

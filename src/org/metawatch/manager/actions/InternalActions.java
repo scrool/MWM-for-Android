@@ -96,7 +96,7 @@ public class InternalActions {
 	}
 
 	public int performAction(Context context) {
-	    MediaControl.ToggleSpeakerphone(context);
+	    MediaControl.getInstance().ToggleSpeakerphone(context);
 	    return ApplicationBase.BUTTON_USED;
 	}
     }
@@ -150,7 +150,7 @@ public class InternalActions {
 	}
 
 	public String getName() {
-	    return Monitors.weatherData.received ? "Refresh Weather" : "Refreshing...";
+	    return Monitors.getInstance().weatherData.received ? "Refresh Weather" : "Refreshing...";
 	}
 
 	public String bulletIcon() {
@@ -158,13 +158,13 @@ public class InternalActions {
 	}
 
 	public int performAction(Context context) {
-	    Monitors.updateWeatherDataForced(context);
+	    Monitors.getInstance().updateWeatherDataForced(context);
 
 	    return ApplicationBase.BUTTON_USED;
 	}
 
 	public long getTimestamp() {
-	    return Monitors.weatherData.timeStamp;
+	    return Monitors.getInstance().weatherData.timeStamp;
 	}
     }
 

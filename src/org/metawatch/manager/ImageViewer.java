@@ -89,7 +89,7 @@ public class ImageViewer extends SherlockFragmentActivity {
 
 		VibratePattern vibratePattern = new VibratePattern(false, 1, 1, 1);
 
-		Notification.addBitmapNotification(this, dithered, vibratePattern, -1, "Image viewer");
+		Notification.getInstance().addBitmapNotification(this, dithered, vibratePattern, -1, "Image viewer");
 	    }
 
 	} catch (FileNotFoundException e) {

@@ -33,7 +33,7 @@ public class NotificationsAction extends ContainerAction {
     public void refreshSubActions(Context context) {
 	subActions.clear();
 
-	for (final NotificationType n : Notification.history()) {
+	for (final NotificationType n : Notification.getInstance().history()) {
 	    subActions.add(new Action() {
 
 		public String getName() {
@@ -49,7 +49,7 @@ public class NotificationsAction extends ContainerAction {
 		}
 
 		public int performAction(Context context) {
-		    Notification.replay(context, n);
+		    Notification.getInstance().replay(context, n);
 		    // DONT_UPDATE since the idle screen overwrites the
 		    // notification otherwise.
 		    return ApplicationBase.BUTTON_USED_DONT_UPDATE;
@@ -63,7 +63,7 @@ public class NotificationsAction extends ContainerAction {
     }
 
     public int performSecondary(Context context) {
-	Notification.clearHistory();
+	Notification.getInstance().clearHistory();
 	return ApplicationBase.BUTTON_USED;
     }
 }

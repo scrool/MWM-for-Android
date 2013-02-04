@@ -44,23 +44,37 @@ import org.metawatch.manager.Log;
 
 public class Notification {
 
-    private static NotificationType currentNotification = null;
+    private NotificationType currentNotification = null;
 
     public static final byte REPLAY = 30;
-
     final static byte NOTIFICATION_NONE = 0;
     final static byte NOTIFICATION_UP = 30;
     final static byte NOTIFICATION_DOWN = 31;
     final static byte NOTIFICATION_DISMISS = 32;
 
-    private static int notifyButtonPress = 0;
+    private int notifyButtonPress = 0;
 
-    private static BlockingQueue<NotificationType> notificationQueue = new LinkedBlockingQueue<NotificationType>();
-    private static volatile boolean notificationSenderRunning = false;
-    private static ArrayList<NotificationType> notificationHistory = new ArrayList<NotificationType>();
+    private BlockingQueue<NotificationType> notificationQueue = new LinkedBlockingQueue<NotificationType>();
+    private volatile boolean notificationSenderRunning = false;
+    private ArrayList<NotificationType> notificationHistory = new ArrayList<NotificationType>();
     final static byte NOTIFICATION_HISTORY_SIZE = 15;
 
-    private static void addToNotificationQueue(Context context, NotificationType notification, boolean forceShow) {
+    private static Notification mInstance;
+    
+    private Notification(){}
+    
+    public static Notification getInstance() {
+	if (mInstance == null)
+	    mInstance = new Notification();
+	return mInstance;
+    }
+    
+    public void destroy() {
+	mInstance = null;
+	System.gc();
+    }
+    
+    private void addToNotificationQueue(Context context, NotificationType notification, boolean forceShow) {
 	if (MetaWatchService.connectionState == MetaWatchService.ConnectionState.CONNECTED) {
 	    if (!forceShow && MetaWatchService.silentMode()) {
 		addToHistory(notification);
@@ -71,14 +85,14 @@ public class Notification {
 	}
     }
 
-    private static void addToHistory(NotificationType notification) {
+    private void addToHistory(NotificationType notification) {
 	notification.isNew = false;
 	notificationHistory.add(0, notification);
 	while (notificationHistory.size() > NOTIFICATION_HISTORY_SIZE)
 	    notificationHistory.remove(notificationHistory.size() - 1);
     }
 
-    private static class NotificationSender implements Runnable {
+    private class NotificationSender implements Runnable {
 	private Context context;
 
 	public NotificationSender(Context context) {
@@ -128,7 +142,7 @@ public class Notification {
 			/*
 			 * Wait until the watch shows the notification before starting the timeout.
 			 */
-			synchronized (Notification.modeChanged) {
+			synchronized (modeChanged) {
 			    modeChanged.wait(60000);
 			}
 
@@ -176,8 +190,8 @@ public class Notification {
 
 				for (int i = 240; i < notification.scrollLength; i += 80) {
 				    try {
-					synchronized (Notification.scrollRequest) {
-					    Notification.scrollRequest.wait(60000);
+					synchronized (scrollRequest) {
+					    scrollRequest.wait(60000);
 					}
 				    } catch (InterruptedException e) {
 					e.printStackTrace();
@@ -231,7 +245,7 @@ public class Notification {
 
 			do {
 			    try {
-				synchronized (Notification.buttonPressed) {
+				synchronized (buttonPressed) {
 				    buttonPressed.wait(timeout);
 				}
 			    } catch (InterruptedException e) {
@@ -301,9 +315,9 @@ public class Notification {
 
     };
 
-    private static Thread notificationSenderThread = null;
+    private Thread notificationSenderThread = null;
 
-    public static synchronized void startNotificationSender(Context context) {
+    public synchronized void startNotificationSender(Context context) {
 	if (notificationSenderRunning == false) {
 	    notificationSenderRunning = true;
 	    NotificationSender notificationSender = new NotificationSender(context);
@@ -313,13 +327,15 @@ public class Notification {
 	}
     }
 
-    public static synchronized void stopNotificationSender() {
+    public synchronized void stopNotificationSender() {
 	if (notificationSenderRunning == true) {
 	    /* Stops thread gracefully */
 	    notificationSenderRunning = false;
 	    notificationSenderThread.interrupt();
 	    /* Thread is dead, we can mark it for garbage collection. */
 	    notificationSenderThread = null;
+	    mInstance = null;
+	    System.gc();
 	}
     }
 
@@ -331,7 +347,7 @@ public class Notification {
     private static final int DEFAULT_STICKY_NOTIFICATION_TIMEOUT = 120;
     private static final int NUM_MS_IN_SECOND = 1000;
 
-    public static int getDefaultNotificationTimeout(Context context) {
+    public int getDefaultNotificationTimeout(Context context) {
 	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 	String timeoutString = sharedPreferences.getString(NOTIFICATION_TIMEOUT_SETTING, DEFAULT_NOTIFICATION_TIMEOUT_STRING);
 	try {
@@ -342,7 +358,7 @@ public class Notification {
 	}
     }
 
-    public static int getStickyNotificationTimeout(Context context) {
+    public int getStickyNotificationTimeout(Context context) {
 	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 	String timeoutString = sharedPreferences.getString(STICKY_NOTIFICATION_TIMEOUT_SETTING, STICKY_NOTIFICATION_TIMEOUT_STRING);
 	try {
@@ -353,11 +369,11 @@ public class Notification {
 	}
     }
 
-    public static Object scrollRequest = new Object();
-    public static Object buttonPressed = new Object();
-    public static Object modeChanged = new Object();
+    public Object scrollRequest = new Object();
+    public Object buttonPressed = new Object();
+    public Object modeChanged = new Object();
 
-    public static class NotificationType {
+    public class NotificationType {
 	public NotificationType() {
 	    this.timestamp = System.currentTimeMillis();
 	}
@@ -398,7 +414,7 @@ public class Notification {
 	}
     }
 
-    public static void addTextNotification(Context context, String text, VibratePattern vibratePattern, int timeout) {
+    public void addTextNotification(Context context, String text, VibratePattern vibratePattern, int timeout) {
 	NotificationType notification = new NotificationType();
 	notification.bitmaps = new Bitmap[] { Protocol.getInstance(context).createTextBitmap(context, text) };
 	notification.timeout = timeout;
@@ -410,11 +426,11 @@ public class Notification {
 	addToNotificationQueue(context, notification, false);
     }
 
-    public static void addBitmapNotification(Context context, Bitmap bitmap, VibratePattern vibratePattern, int timeout, String description) {
+    public void addBitmapNotification(Context context, Bitmap bitmap, VibratePattern vibratePattern, int timeout, String description) {
 	addBitmapNotification(context, new Bitmap[] { bitmap }, vibratePattern, timeout, description);
     }
 
-    public static void addBitmapNotification(Context context, Bitmap[] bitmaps, VibratePattern vibratePattern, int timeout, String description) {
+    public void addBitmapNotification(Context context, Bitmap[] bitmaps, VibratePattern vibratePattern, int timeout, String description) {
 
 	if (bitmaps != null) {
 	    if (Preferences.logging)
@@ -432,7 +448,7 @@ public class Notification {
 	addToNotificationQueue(context, notification, false);
     }
 
-    public static void addArrayNotification(Context context, int[] array, VibratePattern vibratePattern, String description) {
+    public void addArrayNotification(Context context, int[] array, VibratePattern vibratePattern, String description) {
 	NotificationType notification = new NotificationType();
 	notification.array = array;
 
@@ -447,7 +463,7 @@ public class Notification {
 
     }
 
-    public static void addBufferNotification(Context context, byte[] buffer, VibratePattern vibratePattern, String description) {
+    public void addBufferNotification(Context context, byte[] buffer, VibratePattern vibratePattern, String description) {
 	NotificationType notification = new NotificationType();
 	notification.buffer = buffer;
 	int notificationTimeout = getDefaultNotificationTimeout(context);
@@ -461,7 +477,7 @@ public class Notification {
 
     }
 
-    public static void addOledNotification(Context context, byte[] top, byte[] bottom, byte[] scroll, int scrollLength, VibratePattern vibratePattern, String description) {
+    public void addOledNotification(Context context, byte[] top, byte[] bottom, byte[] scroll, int scrollLength, VibratePattern vibratePattern, String description) {
 	NotificationType notification = new NotificationType();
 	notification.oledTop = top;
 	notification.oledBottom = bottom;
@@ -478,7 +494,7 @@ public class Notification {
 
     }
 
-    private static void exitNotification(Context context) {
+    private void exitNotification(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Notification.exitNotification()");
 	// disable notification mode
@@ -492,11 +508,11 @@ public class Notification {
 	    Idle.getInstance().toIdle(context);
     }
 
-    public static void replay(Context context) {
+    public void replay(Context context) {
 	replay(context, lastNotification());
     }
 
-    public static void replay(Context context, NotificationType notification) {
+    public void replay(Context context, NotificationType notification) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Notification.replay()");
 	if (notification != null) {
@@ -506,21 +522,21 @@ public class Notification {
 	}
     }
 
-    public static void buttonPressed(int button) {
+    public void buttonPressed(int button) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Notification:Button pressed " + button);
 
 	notifyButtonPress = button;
-	synchronized (Notification.buttonPressed) {
-	    Notification.buttonPressed.notify();
+	synchronized (buttonPressed) {
+	    buttonPressed.notify();
 	}
     }
 
-    public static int getQueueLength() {
+    public int getQueueLength() {
 	return notificationQueue.size();
     }
 
-    public static String dumpQueue() {
+    public String dumpQueue() {
 
 	StringBuilder builder = new StringBuilder();
 
@@ -551,7 +567,7 @@ public class Notification {
 	return "";
     }
 
-    public static NotificationType lastNotification() {
+    public NotificationType lastNotification() {
 	if (notificationHistory.isEmpty()) {
 	    return null;
 	} else {
@@ -559,15 +575,15 @@ public class Notification {
 	}
     }
 
-    public static ArrayList<NotificationType> history() {
+    public ArrayList<NotificationType> history() {
 	return notificationHistory;
     }
 
-    public static void clearHistory() {
+    public void clearHistory() {
 	notificationHistory.clear();
     }
 
-    public static boolean isActive() {
+    public boolean isActive() {
 	return currentNotification != null;
     }
 

@@ -34,7 +34,6 @@ import java.util.Random;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
-import org.metawatch.manager.Monitors.LocationData;
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.apps.AppManager;
 
@@ -43,7 +42,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceScreen;
-import org.metawatch.manager.Log;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockPreferenceActivity;
@@ -91,11 +89,11 @@ public class Test extends SherlockPreferenceActivity {
 		if (MetaWatchService.watchType == WatchType.DIGITAL) {
 		    // NotificationBuilder.createSmart(context,
 		    // "Notification", ipsum);
-		    Notification.addTextNotification(context, "Notification", new VibratePattern(true, 500, 500, 3), Notification.getDefaultNotificationTimeout(context));
+		    Notification.getInstance().addTextNotification(context, "Notification", new VibratePattern(true, 500, 500, 3), Notification.getInstance().getDefaultNotificationTimeout(context));
 		} else {
-		    Notification.addOledNotification(context, Protocol.createOled2lines(context, "Display A, line 1", "Display A, line 2"), Protocol.createOled2lines(context, "Display B, line 1", "Display B, line 2"), null, 0, null, "notification");
+		    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled2lines(context, "Display A, line 1", "Display A, line 2"), Protocol.getInstance(context).createOled2lines(context, "Display B, line 1", "Display B, line 2"), null, 0, null, "notification");
 		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "Notification timeout is: " + Notification.getDefaultNotificationTimeout(context));
+			Log.d(MetaWatchStatus.TAG, "Notification timeout is: " + Notification.getInstance().getDefaultNotificationTimeout(context));
 
 		}
 		return true;
@@ -344,14 +342,14 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("refresh_location").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		Monitors.RefreshLocation();
+		Monitors.getInstance().RefreshLocation();
 		return true;
 	    }
 	});
 
 	preferenceScreen.findPreference("refresh_weather").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		Monitors.updateWeatherDataForced(context);
+		Monitors.getInstance().updateWeatherDataForced(context);
 		return true;
 	    }
 	});
@@ -359,12 +357,12 @@ public class Test extends SherlockPreferenceActivity {
 	preferenceScreen.findPreference("random_location").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
 		Random rnd = new Random();
-		LocationData.latitude = (rnd.nextDouble() * 180.0) - 90.0;
-		LocationData.longitude = (rnd.nextDouble() * 360.0) - 180.0;
-		LocationData.timeStamp = System.currentTimeMillis();
-		LocationData.received = true;
-		Monitors.weatherData.timeStamp = 0;
-		Monitors.updateWeatherData(context);
+		Monitors.getInstance().mLocationData.latitude = (rnd.nextDouble() * 180.0) - 90.0;
+		Monitors.getInstance().mLocationData.longitude = (rnd.nextDouble() * 360.0) - 180.0;
+		Monitors.getInstance().mLocationData.timeStamp = System.currentTimeMillis();
+		Monitors.getInstance().mLocationData.received = true;
+		Monitors.getInstance().weatherData.timeStamp = 0;
+		Monitors.getInstance().updateWeatherData(context);
 		return true;
 	    }
 	});
@@ -427,21 +425,21 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("media_next").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		MediaControl.next(context);
+		MediaControl.getInstance().next(context);
 		return true;
 	    }
 	});
 
 	preferenceScreen.findPreference("media_previous").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		MediaControl.previous(context);
+		MediaControl.getInstance().previous(context);
 		return true;
 	    }
 	});
 
 	preferenceScreen.findPreference("media_togglepause").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		MediaControl.togglePause(context);
+		MediaControl.getInstance().togglePause(context);
 		return true;
 	    }
 	});
