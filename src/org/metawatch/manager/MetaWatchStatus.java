@@ -31,6 +31,7 @@ package org.metawatch.manager;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.metawatch.manager.MetaWatchAccessibilityService.GetAccessibilityReceived;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
@@ -55,6 +56,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -75,6 +77,7 @@ public class MetaWatchStatus extends SherlockFragment {
     public static Messenger mService = null;
     public static long startupTime = 0;
     private TextView mStatisticsText = null;
+    private TextView mAccessibilityText = null;
     private AlertDialog mStatisticsDialog = null;
     private ActionBar mActionBar = null;
     private View mMainView = null;
@@ -89,11 +92,18 @@ public class MetaWatchStatus extends SherlockFragment {
 	super.onCreate(savedInstanceState);
 	context = (SherlockFragmentActivity) getActivity();
 	mActionBar = context.getSupportActionBar();
+	LinearLayout statisticsContainer = new LinearLayout(context);
+	statisticsContainer.setGravity(Gravity.CENTER);
+	statisticsContainer.setOrientation(LinearLayout.VERTICAL);
 	mStatisticsText = new TextView(context);
+	mAccessibilityText = new TextView(context);
+	mAccessibilityText.setGravity(Gravity.CENTER);
+	statisticsContainer.addView(mAccessibilityText);
+	statisticsContainer.addView(mStatisticsText);
 	Builder builder = new Builder(context);
 	builder.setIcon(R.drawable.icon);
 	builder.setTitle(R.string.statistics);
-	builder.setView(mStatisticsText);
+	builder.setView(statisticsContainer);
 	builder.setPositiveButton(android.R.string.ok, null);
 	mStatisticsDialog = builder.create();
 	configureBugSense();
@@ -207,9 +217,8 @@ public class MetaWatchStatus extends SherlockFragment {
 
     private void getStatistics() {
 	mStatisticsText.setGravity(Gravity.CENTER);
-	Resources res = context.getResources();
+	final Resources res = context.getResources();
 	mStatisticsText.setText("");
-	mStatisticsText.append("\n");
 	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
 	    if (Monitors.getInstance().weatherData.error) {
 		Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
@@ -243,21 +252,29 @@ public class MetaWatchStatus extends SherlockFragment {
 	    }
 	}
 
-	mStatisticsText.append("\n");
 	if (Utils.isAccessibilityEnabled(context)) {
-	    if (MetaWatchAccessibilityService.accessibilityReceived) {
-		Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_working), Color.GREEN);
-	    } else {
-		if (startupTime == 0 || System.currentTimeMillis() - startupTime < 60 * 1000) {
-		    mStatisticsText.append(res.getString(R.string.status_accessibility_waiting));
-		} else {
-		    Utils.appendColoredText(mStatisticsText, res.getString(R.string.status_accessibility_failed), Color.RED);
+	    GetAccessibilityReceived getAccessibilityReceived = new GetAccessibilityReceived() {
+		@Override
+		public void onAccessibilityReceived(boolean accessibilityReceived) {
+		    if (accessibilityReceived) {
+			mAccessibilityText.setText("\n");
+			Utils.appendColoredText(mAccessibilityText, res.getString(R.string.status_accessibility_working), Color.GREEN);
+			mAccessibilityText.append("\n");
+		    } else {
+			if (startupTime == 0 || System.currentTimeMillis() - startupTime < 10 * 1000) {
+			    mAccessibilityText.setText("\n" + res.getString(R.string.status_accessibility_waiting) + "\n");
+			} else {
+			    mAccessibilityText.setText("\n");
+			    Utils.appendColoredText(mAccessibilityText, res.getString(R.string.status_accessibility_failed), Color.RED);
+			    mAccessibilityText.append("\n");
+			}
+		    }
 		}
-	    }
+	    };
+	    MetaWatchAccessibilityService.getAccessibilityReceived(context, getAccessibilityReceived);
 	} else {
-	    mStatisticsText.append(res.getString(R.string.status_accessibility_disabled));
+	    mAccessibilityText.setText("\n" + res.getString(R.string.status_accessibility_disabled) + "\n");
 	}
-	mStatisticsText.append("\n");
 
 	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getInstance(context).getQueueLength());
 	mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getInstance().getQueueLength() + "\n");

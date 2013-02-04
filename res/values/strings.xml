@@ -401,7 +401,7 @@
 	<string name="status_accessibility_working">Accessibility enabled and working</string>
 	<string name="status_accessibility_waiting">Accessibility enabled - waiting for notifications</string>
 	<string name="status_accessibility_failed">Accessibility not working - disable and renable Accessibility in the system settings</string>
-	<string name="status_accessibility_disabled">Accessibility disabled</string>
+	<string name="status_accessibility_disabled">Accessibility disabled. Enable in the Android system settings.</string>
 	
 	<string name="status_message_queue">Message Queue Length:</string>
 	<string name="status_notification_queue">Notification Queue Length:</string>
