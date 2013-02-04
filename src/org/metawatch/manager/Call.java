@@ -117,9 +117,9 @@ public class Call {
 	    Bitmap icon = Utils.getBitmap(context, "phone.bmp");
 	    Notification.getInstance().addOledNotification(context, Protocol.getInstance(context).createOled1line(context, icon, "Call from"), Protocol.getInstance(context).createOled1line(context, null, name), null, 0, new VibratePattern(true, 500, 500, 3), "Phonecall");
 	}
-
-	Thread ringer = new Thread(new CallVibrate(context));
-	ringer.start();
+	if (Preferences.notifyLight)
+	    Protocol.getInstance(context).ledChange(true);
+	Protocol.getInstance(context).vibrate(1000, 1000, 3);
     }
 
     public static void endRinging(Context context) {
