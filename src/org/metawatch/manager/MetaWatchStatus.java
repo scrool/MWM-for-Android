@@ -31,7 +31,6 @@ package org.metawatch.manager;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.metawatch.manager.MetaWatchAccessibilityService.GetAccessibilityReceived;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
@@ -253,25 +252,20 @@ public class MetaWatchStatus extends SherlockFragment {
 	}
 
 	if (Utils.isAccessibilityEnabled(context)) {
-	    GetAccessibilityReceived getAccessibilityReceived = new GetAccessibilityReceived() {
-		@Override
-		public void onAccessibilityReceived(boolean accessibilityReceived) {
-		    if (accessibilityReceived) {
-			mAccessibilityText.setText("\n");
-			Utils.appendColoredText(mAccessibilityText, res.getString(R.string.status_accessibility_working), Color.GREEN);
-			mAccessibilityText.append("\n");
-		    } else {
-			if (startupTime == 0 || System.currentTimeMillis() - startupTime < 10 * 1000) {
-			    mAccessibilityText.setText("\n" + res.getString(R.string.status_accessibility_waiting) + "\n");
-			} else {
-			    mAccessibilityText.setText("\n");
-			    Utils.appendColoredText(mAccessibilityText, res.getString(R.string.status_accessibility_failed), Color.RED);
-			    mAccessibilityText.append("\n");
-			}
-		    }
+	    if (MetaWatchAccessibilityService.accessibilityReceived) {
+		mAccessibilityText.setText("\n");
+		Utils.appendColoredText(mAccessibilityText, res.getString(R.string.status_accessibility_working), Color.GREEN);
+		mAccessibilityText.append("\n");
+	    } else {
+		if (startupTime == 0 || System.currentTimeMillis() - startupTime < 10 * 1000) {
+		    mAccessibilityText.setText("\n" + res.getString(R.string.status_accessibility_waiting) + "\n");
+		} else {
+		    mAccessibilityText.setText("\n");
+		    Utils.appendColoredText(mAccessibilityText, res.getString(R.string.status_accessibility_failed), Color.RED);
+		    mAccessibilityText.append("\n");
 		}
-	    };
-	    MetaWatchAccessibilityService.getAccessibilityReceived(context, getAccessibilityReceived);
+	    }
+
 	} else {
 	    mAccessibilityText.setText("\n" + res.getString(R.string.status_accessibility_disabled) + "\n");
 	}

@@ -6,8 +6,6 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -36,41 +34,11 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
     }
 
     private String currentActivity = "";
-    public boolean accessibilityReceived = false;
+    public static boolean accessibilityReceived = false;
 
     private String lastNotificationPackage = "";
     private String lastNotificationText = "";
     private long lastNotificationWhen = 0;
-    
-    public static final String COMMAND = "COMMAND";
-    public static final int GET_ACCESSIBILITY_RECEIVED = 234;
-    private static GetAccessibilityReceived mGetAccessibilityReceived;
-    
-    public interface GetAccessibilityReceived {
-	public void onAccessibilityReceived(boolean accessibilityReceived);
-    }
-    
-    public static void getAccessibilityReceived(Context context, GetAccessibilityReceived getAccessibilityReceived) {
-	mGetAccessibilityReceived = getAccessibilityReceived;
-	Intent intent = new Intent(context, MetaWatchAccessibilityService.class);
-	intent.putExtra(COMMAND, GET_ACCESSIBILITY_RECEIVED);
-	context.startService(intent);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-	if (intent != null) {
-	    switch(intent.getIntExtra(COMMAND, 0)) {
-	    case GET_ACCESSIBILITY_RECEIVED:
-		if (mGetAccessibilityReceived != null) {
-		    mGetAccessibilityReceived.onAccessibilityReceived(accessibilityReceived);
-		    mGetAccessibilityReceived = null;
-		}
-		break;
-	    }
-	}
-	return AccessibilityService.START_STICKY;
-    }
     
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
