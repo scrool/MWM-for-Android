@@ -37,18 +37,13 @@ import org.metawatch.manager.MetaWatchService.WeatherProvider;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
+import android.os.Looper;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +52,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -66,20 +60,20 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorSet;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bugsense.trace.BugSenseHandler;
 
-public class MetaWatchStatus extends SherlockFragment {
+public class MetaWatchStatus extends SherlockFragment implements OnClickListener {
 
     public static final String TAG = "MetaWatchStatus";
-    public static Button mStatistics = null;
-    public static ToggleButton toggleButton = null;
-    private static SherlockFragmentActivity context = null;
-    public static Messenger mService = null;
-    public static long startupTime = 0;
+    public Button mStatistics = null;
+    public Button startButton = null;
+    public Button shutdownButton = null;
+    private SherlockFragmentActivity context = null;
+    public Messenger mService = null;
+    public long startupTime = 0;
     private TextView mStatisticsText = null;
     private TextView mAccessibilityText = null;
     private AlertDialog mStatisticsDialog = null;
     private ActionBar mActionBar = null;
     private View mMainView = null;
-    private final Messenger mMessenger = new Messenger(new IncomingHandler());
 
     public static MetaWatchStatus newInstance() {
 	return new MetaWatchStatus();
@@ -141,60 +135,69 @@ public class MetaWatchStatus extends SherlockFragment {
 		mStatisticsDialog.show();
 	    }
 	});
-	toggleButton = (ToggleButton) mMainView.findViewById(R.id.toggleButton);
-	toggleButton.setOnClickListener(new OnClickListener() {
-	    @Override
-	    public void onClick(View v) {
-		wiggleButton();
-		if (!toggleButton.isChecked()) {
-		    stopService();
-		} else if (toggleButton.isChecked()) {
-		    startService();
-		}
-	    }
-	    private void wiggleButton() {
-		ObjectAnimator right = ObjectAnimator.ofFloat(toggleButton, "translationX", 0, 5);
-		right.setDuration(45);
-		ObjectAnimator left = ObjectAnimator.ofFloat(toggleButton, "translationX", 5, -5);
-		left.setDuration(45);
-		ObjectAnimator centerHorizontal = ObjectAnimator.ofFloat(toggleButton, "translationX", -5, 0);
-		centerHorizontal.setDuration(45);
-		ObjectAnimator up = ObjectAnimator.ofFloat(toggleButton, "translationY", 0, -5);
-		up.setDuration(45);
-		ObjectAnimator down = ObjectAnimator.ofFloat(toggleButton, "translationY", -5, 5);
-		down.setDuration(45);
-		ObjectAnimator centerVertical = ObjectAnimator.ofFloat(toggleButton, "translationY", 5, 0);
-		centerVertical.setDuration(45);
-		AnimatorSet set = new AnimatorSet();
-		set.playSequentially(right, left, centerHorizontal, up, down, centerVertical);
-		set.start();
-	    }
-	});
+	startButton = (Button) mMainView.findViewById(R.id.startButton);
+	startButton.setOnClickListener(this);
+	shutdownButton = (Button) mMainView.findViewById(R.id.shutdownButton);
+	shutdownButton.setOnClickListener(this);
 	return mMainView;
+    }
+    
+    @Override
+    public void onClick(View view) {
+	wiggleButton(view);
+	switch(view.getId()) {
+	case R.id.startButton:
+	    startService();
+	    break;
+	case R.id.shutdownButton:
+	    stopService();
+	    break;
+	}
+    }
+    
+    private void wiggleButton(View view) {
+	ObjectAnimator right = ObjectAnimator.ofFloat(view, "translationX", 0, 5);
+	right.setDuration(45);
+	ObjectAnimator left = ObjectAnimator.ofFloat(view, "translationX", 5, -5);
+	left.setDuration(45);
+	ObjectAnimator centerHorizontal = ObjectAnimator.ofFloat(view, "translationX", -5, 0);
+	centerHorizontal.setDuration(45);
+	ObjectAnimator up = ObjectAnimator.ofFloat(view, "translationY", 0, -5);
+	up.setDuration(45);
+	ObjectAnimator down = ObjectAnimator.ofFloat(view, "translationY", -5, 5);
+	down.setDuration(45);
+	ObjectAnimator centerVertical = ObjectAnimator.ofFloat(view, "translationY", 5, 0);
+	centerVertical.setDuration(45);
+	AnimatorSet set = new AnimatorSet();
+	set.playSequentially(right, left, centerHorizontal, up, down, centerVertical);
+	set.start();
     }
 
     @Override
     public void onResume() {
 	super.onResume();
-	displayStatus();
-	if (MetaWatchService.isRunning())
+	mHandler.post(mConnectionUpdater);
+	if (MetaWatchService.isRunning()) {
 	    startService();
+	}
     }
 
     @Override
     public void onPause() {
 	super.onPause();
-	if (mConnection != null)
-	    try {
-		context.unbindService(mConnection);
-	    } catch (IllegalArgumentException e) {
-		e.printStackTrace();
-		// Service not registered
-	    }
+	mHandler.removeCallbacks(mConnectionUpdater);
     }
+    
+    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private Runnable mConnectionUpdater = new Runnable() {
+ 	@Override
+ 	public void run() {
+ 	   displayStatus();
+ 	    mHandler.postDelayed(mConnectionUpdater, 1000);
+ 	}
+     };
 
     private void displayStatus() {
-	toggleButton.setChecked(MetaWatchService.isRunning());
 	getStatistics();
 	if (mActionBar == null)
 	    return;
@@ -281,7 +284,7 @@ public class MetaWatchStatus extends SherlockFragment {
 	printDate(mStatisticsText, System.currentTimeMillis());
     }
 
-    private static void printDate(TextView textView, long ticks) {
+    private void printDate(TextView textView, long ticks) {
 	if (ticks == 0) {
 	    textView.append(context.getResources().getString(R.string.status_loading));
 	} else {
@@ -291,56 +294,16 @@ public class MetaWatchStatus extends SherlockFragment {
     }
 
     void startService() {
-	context.bindService(new Intent(context, MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
 	context.startService(new Intent(context, MetaWatchService.class));
     }
 
     void stopService() {
 	try {
 	    context.stopService(new Intent(context, MetaWatchService.class));
-	    context.unbindService(mConnection);
 	} catch (Throwable e) {
 	    // The service wasn't running
 	    if (Preferences.logging)
 		Log.d(TAG, e.getMessage());
 	}
     }
-
-    /**
-     * Handler of incoming messages from service.
-     */
-    private class IncomingHandler extends Handler {
-	@Override
-	public void handleMessage(Message msg) {
-	    switch (msg.what) {
-	    case MetaWatchService.Msg.UPDATE_STATUS:
-		displayStatus();
-		break;
-	    default:
-		super.handleMessage(msg);
-	    }
-	}
-    }
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-	public void onServiceConnected(ComponentName className, IBinder service) {
-	    displayStatus();
-	    mService = new Messenger(service);
-	    try {
-		Message msg = Message.obtain(null, MetaWatchService.Msg.REGISTER_CLIENT);
-		msg.replyTo = mMessenger;
-		mService.send(msg);
-	    } catch (RemoteException e) {
-		e.printStackTrace();
-	    }
-	}
-
-	public void onServiceDisconnected(ComponentName className) {
-	    // This is called when the connection with the service has been
-	    // unexpectedly disconnected -- that is, its process crashed.
-	    displayStatus();
-	    mService = null;
-	}
-    };
 }

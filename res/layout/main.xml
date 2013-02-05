@@ -3,11 +3,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
-    <ToggleButton android:id="@+id/toggleButton"
-        android:textSize="15sp"
-   	    android:layout_width="match_parent"
-   	    android:layout_height="wrap_content"
-		android:textOn="@string/main_service_toggle_on"
-		android:textOff="@string/main_service_toggle_off" /> 
-	<Button android:id="@+id/statistics" android:textSize="15sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/statistics"/>  
+    <Button android:id="@+id/startButton" android:text="@string/request_service_start" android:textSize="15sp" android:layout_width="match_parent" android:layout_height="wrap_content" /> 
+    <Button android:id="@+id/shutdownButton" android:text="@string/request_service_shutdown" android:textSize="15sp" android:layout_width="match_parent" android:layout_height="wrap_content" /> 
+    <Button android:id="@+id/statistics" android:textSize="15sp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/statistics"/>  
 </LinearLayout>

@@ -354,11 +354,7 @@
     
 	<string name="settings_about">About</string>
 	<string name="settings_exit">Disconnect and Exit</string>
-	
-    <string name="main_service_toggle_on">Service läuft. Click zum Stoppen.</string>
-    <string name="main_service_toggle_off">Service gestoppt. Click zum Starten.</string>
-
-  
+	  
   	<string name="ui_tab_status">Status</string>
   	<string name="ui_tab_preferences">Einstellungen</string>
   	<string name="ui_tab_widgets">Widgets</string>
@@ -415,5 +411,8 @@
 	<string name="would_you_like_to_retry">Would you like to retry?</string>
 	
 	<string name="downloading_theme">Downloading Theme</string>
+	
+	<string name="request_service_start">Request Service Start</string>
+	<string name="request_service_shutdown">Request Service Shutdown</string>
 	
 </resources>
