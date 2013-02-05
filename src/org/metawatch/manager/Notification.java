@@ -543,7 +543,7 @@ public class Notification {
 	    if (currentNotification != null) {
 		builder.append(" Displaying: ");
 		builder.append(currentNotification.description);
-		builder.append("\n\n");
+		builder.append("\n");
 	    }
 
 	    if (notificationQueue.size() > 0) {
