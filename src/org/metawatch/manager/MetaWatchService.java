@@ -211,7 +211,7 @@ public class MetaWatchService extends Service {
 	public static boolean notifyNMA = true;
 	public static boolean notifyNewVoicemail = true;
 	public static String watchMacAddress = "";
-	public static int packetWait = 10;
+	public static int packetWait = 25;
 	public static boolean skipSDP = false;
 	public static boolean insecureBtSocket = false;
 	public static boolean invertLCD = false;
