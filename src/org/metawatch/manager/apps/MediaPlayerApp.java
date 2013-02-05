@@ -60,7 +60,7 @@ public class MediaPlayerApp extends ApplicationBase {
 	    // -
 	    // immediate
 
-//	    Protocol.getInstance(context).enableButton(2, 1, MENU, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    Protocol.getInstance(context).enableButton(2, 1, MENU, MetaWatchService.WatchBuffers.APPLICATION); // right
 	    // bottom
 	    // -
 	    // press

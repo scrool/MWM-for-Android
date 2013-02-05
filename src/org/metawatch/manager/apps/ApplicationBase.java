@@ -152,27 +152,25 @@ public abstract class ApplicationBase {
 	    return;
 	}
 
-	int page = Idle.getInstance().getAppPage(getInfo().id);
-
-	// Open the existing Idle app page.
-	if (page != -1) {
-	    Idle.getInstance().toPage(context, page);
-	    Idle.getInstance().toIdle(context);
-
-	    // Open new app.
-	} else {
-	    if (forcePopup || Preferences.appLaunchMode == AppLaunchMode.POPUP) {
-		appState = ACTIVE_POPUP;
-		int watchType = MetaWatchService.watchType;
-		if (watchType == MetaWatchService.WatchType.DIGITAL) {
-		    Application.startAppMode(context, this);
-		    Application.toApp(context); // Will call update() to draw
-						// app screen.
-		} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-		    // FIXME
-		}
-
-	    } else if (Preferences.appLaunchMode == AppLaunchMode.APP_PAGE) {
+	if (forcePopup || Preferences.appLaunchMode == AppLaunchMode.POPUP) {
+	    appState = ACTIVE_POPUP;
+	    int watchType = MetaWatchService.watchType;
+	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
+		Application.startAppMode(context, this);
+		Application.toApp(context); // Will call update() to draw
+		// app screen.
+	    } else if (watchType == MetaWatchService.WatchType.ANALOG) {
+		// FIXME
+	    }
+	} else if (Preferences.appLaunchMode == AppLaunchMode.APP_PAGE) {
+	    int page = Idle.getInstance().getAppPage(getInfo().id);
+	    // Open the existing Idle app page.
+	    if (page != -1) {
+		Idle.getInstance().toPage(context, page);
+		Idle.getInstance().toIdle(context);
+		Idle.getInstance().updateIdle(context, true);
+		// Open new app.
+	    } else {	
 		page = Idle.getInstance().addAppPage(context, this);
 		Idle.getInstance().toPage(context, page);
 		Idle.getInstance().toIdle(context);
