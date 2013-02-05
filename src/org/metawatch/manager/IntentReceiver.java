@@ -54,8 +54,6 @@ public class IntentReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 	String action = intent.getAction();
 
-	MetaWatchService.autoStartService(context);
-
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "IntentReceiver.onReceive(): received intent, action='" + action + "'");
 

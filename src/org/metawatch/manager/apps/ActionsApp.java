@@ -235,7 +235,7 @@ public class ActionsApp extends ApplicationBase {
 	return null;
     }
 
-    private Bitmap drawDigital(final Context context, boolean preview) {
+    private Bitmap drawDigital(final Context context, boolean preview) throws IllegalArgumentException {
 	TextPaint paint = new TextPaint();
 	paint.setColor(Color.BLACK);
 	paint.setTextSize(FontCache.instance(context).Get().size);

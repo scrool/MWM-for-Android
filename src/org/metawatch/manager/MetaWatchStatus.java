@@ -57,7 +57,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -147,11 +146,11 @@ public class MetaWatchStatus extends SherlockFragment {
 	    @Override
 	    public void onClick(View v) {
 		wiggleButton();
-		displayStatus();
-		if (!MetaWatchService.isRunning())
-		    startService();
-		else
+		if (!toggleButton.isChecked()) {
 		    stopService();
+		} else if (toggleButton.isChecked()) {
+		    startService();
+		}
 	    }
 	    private void wiggleButton() {
 		ObjectAnimator right = ObjectAnimator.ofFloat(toggleButton, "translationX", 0, 5);
@@ -177,8 +176,9 @@ public class MetaWatchStatus extends SherlockFragment {
     @Override
     public void onResume() {
 	super.onResume();
-	startService();
 	displayStatus();
+	if (MetaWatchService.isRunning())
+	    startService();
     }
 
     @Override
@@ -194,7 +194,7 @@ public class MetaWatchStatus extends SherlockFragment {
     }
 
     private void displayStatus() {
-	setButtonState(context);
+	toggleButton.setChecked(MetaWatchService.isRunning());
 	getStatistics();
 	if (mActionBar == null)
 	    return;
@@ -291,16 +291,8 @@ public class MetaWatchStatus extends SherlockFragment {
     }
 
     void startService() {
-	displayStatus();
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		context.bindService(new Intent(context, MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
-		context.startService(new Intent(context, MetaWatchService.class));
-	    }
-	}).start();
-	if (!MetaWatchService.isRunning())
-	    Toast.makeText(context, context.getString(R.string.main_service_toggle_starting), Toast.LENGTH_SHORT).show();
+	context.bindService(new Intent(context, MetaWatchService.class), mConnection, Context.BIND_AUTO_CREATE);
+	context.startService(new Intent(context, MetaWatchService.class));
     }
 
     void stopService() {
@@ -312,12 +304,6 @@ public class MetaWatchStatus extends SherlockFragment {
 	    if (Preferences.logging)
 		Log.d(TAG, e.getMessage());
 	}
-	displayStatus();
-    }
-
-    private static void setButtonState(Context context) {
-	if (toggleButton != null)
-	    toggleButton.setChecked(MetaWatchService.isRunning());
     }
 
     /**
@@ -339,6 +325,7 @@ public class MetaWatchStatus extends SherlockFragment {
     private ServiceConnection mConnection = new ServiceConnection() {
 
 	public void onServiceConnected(ComponentName className, IBinder service) {
+	    displayStatus();
 	    mService = new Messenger(service);
 	    try {
 		Message msg = Message.obtain(null, MetaWatchService.Msg.REGISTER_CLIENT);
@@ -352,6 +339,7 @@ public class MetaWatchStatus extends SherlockFragment {
 	public void onServiceDisconnected(ComponentName className) {
 	    // This is called when the connection with the service has been
 	    // unexpectedly disconnected -- that is, its process crashed.
+	    displayStatus();
 	    mService = null;
 	}
     };

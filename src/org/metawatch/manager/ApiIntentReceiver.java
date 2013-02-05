@@ -49,8 +49,6 @@ public class ApiIntentReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-	MetaWatchService.autoStartService(context);
-
 	final String action = intent.getAction();
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "ApiIntentReceiver.onReceive(): received intent, action='" + action + "'");
