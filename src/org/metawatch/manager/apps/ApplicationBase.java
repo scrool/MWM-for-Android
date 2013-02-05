@@ -176,6 +176,7 @@ public abstract class ApplicationBase {
 		page = Idle.getInstance().addAppPage(context, this);
 		Idle.getInstance().toPage(context, page);
 		Idle.getInstance().toIdle(context);
+		Idle.getInstance().updateIdle(context, true);
 	    }
 	}
     }

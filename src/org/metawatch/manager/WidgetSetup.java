@@ -356,7 +356,8 @@ public class WidgetSetup extends SherlockFragment {
 			public void onClick(View v) {
 			    Integer page = (Integer) v.getTag();
 			    Idle.getInstance().toPage(mActivity, page);
-			    Idle.getInstance().updateIdle(v.getContext(), true);
+			    Idle.getInstance().toIdle(mActivity);
+			    Idle.getInstance().updateIdle(mActivity, true);
 			    if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
 				Idle.getInstance().sendOledIdle(v.getContext());
 			    }
