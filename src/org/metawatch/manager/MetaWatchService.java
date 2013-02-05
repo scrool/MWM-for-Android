@@ -540,7 +540,6 @@ public class MetaWatchService extends Service {
     public synchronized int onStartCommand(final Intent intent, int flags, int startId) {
 	if (intent != null) {
 	    try {
-		wakeLock.acquire();
 		switch (intent.getIntExtra(COMMAND_KEY, 0)) {
 		case SILENT_MODE_ENABLE:
 		    setSilentMode(false);
@@ -559,11 +558,15 @@ public class MetaWatchService extends Service {
 			@Override
 			public void run() {
 			    try {
+				wakeLock.acquire();
 				outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
 				outputStream.flush();
 			    } catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				resetConnection();
+			    } finally {
+				if (wakeLock != null && wakeLock.isHeld())
+				    wakeLock.release();
 			    }
 			}
 		    });
@@ -574,8 +577,6 @@ public class MetaWatchService extends Service {
 		    Log.d(MetaWatchStatus.TAG, e.toString());
 		resetConnection();
 	    } finally {
-		if (wakeLock != null && wakeLock.isHeld())
-		    wakeLock.release();
 	    }
 	}
 

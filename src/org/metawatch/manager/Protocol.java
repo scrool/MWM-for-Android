@@ -279,59 +279,49 @@ public class Protocol {
     // Force the message packet to the head of the queue
     // this should only be used when really necessary / time critical
     public synchronized void pushhead(final byte[] bytes) {
-	mSerialExecutor.execute(new Runnable() {
-	    @Override
-	    public void run() {
-		if (MetaWatchService.fakeWatch)
-		    return;
+	if (MetaWatchService.fakeWatch)
+	    return;
 
-		ArrayList<byte[]> temp = new ArrayList<byte[]>();
-		sendQueue.drainTo(temp);
-		sendQueue.add(bytes);
-		sendQueue.addAll(temp);
+	ArrayList<byte[]> temp = new ArrayList<byte[]>();
+	sendQueue.drainTo(temp);
+	sendQueue.add(bytes);
+	sendQueue.addAll(temp);
 
-		if (sendQueue.size() % 10 == 0)
-		    MetaWatchService.sendNotifyClientsRequest(mContext);		
-	    }
-	});
+	if (sendQueue.size() % 10 == 0)
+	    MetaWatchService.sendNotifyClientsRequest(mContext);
     }
 
     public synchronized void send(final byte[] bytes) throws IOException {
-	mSerialExecutor.execute(new Runnable() {
-	    @Override
-	    public void run() {
-		if (bytes == null)
-		    return;
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		try {
-		    byteArrayOutputStream.write(bytes);
-		    byteArrayOutputStream.write(crc(bytes));
-		} catch (IOException e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		    return;
-		}
+	if (bytes == null)
+	    return;
+	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+	try {
+	    byteArrayOutputStream.write(bytes);
+	    byteArrayOutputStream.write(crc(bytes));
+	} catch (IOException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	    return;
+	}
 
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-		if (sharedPreferences.getBoolean("logPacketDetails", false)) {
-		    String str = "sending: ";
-		    byte[] b = byteArrayOutputStream.toByteArray();
-		    for (int i = 0; i < b.length; i++) {
-			str += "0x" + Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1) + ", ";
-		    }
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, str);
-		}
-
-		MetaWatchService.sentBytes(mContext, byteArrayOutputStream.toByteArray());
-		sentPackets++;
-		if (sentPackets < 0)
-		    sentPackets = 1;
-
-		if (sendQueue.size() % 10 == 0)
-		    MetaWatchService.sendNotifyClientsRequest(mContext);		
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+	if (sharedPreferences.getBoolean("logPacketDetails", false)) {
+	    String str = "sending: ";
+	    byte[] b = byteArrayOutputStream.toByteArray();
+	    for (int i = 0; i < b.length; i++) {
+		str += "0x" + Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1) + ", ";
 	    }
-	});
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, str);
+	}
+
+	MetaWatchService.sentBytes(mContext, byteArrayOutputStream.toByteArray());
+	sentPackets++;
+	if (sentPackets < 0)
+	    sentPackets = 1;
+
+	if (sendQueue.size() % 10 == 0)
+	    MetaWatchService.sendNotifyClientsRequest(mContext);
     }
 
     public void sendAdvanceHands(int hour, int minute, int second) {
