@@ -545,7 +545,7 @@
 			android:key="AppLaunchMode" 
 			android:title="@string/settings_app_launch_mode" 
 			android:negativeButtonText="@string/settings_CancelButton" 
- 			android:enabled="true" 
+ 			android:enabled="false" 
  			android:defaultValue="0"
  			/>
 

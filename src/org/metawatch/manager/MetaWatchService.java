@@ -857,7 +857,7 @@ public class MetaWatchService extends Service {
     }
 
     int processState() {
-	int result = 0;
+	int result = Preferences.packetWait;
 	switch (connectionState) {
 	case ConnectionState.DISCONNECTED:
 	    if (Preferences.logging)
