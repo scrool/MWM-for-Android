@@ -565,9 +565,6 @@ public class MetaWatchService extends Service {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onStartCommand()");
 
-	if (connectionState == ConnectionState.DISCONNECTED)
-	    initialize();
-
 	return START_STICKY;
     }
 
