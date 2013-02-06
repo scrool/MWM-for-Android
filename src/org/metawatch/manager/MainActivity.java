@@ -27,6 +27,7 @@ public class MainActivity extends SherlockFragmentActivity {
     private ObjectAnimator downFromTop(final View view) {
 	ObjectAnimator downFromTop = ObjectAnimator.ofFloat(view, "translationY", -1000, 0);
 	downFromTop.setDuration(1250);
+	downFromTop.setStartDelay(500);
 	downFromTop.setInterpolator(new DecelerateInterpolator());
 	downFromTop.addListener(new AnimatorListener() {
 	    @Override
@@ -48,6 +49,7 @@ public class MainActivity extends SherlockFragmentActivity {
     private ObjectAnimator inFromLeft(final View view) {
 	ObjectAnimator inFromLeft = ObjectAnimator.ofFloat(view, "translationX", -1000, 0);
 	inFromLeft.setDuration(1000);
+	inFromLeft.setStartDelay(500);
 	inFromLeft.setInterpolator(new DecelerateInterpolator());
 	inFromLeft.addListener(new AnimatorListener() {
 	    @Override

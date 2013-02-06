@@ -165,6 +165,7 @@ public class Settings extends SherlockPreferenceActivity {
 
     private void processActionBar() {
 	mActionBar = getSupportActionBar();
+	mActionBar.setTitle("MetaWatch Preferences");
 	mActionBar.setDisplayHomeAsUpEnabled(true);
 	mActionBar.setDisplayShowTitleEnabled(true);
 	this.invalidateOptionsMenu();
