@@ -1,7 +1,11 @@
 package org.metawatch.manager;
 
+import org.metawatch.manager.MetaWatchService.Preferences;
+
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
@@ -73,25 +77,44 @@ public class MainActivity extends SherlockFragmentActivity {
     @Override
     public void onResume() {
 	super.onResume();
-	View status = findViewById(R.id.status);
-	status.setVisibility(View.INVISIBLE);
-	downFromTop(status).start();
-	View widgets = findViewById(R.id.widget_setup);
-	widgets.setVisibility(View.INVISIBLE);
-	inFromLeft(widgets).start();
+	if (Preferences.animations) {
+	    View status = findViewById(R.id.status);
+	    status.setVisibility(View.INVISIBLE);
+	    downFromTop(status).start();
+	    View widgets = findViewById(R.id.widget_setup);
+	    widgets.setVisibility(View.INVISIBLE);
+	    inFromLeft(widgets).start();
+	}
 
     }
+    
+    MenuItem enableAnimations;
+    MenuItem disableAnimations;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 	super.onCreateOptionsMenu(menu);
 	com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
 	inflater.inflate(R.menu.main, menu);
+	enableAnimations = menu.findItem(R.id.animations_enabled);
+	disableAnimations = menu.findItem(R.id.animations_disabled);
 	return true;
     }
-
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+	if (Preferences.animations) {
+	    enableAnimations.setChecked(true);
+	} else {
+	    disableAnimations.setChecked(true);
+	}
+        return true;
+    }
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+	Editor editor;
 	Intent intent;
 	switch (item.getItemId()) {
 	case R.id.settings:
@@ -101,6 +124,20 @@ public class MainActivity extends SherlockFragmentActivity {
 	case R.id.tests:
 	    intent = new Intent(this, Test.class);
 	    startActivity(intent);
+	    return true;
+	case R.id.animations_disabled:
+	    editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+	    editor.putBoolean("animations", false);
+	    editor.commit();
+	    Preferences.animations = false;
+	    invalidateOptionsMenu();
+	    return true;
+	case R.id.animations_enabled:
+	    editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+	    editor.putBoolean("animations", true);
+	    editor.commit();
+	    Preferences.animations = true;
+	    invalidateOptionsMenu();
 	    return true;
 	default:
 	    return false;

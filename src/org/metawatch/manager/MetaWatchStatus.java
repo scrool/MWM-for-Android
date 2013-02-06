@@ -145,7 +145,8 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     
     @Override
     public void onClick(View view) {
-	wiggleButton(view);
+	if (Preferences.animations)
+	    wiggleButton(view);
 	switch(view.getId()) {
 	case R.id.startButton:
 	    startService();
@@ -201,16 +202,16 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	    return;
 	switch (MetaWatchService.connectionState) {
 	case MetaWatchService.ConnectionState.DISCONNECTED:
-	    mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnected));
+	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_disconnected));
 	    break;
 	case MetaWatchService.ConnectionState.CONNECTING:
-	    mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_connecting));
+	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_connecting));
 	    break;
 	case MetaWatchService.ConnectionState.CONNECTED:
-	    mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_connected));
+	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_connected));
 	    break;
 	case MetaWatchService.ConnectionState.DISCONNECTING:
-	    mActionBar.setTitle(context.getString(R.string.app_name) + ": " + context.getString(R.string.connection_disconnecting));
+	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_disconnecting));
 	    break;
 	}
     }

@@ -173,7 +173,7 @@ public class WidgetSetup extends SherlockFragment {
 	    if (bmp != null) {
 		icon.setImageBitmap(Bitmap.createScaledBitmap(bmp, bmp.getWidth() * 2, bmp.getHeight() * 2, false));
 	    }
-	    if (convertView.getTag() == null || !((Boolean) convertView.getTag())) {
+	    if (Preferences.animations && (convertView.getTag() == null || !((Boolean) convertView.getTag()))) {
 		ObjectAnimator fadeIn = ObjectAnimator.ofFloat(convertView, "alpha", 0, 1);
 		fadeIn.setDuration(750);
 		fadeIn.start();
@@ -376,7 +376,7 @@ public class WidgetSetup extends SherlockFragment {
 		Bitmap currentBitmap = null;
 		if (tmpDrawable != null)
 		    currentBitmap = ((BitmapDrawable) tmpDrawable).getBitmap();
-		if (currentBitmap != null && !bitmapCompare(currentBitmap, bmp)) {
+		if (Preferences.animations && currentBitmap != null && !bitmapCompare(currentBitmap, bmp)) {
 		    ObjectAnimator upToTop = ObjectAnimator.ofFloat(imageView, "alpha", 1, 0);
 		    upToTop.setDuration(750);
 		    upToTop.addListener(new MyAnimatorListener(imageView, bmp));

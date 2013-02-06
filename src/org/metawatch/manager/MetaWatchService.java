@@ -242,6 +242,7 @@ public class MetaWatchService extends Service {
 	public static boolean displayWidgetIconOnTop = true;
 	public static String displayCalendars = "";
 	public static int calendarLookahead = 24;
+	public static boolean animations = true;
     }
 
     public final class WatchType {
@@ -350,6 +351,7 @@ public class MetaWatchService extends Service {
 	Preferences.alignWidgetRowToBottom = sharedPreferences.getBoolean("AlignWidgetRowToBottom", Preferences.alignWidgetRowToBottom);
 	Preferences.displayWidgetIconOnTop = sharedPreferences.getBoolean("DisplayWidgetIconOnTop", Preferences.displayWidgetIconOnTop);
 	Preferences.displayCalendars = sharedPreferences.getString("DisplayCalendars", Preferences.displayCalendars);
+	Preferences.animations = sharedPreferences.getBoolean("animations", true);
 
 	boolean silent = sharedPreferences.getBoolean("SilentMode", silentMode);
 	if (silent != silentMode)

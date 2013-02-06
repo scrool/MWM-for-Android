@@ -414,5 +414,13 @@
 
 	<string name="request_service_start">Request Service Start</string>
 	<string name="request_service_shutdown">Request Service Shutdown</string>
-				
+		
+	
+	<string name="animations">Animations</string>
+	<string name="enabled">Enable Animations</string>
+	<string name="disabled">Disable Animations</string>
+	<string name="watch">Watch</string>
+	<string name="metawatch_preferences">MetaWatch Preferences</string>
+	<string name="metawatch_tests">MetaWatch Tests</string>
+			
 </resources>

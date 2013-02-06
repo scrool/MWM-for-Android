@@ -69,7 +69,7 @@ public class Test extends SherlockPreferenceActivity {
 
     private void processActionBar() {
 	mActionBar = getSupportActionBar();
-	mActionBar.setTitle("MetaWatch Tests");
+	mActionBar.setTitle(R.string.metawatch_tests);
 	mActionBar.setDisplayHomeAsUpEnabled(true);
 	mActionBar.setDisplayShowTitleEnabled(true);
 	this.invalidateOptionsMenu();
