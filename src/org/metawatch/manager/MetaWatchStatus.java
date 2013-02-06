@@ -157,7 +157,7 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	}
     }
     
-    private void wiggleButton(View view) {
+    public static void wiggleButton(View view) {
 	ObjectAnimator right = ObjectAnimator.ofFloat(view, "translationX", 0, 5);
 	right.setDuration(45);
 	ObjectAnimator left = ObjectAnimator.ofFloat(view, "translationX", 5, -5);
