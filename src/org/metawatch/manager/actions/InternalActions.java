@@ -244,7 +244,7 @@ public class InternalActions {
 	}
 
 	public int performAction(Context context) {
-	    if (!MetaWatchStatus.mShutdownRequested) {
+	    if (!MetaWatchStatus.mShutdownRequested && MetaWatchService.mIsRunning) {
 		Intent setSilentMode = new Intent(context, MetaWatchService.class);
 		setSilentMode.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.INVERT_SILENT_MODE);
 		context.startService(setSilentMode);

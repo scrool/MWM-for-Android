@@ -52,7 +52,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -293,16 +292,13 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     }
 
     void startService() {
-	if (mShutdownRequested) {
-	    Toast.makeText(context, "Please wait, shutting down...", Toast.LENGTH_SHORT).show();
-	} else {
-	    new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    context.startService(new Intent(context, MetaWatchService.class));
-		}
-	    }).start();
-	}
+	mShutdownRequested = false;
+	new Thread(new Runnable() {
+	    @Override
+	    public void run() {
+		context.startService(new Intent(context, MetaWatchService.class));
+	    }
+	}).start();
     }
 
     void stopService() {

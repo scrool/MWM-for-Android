@@ -208,7 +208,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 	}
 
 	else if (action.equals("org.metawatch.manager.SILENTMODE")) {
-	    if (intent.hasExtra("enabled") && !MetaWatchStatus.mShutdownRequested) {
+	    if (intent.hasExtra("enabled") && !MetaWatchStatus.mShutdownRequested && MetaWatchService.mIsRunning) {
 		Intent setSilentMode = new Intent(context, MetaWatchService.class);
 		setSilentMode.putExtra(MetaWatchService.COMMAND_KEY, intent.getBooleanExtra("enabled", false) ? MetaWatchService.SILENT_MODE_ENABLE : MetaWatchService.SILENT_MODE_DISABLE);
 		context.startService(setSilentMode);
