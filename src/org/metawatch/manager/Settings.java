@@ -50,9 +50,10 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceCategory;
-import org.metawatch.manager.Log;
+import android.preference.PreferenceScreen;
 import android.webkit.WebView;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -75,6 +76,27 @@ public class Settings extends SherlockPreferenceActivity {
 	EditTextPreference editTextMac = (EditTextPreference) findPreference("MAC");
 	editTextMac.setText(MetaWatchService.Preferences.watchMacAddress);
 
+	final PreferenceScreen notificationsPreferenceScreen = (PreferenceScreen) findPreference("notifications_preference_screen");
+	notificationsPreferenceScreen.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+	    @Override
+	    public boolean onPreferenceClick(Preference preference) {
+		final CheckBoxPreference notifySMSAlert = (CheckBoxPreference) notificationsPreferenceScreen.findPreference("NotifySMSAlert");
+		notifySMSAlert.setEnabled(Preferences.notifySMS);
+
+		CheckBoxPreference notifySMS = (CheckBoxPreference) getPreferenceManager().findPreference("NotifySMS");
+		notifySMS.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+		    @Override
+		    public boolean onPreferenceChange(Preference preference, Object newValue) {
+			if (Preferences.logging)
+			    Log.d(MetaWatchStatus.TAG, "theme click");
+			notifySMSAlert.setEnabled((Boolean) newValue);
+			return true;
+		    }
+		});
+		return false;
+	    }
+	});
+	
 	Preference discovery = findPreference("Discovery");
 	discovery.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
@@ -216,7 +238,7 @@ public class Settings extends SherlockPreferenceActivity {
 	    calendars.setEntries(entriesArray);
 	    calendars.setEntryValues(entryValuesArray);
 	}
-
+	
 	super.onResume();
     }
 

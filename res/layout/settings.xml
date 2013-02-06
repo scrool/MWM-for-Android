@@ -36,6 +36,7 @@
     
 	<PreferenceScreen
 		android:title="@string/settings_Notifications"
+		android:key="notifications_preference_screen"
 		>
 		<CheckBoxPreference
 			android:title="@string/settings_Call"
@@ -47,6 +48,13 @@
 			android:title="@string/settings_SMS"
 			android:key="NotifySMS"
 			android:summary="@string/settings_SMS_desc"
+			android:defaultValue="true"
+			/>
+		<CheckBoxPreference
+			android:title="@string/settings_SMS"
+			android:key="NotifySMSAlert"
+			android:summaryOn="@string/settings_SMS_with_alert_desc_on"
+			android:summaryOff="@string/settings_SMS_with_alert_desc_off"
 			android:defaultValue="true"
 			/>
 		<ListPreference 

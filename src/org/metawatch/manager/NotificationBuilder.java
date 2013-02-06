@@ -70,13 +70,16 @@ public class NotificationBuilder {
 	Bitmap icon = Utils.getBitmap(context, "message.bmp");
 	String description = "SMS: " + name;
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
-	    if (Preferences.stickyNotifications & !number.equals("Google Chat")) {
+	    if (Preferences.stickyNotifications && !number.equals("Google Chat")) {
 		Bitmap[] bitmaps = smartNotify(context, icon, name, text);
 		Notification.getInstance().addBitmapNotification(context, bitmaps, vibratePattern, -1, description);
 	    } else {
 		Bitmap bitmap = smartLines(context, icon, "SMS from", new String[] { name });
-		Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, 4000, description);
-		Notification.getInstance().addTextNotification(context, text, Notification.VibratePattern.NO_VIBRATE, Notification.getInstance().getDefaultNotificationTimeout(context));
+		if (Preferences.smsWithAlert) {
+		    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, 4000, description);
+		    vibratePattern = Notification.VibratePattern.NO_VIBRATE;
+		}
+		Notification.getInstance().addTextNotification(context, text, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context));
 	    }
 	} else {
 	    byte[] scroll = new byte[800];
