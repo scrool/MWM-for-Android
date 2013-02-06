@@ -531,7 +531,7 @@ public class MetaWatchService extends Service {
 	    try {
 		switch (intent.getIntExtra(COMMAND_KEY, 0)) {
 		case SILENT_MODE_ENABLE:
-		    setSilentMode(false);
+		    setSilentMode(true);
 		    break;
 		case SILENT_MODE_DISABLE:
 		    setSilentMode(false);
@@ -781,7 +781,7 @@ public class MetaWatchService extends Service {
     }
 
     int processState() {
-	int result = Preferences.packetWait;
+	int result = 0;
 	switch (connectionState) {
 	case ConnectionState.DISCONNECTED:
 	    if (Preferences.logging)
@@ -794,9 +794,9 @@ public class MetaWatchService extends Service {
 	    updateNotification();
 	    connect();
 	    if (powerManager.isScreenOn()) {
-		result = 500;
+		result = 1000;
 	    } else {
-		result = 2500;
+		result = 5000;
 	    }
 	    break;
 	case ConnectionState.CONNECTED:
