@@ -32,22 +32,40 @@ public class MainActivity extends SherlockFragmentActivity {
 	    @Override
 	    public void onAnimationStart(Animator animation) {
 		view.setVisibility(View.VISIBLE);
-		MainActivity.this.setProgressBarIndeterminateVisibility(Boolean.TRUE);
 	    }
-
 	    public void onAnimationEnd(Animator animation) {
-		setProgressBarIndeterminateVisibility(Boolean.FALSE);
 	    }
-
 	    @Override
 	    public void onAnimationCancel(Animator animation) {
 	    }
-
 	    @Override
 	    public void onAnimationRepeat(Animator animation) {
 	    }
 	});
 	return downFromTop;
+    }
+    
+    private ObjectAnimator inFromLeft(final View view) {
+	ObjectAnimator inFromLeft = ObjectAnimator.ofFloat(view, "translationX", -1000, 0);
+	inFromLeft.setDuration(1000);
+	inFromLeft.setInterpolator(new DecelerateInterpolator());
+	inFromLeft.addListener(new AnimatorListener() {
+	    @Override
+	    public void onAnimationStart(Animator animation) {
+		view.setVisibility(View.VISIBLE);
+		MainActivity.this.setProgressBarIndeterminateVisibility(Boolean.TRUE);
+	    }
+	    public void onAnimationEnd(Animator animation) {
+		setProgressBarIndeterminateVisibility(Boolean.FALSE);
+	    }
+	    @Override
+	    public void onAnimationCancel(Animator animation) {
+	    }
+	    @Override
+	    public void onAnimationRepeat(Animator animation) {
+	    }
+	});
+	return inFromLeft;
     }
     
     @Override
@@ -56,6 +74,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	View status = findViewById(R.id.status);
 	status.setVisibility(View.INVISIBLE);
 	downFromTop(status).start();
+	View widgets = findViewById(R.id.widget_setup);
+	widgets.setVisibility(View.INVISIBLE);
+	inFromLeft(widgets).start();
+
     }
 
     @Override

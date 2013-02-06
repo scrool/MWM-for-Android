@@ -269,9 +269,6 @@ public class Protocol {
 		    return;
 
 		sendQueue.add(bytes);
-
-		if (sendQueue.size() % 10 == 0)
-		    MetaWatchService.sendNotifyClientsRequest(mContext);
 	    }
 	});
     }
@@ -286,9 +283,6 @@ public class Protocol {
 	sendQueue.drainTo(temp);
 	sendQueue.add(bytes);
 	sendQueue.addAll(temp);
-
-	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.sendNotifyClientsRequest(mContext);
     }
 
     public synchronized void send(final byte[] bytes) throws IOException {
@@ -319,9 +313,6 @@ public class Protocol {
 	sentPackets++;
 	if (sentPackets < 0)
 	    sentPackets = 1;
-
-	if (sendQueue.size() % 10 == 0)
-	    MetaWatchService.sendNotifyClientsRequest(mContext);
     }
 
     public void sendAdvanceHands(int hour, int minute, int second) {

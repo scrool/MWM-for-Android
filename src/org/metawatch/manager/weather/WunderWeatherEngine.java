@@ -16,7 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.metawatch.manager.Idle;
 import org.metawatch.manager.Log;
-import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchStatus;
@@ -184,7 +183,6 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		weatherData.errorString = "";
 
 		Idle.getInstance().updateIdle(context, true);
-		MetaWatchService.sendNotifyClientsRequest(context);
 	    }
 
 	} catch (Exception e) {

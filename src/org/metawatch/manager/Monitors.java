@@ -378,7 +378,6 @@ public class Monitors {
 			    Log.d(MetaWatchStatus.TAG, "location changed " + location.toString());
 
 			mLocationData.received = true;
-			MetaWatchService.sendNotifyClientsRequest(context);
 
 			if (!weatherData.received /* && !WeatherData.updating */) {
 			    if (Preferences.logging)

@@ -35,7 +35,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -50,7 +49,6 @@ import org.metawatch.manager.widgets.WidgetManager;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -65,13 +63,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
 public class MetaWatchService extends Service {
 
@@ -81,6 +75,7 @@ public class MetaWatchService extends Service {
     private OutputStream outputStream;
     private WatchReceiverThread watchReceiverThread;
     private Executor watchTransmitThread = Executors.newSingleThreadExecutor();
+    private Handler mHandler = new Handler(Looper.getMainLooper());
 
     private PowerManager powerManager;
     public static PowerManager.WakeLock wakeLock;
@@ -107,7 +102,6 @@ public class MetaWatchService extends Service {
     public static final int INVERT_SILENT_MODE = 2;
     public static final int SEND_BYTE_ARRAY = 3;
     public static final String BYTE_ARRAY = "BYTE_ARRAY";
-    public static final int NOTIFY_CLIENTS = 4;
     
     public static boolean mIsRunning = false;
     
@@ -122,14 +116,6 @@ public class MetaWatchService extends Service {
 	Editor editor = sharedPreferences.edit();
 	editor.putBoolean("SilentMode", silentMode);
 	editor.commit();
-    }
-    
-    public static synchronized void sendNotifyClientsRequest(Context context) {
-	if (!MetaWatchStatus.mShutdownRequested && MetaWatchService.mIsRunning) {
-	    Intent intent = new Intent(context, MetaWatchService.class);
-	    intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
-	    context.startService(intent);
-	}
     }
     
     public static void sentBytes(Context context, byte[] bytes) {
@@ -272,7 +258,7 @@ public class MetaWatchService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-	return mMessenger.getBinder();
+	return null;
     }
 
     private OnSharedPreferenceChangeListener prefChangeListener = new OnSharedPreferenceChangeListener() {
@@ -491,7 +477,6 @@ public class MetaWatchService extends Service {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.updateNotification(): hideNotificationIcon=" + hideNotificationIcon);
 	createNotification();
-	notifyClients();
     }
 
     public void removeNotification() {
@@ -550,9 +535,6 @@ public class MetaWatchService extends Service {
 		case INVERT_SILENT_MODE:
 		    setSilentMode(!silentMode);
 		    break;
-		case NOTIFY_CLIENTS:
-		    notifyClients();
-		    break;
 		case SEND_BYTE_ARRAY:
 		    watchTransmitThread.execute(new Runnable() {
 			@Override
@@ -599,6 +581,8 @@ public class MetaWatchService extends Service {
 	setPreviousConnectionState(MetaWatchService.this, false);
 	
 	watchReceiverThread.quit();
+	
+	mHandler.removeCallbacks(pollWeatherBattery);
 
 	cleanup();
 	
@@ -610,8 +594,6 @@ public class MetaWatchService extends Service {
 	ActionManager.getInstance(this).destroy();
 	WidgetManager.getInstance(this).destroy();
 	
-	notifyClients();
-	mClients.clear();
 	mIsRunning = false;
 
     }
@@ -640,10 +622,8 @@ public class MetaWatchService extends Service {
 	    if (!MetaWatchService.fakeWatch) {
 
 		if (bluetoothAdapter == null) {
-		    sendToast(getResources().getString(R.string.error_bluetooth_not_supported));
 		    return;
 		} else if (!bluetoothAdapter.isEnabled()) {
-		    sendToast(getResources().getString(R.string.error_bluetooth_not_enabled));
 		    return;
 		}
 
@@ -722,60 +702,6 @@ public class MetaWatchService extends Service {
 	} finally {
 	    if(wakeLock != null && wakeLock.isHeld()) 
 		wakeLock.release();
-	}
-    }
-
-    public void sendToast(String text) {
-	Message m = new Message();
-	m.what = Msg.SEND_TOAST;
-	m.obj = text;
-	messageHandler.sendMessage(m);
-    }
-
-    /** Keeps track of all current registered clients. */
-    private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
-
-    private Handler messageHandler = new Handler() {
-
-	@Override
-	public void handleMessage(Message msg) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "handleMessage " + msg);
-	    switch (msg.what) {
-	    case Msg.REGISTER_CLIENT:
-		mClients.add(msg.replyTo);
-		break;
-	    case Msg.UNREGISTER_CLIENT:
-		mClients.remove(msg.replyTo);
-		break;
-	    case Msg.SEND_TOAST:
-		Toast.makeText(MetaWatchService.this, (CharSequence) msg.obj, Toast.LENGTH_SHORT).show();
-		break;
-	    default:
-		super.handleMessage(msg);
-	    }
-	}
-    };
-
-    /**
-     * Target we publish for clients to send messages to IncomingHandler.
-     */
-    final Messenger mMessenger = new Messenger(messageHandler);
-
-    private void notifyClients() {
-	if (mClients.size() > 0) {
-	    for (int i = mClients.size() - 1; i >= 0; i--) {
-		try {
-		    mClients.get(i).send(Message.obtain(null, Msg.UPDATE_STATUS, 0, 0));
-		} catch (RemoteException e) {
-		    // The client is dead. Remove it from the list;
-		    // we are going through the list from back to front
-		    // so this is safe to do inside the loop.
-		    mClients.remove(i);
-		} catch (Exception e) {
-		    mClients.remove(i);
-		}
-	    }
 	}
     }
 
@@ -867,9 +793,9 @@ public class MetaWatchService extends Service {
 	    updateNotification();
 	    connect();
 	    if (powerManager.isScreenOn()) {
-		result = 1000; // try to reconnect in 10s
+		result = 500;
 	    } else {
-		result = 5000; // try to reconnect in 30s
+		result = 2500;
 	    }
 	    break;
 	case ConnectionState.CONNECTED:
@@ -888,34 +814,56 @@ public class MetaWatchService extends Service {
 
 	return result;
     }
+    
+    private Runnable pollWeatherBattery = new Runnable() {
+	@Override
+	public void run() {
+	    String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).getString("collectWatchVoltage", "0");
+	    try {
+		final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
+		if (voltageFrequency > 0) {
+		    
+		    Intent intent = new Intent(MetaWatchService.this, AlarmReceiver.class);
+		    intent.putExtra("action_poll_voltage", "poll_voltage");
+		    MetaWatchService.this.sendBroadcast(intent);
+		}
+	    } catch (NumberFormatException nfe) {
+		if (Preferences.logging)
+		    Log.e(MetaWatchStatus.TAG, "MetaWatchService.start(): bad voltage frequency string '" + voltageFrequencyString + "'");
+	    }	
+	    mHandler.postDelayed(this, 60000);
+	}
+    };
 
     private void start() {
 
 	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
 	watchReceiverThread.setPriority(7);
 	watchReceiverThread.start();
+	
+	mHandler.post(pollWeatherBattery);
 
 	/* DEBUG */
-	String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(this).getString("collectWatchVoltage", "0");
-	try {
-
-	    final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
-	    if (voltageFrequency > 0) {
-
-		AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(this, AlarmReceiver.class);
-		intent.putExtra("action_poll_voltage", "poll_voltage");
-		PendingIntent sender = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		long sleep = voltageFrequency * 60 * 1000;
-		alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, sleep, sender);
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.start(): Set voltage reading every " + sleep + "ms");
-	    }
-
-	} catch (NumberFormatException nfe) {
-	    if (Preferences.logging)
-		Log.e(MetaWatchStatus.TAG, "MetaWatchService.start(): bad voltage frequency string '" + voltageFrequencyString + "'");
-	}
+//	String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(this).getString("collectWatchVoltage", "0");
+//	try {
+//
+//	    final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
+//	    if (voltageFrequency > 0) {
+//
+//		AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+//		Intent intent = new Intent(this, AlarmReceiver.class);
+//		intent.putExtra("action_poll_voltage", "poll_voltage");
+//		PendingIntent sender = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+//		long sleep = voltageFrequency * 60 * 1000;
+//		alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, sleep, sender);
+//		if (Preferences.logging)
+//		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.start(): Set voltage reading every " + sleep + "ms");
+//	    }
+//
+//	} catch (NumberFormatException nfe) {
+//	    if (Preferences.logging)
+//		Log.e(MetaWatchStatus.TAG, "MetaWatchService.start(): bad voltage frequency string '" + voltageFrequencyString + "'");
+//	}
 
     }
 
@@ -1140,7 +1088,6 @@ public class MetaWatchService extends Service {
 	    Intent intent = new Intent("org.metawatch.manager.CONNECTION_CHANGE");
 	    intent.putExtra("state", connected);
 	    sendBroadcast(intent);
-	    notifyClients();
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "MetaWatchService.broadcastConnection(): Broadcast connection change: state='" + connected + "'");
 	    Protocol.getInstance(MetaWatchService.this).resetLCDDiffBuffer();

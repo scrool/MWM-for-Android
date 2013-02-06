@@ -45,7 +45,6 @@ public class MetaWatchAccessibilityService extends AccessibilityService {
 
 	if (!accessibilityReceived) {
 	    accessibilityReceived = true;
-	    MetaWatchService.sendNotifyClientsRequest(this);
 	}
 
 	/* Acquire details of event. */

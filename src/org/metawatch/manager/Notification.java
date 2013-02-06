@@ -80,7 +80,6 @@ public class Notification {
 		addToHistory(notification);
 	    } else {
 		notificationQueue.add(notification);
-		MetaWatchService.sendNotifyClientsRequest(context);
 	    }
 	}
     }
@@ -109,8 +108,6 @@ public class Notification {
 			// notification, show it again.
 			notification = currentNotification;
 		    } else {
-			if (Preferences.showNotificationQueue)
-			    MetaWatchService.sendNotifyClientsRequest(context);
 			notification = notificationQueue.take();
 			currentNotification = notification;
 		    }
