@@ -52,6 +52,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -74,6 +75,7 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     private AlertDialog mStatisticsDialog = null;
     private ActionBar mActionBar = null;
     private View mMainView = null;
+    public static boolean mShutdownRequested = false;
 
     public static MetaWatchStatus newInstance() {
 	return new MetaWatchStatus();
@@ -177,9 +179,6 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     public void onResume() {
 	super.onResume();
 	mHandler.post(mConnectionUpdater);
-	if (MetaWatchService.isRunning()) {
-	    startService();
-	}
     }
 
     @Override
@@ -294,12 +293,27 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     }
 
     void startService() {
-	context.startService(new Intent(context, MetaWatchService.class));
+	if (mShutdownRequested) {
+	    Toast.makeText(context, "Please wait, shutting down...", Toast.LENGTH_SHORT).show();
+	} else {
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    context.startService(new Intent(context, MetaWatchService.class));
+		}
+	    }).start();
+	}
     }
 
     void stopService() {
 	try {
-	    context.stopService(new Intent(context, MetaWatchService.class));
+	    mShutdownRequested = true;
+	    new Thread(new Runnable() {
+		@Override
+		public void run() {
+		    context.stopService(new Intent(context, MetaWatchService.class));
+		}
+	    }).start();
 	} catch (Throwable e) {
 	    // The service wasn't running
 	    if (Preferences.logging)

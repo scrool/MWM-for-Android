@@ -109,8 +109,6 @@ public class MetaWatchService extends Service {
     public static final String BYTE_ARRAY = "BYTE_ARRAY";
     public static final int NOTIFY_CLIENTS = 4;
     
-    private static boolean mIsRunning = false;
-    
     public static boolean silentMode() {
 	return silentMode;
     }
@@ -125,7 +123,7 @@ public class MetaWatchService extends Service {
     }
     
     public static synchronized void sendNotifyClientsRequest(Context context) {
-	if (mIsRunning) {
+	if (!MetaWatchStatus.mShutdownRequested) {
 	    Intent intent = new Intent(context, MetaWatchService.class);
 	    intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.NOTIFY_CLIENTS);
 	    context.startService(intent);
@@ -133,7 +131,7 @@ public class MetaWatchService extends Service {
     }
     
     public static void sentBytes(Context context, byte[] bytes) {
-	if (mIsRunning) {
+	if (!MetaWatchStatus.mShutdownRequested) {
 	    Intent intent = new Intent(context, MetaWatchService.class);
 	    intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.SEND_BYTE_ARRAY);
 	    intent.putExtra(MetaWatchService.BYTE_ARRAY, bytes);
@@ -504,7 +502,6 @@ public class MetaWatchService extends Service {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onCreate()");
 	initialize();
-	mIsRunning = true;
     }
 
     private void initialize() {
@@ -588,10 +585,6 @@ public class MetaWatchService extends Service {
 
 	return START_STICKY;
     }
-    
-    public static boolean isRunning() {
-	return mIsRunning;
-    }
 
     @Override
     public void onDestroy() {
@@ -616,7 +609,7 @@ public class MetaWatchService extends Service {
 	
 	notifyClients();
 	mClients.clear();
-	mIsRunning = false;
+	MetaWatchStatus.mShutdownRequested = false;
     }
 
     @TargetApi(10)

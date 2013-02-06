@@ -3,6 +3,7 @@ package org.metawatch.manager.actions;
 import org.metawatch.manager.Call;
 import org.metawatch.manager.MediaControl;
 import org.metawatch.manager.MetaWatchService;
+import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Monitors;
 import org.metawatch.manager.Utils;
 import org.metawatch.manager.apps.ApplicationBase;
@@ -243,9 +244,11 @@ public class InternalActions {
 	}
 
 	public int performAction(Context context) {
-	    Intent setSilentMode = new Intent(context, MetaWatchService.class);
-	    setSilentMode.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.INVERT_SILENT_MODE);
-	    context.startService(setSilentMode);
+	    if (!MetaWatchStatus.mShutdownRequested) {
+		Intent setSilentMode = new Intent(context, MetaWatchService.class);
+		setSilentMode.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.INVERT_SILENT_MODE);
+		context.startService(setSilentMode);
+	    }
 	    return ApplicationBase.BUTTON_USED;
 	}
     }

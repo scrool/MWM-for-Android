@@ -22,11 +22,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	Intent intent = getIntent();
 	if (intent != null && intent.getBooleanExtra("shutdown", false) && (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0)
 	    finish();
-	View status = findViewById(R.id.status);
-	if (MetaWatchService.isRunning()) {
-	    status.setVisibility(View.INVISIBLE);
-	    downFromTop(status).start();
-	}
     }
 
     private ObjectAnimator downFromTop(final View view) {
@@ -53,6 +48,14 @@ public class MainActivity extends SherlockFragmentActivity {
 	    }
 	});
 	return downFromTop;
+    }
+    
+    @Override
+    public void onResume() {
+	super.onResume();
+	View status = findViewById(R.id.status);
+	status.setVisibility(View.INVISIBLE);
+	downFromTop(status).start();
     }
 
     @Override

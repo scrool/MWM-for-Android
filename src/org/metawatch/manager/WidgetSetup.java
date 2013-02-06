@@ -364,8 +364,7 @@ public class WidgetSetup extends SherlockFragment {
 			}
 		    });
 		    mIdlePreviews.addView(view);
-		    if (MetaWatchService.isRunning())
-			fadeIn(view).start();
+		    fadeIn(view).start();
 		} else {
 		    imageView = (ImageView) view.findViewById(R.id.image);
 		}
