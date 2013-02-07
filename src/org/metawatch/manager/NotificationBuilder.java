@@ -79,7 +79,7 @@ public class NotificationBuilder {
 		    Notification.getInstance().addBitmapNotification(context, bitmap, vibratePattern, 4000, description);
 		    vibratePattern = Notification.VibratePattern.NO_VIBRATE;
 		}
-		Notification.getInstance().addTextNotification(context, text, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context));
+		Notification.getInstance().addTextNotification(context, name + ": " + text, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context));
 	    }
 	} else {
 	    byte[] scroll = new byte[800];
