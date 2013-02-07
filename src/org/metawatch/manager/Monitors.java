@@ -29,6 +29,8 @@
 package org.metawatch.manager;
 
 import java.util.Hashtable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
@@ -51,6 +53,8 @@ import android.telephony.TelephonyManager;
 
 public class Monitors {
 
+    private Executor mExecutor = Executors.newSingleThreadExecutor();
+    
     public AlarmManager alarmManager;
     public Intent intent;
     public PendingIntent sender;
@@ -265,14 +269,12 @@ public class Monitors {
 	// as often it seems to know, without actually notifying us!
 	RefreshLocation();
 
-	Thread thread = new Thread("WeatherUpdater") {
-
+	mExecutor.execute(new Runnable() {
 	    @Override
 	    public void run() {
 		weatherData = WeatherEngineFactory.getEngine().update(context, weatherData);
 	    }
-	};
-	thread.start();
+	});
     }
 
     // Force the update, by clearing the timestamps
