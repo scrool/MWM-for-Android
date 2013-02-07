@@ -581,11 +581,18 @@ public class MetaWatchService extends Service {
 	connectionState = ConnectionState.DISCONNECTING;
 	setPreviousConnectionState(MetaWatchService.this, false);
 	
-	watchReceiverThread.quit();
+	if (watchReceiverThread != null) {
+	    watchReceiverThread.quit();
+	} else {
+	    connectionState = ConnectionState.DISCONNECTED;
+	}
 	
 	mHandler.removeCallbacks(pollWeatherBattery);
 
 	cleanup();
+	
+	Idle.getInstance().destroy();
+	removeNotification();
 	
 	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
 	Monitors.getInstance().destroy(this);
@@ -725,8 +732,6 @@ public class MetaWatchService extends Service {
 	broadcastConnection(false);
 	
 	Protocol.getInstance(this).destroy();
-	Idle.getInstance().destroy();
-	removeNotification();
 	Notification.getInstance().destroy();
 	MediaControl.getInstance().destroy();
     }

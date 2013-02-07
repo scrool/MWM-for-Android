@@ -38,16 +38,6 @@ public class ThemeContainer extends SherlockFragmentActivity {
 
 	mActionBar.addTab(mDownloadedTab);
 	mActionBar.addTab(mGalleryTab);
-	// TabHost tabHost = (TabHost) findViewById(R.id.tabhost);
-	// final Resources res = getResources();
-	//
-	// tabHost.addTab(tabHost.newTabSpec("tab1")
-	// .setIndicator(res.getString(R.string.ui_tab_downloaded_themes),res.getDrawable(R.drawable.ic_tab_downloaded))
-	// .setContent(new Intent(this, ThemePicker.class)));
-	//
-	// tabHost.addTab(tabHost.newTabSpec("tab2")
-	// .setIndicator(res.getString(R.string.ui_tab_theme_gallery),res.getDrawable(R.drawable.ic_tab_gallery))
-	// .setContent(new Intent(this, ThemeGallery.class)));
     }
 
     class MyTabsListener implements ActionBar.TabListener {

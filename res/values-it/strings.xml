@@ -353,7 +353,7 @@
 	</string-array>
     
 	<string name="settings_about">Circa</string>
-	<string name="settings_exit">Dsconnetti e Esci</string>
+	<string name="settings_exit">Disconnetti e Esci</string>
 	  
   	<string name="ui_tab_status">Stato</string>
   	<string name="ui_tab_preferences">Preferenze</string>

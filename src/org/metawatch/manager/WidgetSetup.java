@@ -405,7 +405,7 @@ public class WidgetSetup extends SherlockFragment {
 	int glowRadius = 16;
 
 	// the glow color
-	int glowColor = Color.rgb(0, 192, 255);
+	int glowColor = Color.parseColor("#ff0000");
 
 	// extract the alpha from the source image
 	Bitmap alpha = src.extractAlpha();

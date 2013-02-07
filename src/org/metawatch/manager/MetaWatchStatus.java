@@ -37,6 +37,7 @@ import org.metawatch.manager.MetaWatchService.WeatherProvider;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -52,6 +53,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -63,18 +65,21 @@ import com.bugsense.trace.BugSenseHandler;
 public class MetaWatchStatus extends SherlockFragment implements OnClickListener {
 
     public static final String TAG = "MetaWatchStatus";
+    private BluetoothAdapter bluetoothAdapter;
     public Button mStatistics = null;
-    public Button startButton = null;
-    public Button shutdownButton = null;
-    private SherlockFragmentActivity context = null;
+    public Button mStartButton = null;
+    public Button mShutdownButton = null;
+    private SherlockFragmentActivity mContext = null;
     public Messenger mService = null;
-    public long startupTime = 0;
+    public long mStartupTime = 0;
     private TextView mStatisticsText = null;
     private TextView mAccessibilityText = null;
     private AlertDialog mStatisticsDialog = null;
     private ActionBar mActionBar = null;
     private View mMainView = null;
     public static boolean mShutdownRequested = false;
+    private Handler mHandler = new Handler(Looper.getMainLooper());
+    public static final String DEVICE_SELECTED_AUTO_CONNECT = "DEVICE_SELECTED_AUTO_CONNECT";
 
     public static MetaWatchStatus newInstance() {
 	return new MetaWatchStatus();
@@ -83,43 +88,44 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-	context = (SherlockFragmentActivity) getActivity();
-	mActionBar = context.getSupportActionBar();
-	LinearLayout statisticsContainer = new LinearLayout(context);
+	mContext = (SherlockFragmentActivity) getActivity();
+	mActionBar = mContext.getSupportActionBar();
+	bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+	LinearLayout statisticsContainer = new LinearLayout(mContext);
 	statisticsContainer.setGravity(Gravity.CENTER);
 	statisticsContainer.setOrientation(LinearLayout.VERTICAL);
-	mStatisticsText = new TextView(context);
-	mAccessibilityText = new TextView(context);
+	mStatisticsText = new TextView(mContext);
+	mAccessibilityText = new TextView(mContext);
 	mAccessibilityText.setGravity(Gravity.CENTER);
 	statisticsContainer.addView(mAccessibilityText);
 	statisticsContainer.addView(mStatisticsText);
-	Builder builder = new Builder(context);
+	Builder builder = new Builder(mContext);
 	builder.setIcon(R.drawable.icon);
 	builder.setTitle(R.string.statistics);
 	builder.setView(statisticsContainer);
 	builder.setPositiveButton(android.R.string.ok, null);
 	mStatisticsDialog = builder.create();
 	configureBugSense();
-	MetaWatchService.loadPreferences(context);
+	MetaWatchService.loadPreferences(mContext);
 
-	startupTime = System.currentTimeMillis();
+	mStartupTime = System.currentTimeMillis();
 
 	if (Preferences.watchMacAddress == "") {
 	    // Show the watch discovery screen on first start
-	    startActivity(new Intent(context, DeviceSelection.class));
-	    context.finish();
+	    startActivity(new Intent(mContext, DeviceSelection.class));
+	    mContext.finish();
 	}
-	Protocol.getInstance(context).configureMode();
+	Protocol.getInstance(mContext).configureMode();
     }
 
     private void configureBugSense() {
 	try {
-	    InputStream inputStream = context.getAssets().open("bugsense.txt");
+	    InputStream inputStream = mContext.getAssets().open("bugsense.txt");
 	    String key = Utils.ReadInputStream(inputStream);
 	    key = key.trim();
 	    if (Preferences.logging)
 		Log.d(TAG, "BugSense enabled");
-	    BugSenseHandler.initAndStartSession(context, key);
+	    BugSenseHandler.initAndStartSession(mContext, key);
 	} catch (IOException e) {
 	    if (Preferences.logging)
 		Log.d(TAG, "No BugSense keyfile found");
@@ -136,10 +142,10 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 		mStatisticsDialog.show();
 	    }
 	});
-	startButton = (Button) mMainView.findViewById(R.id.startButton);
-	startButton.setOnClickListener(this);
-	shutdownButton = (Button) mMainView.findViewById(R.id.shutdownButton);
-	shutdownButton.setOnClickListener(this);
+	mStartButton = (Button) mMainView.findViewById(R.id.startButton);
+	mStartButton.setOnClickListener(this);
+	mShutdownButton = (Button) mMainView.findViewById(R.id.shutdownButton);
+	mShutdownButton.setOnClickListener(this);
 	return mMainView;
     }
     
@@ -179,6 +185,13 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     public void onResume() {
 	super.onResume();
 	mHandler.post(mConnectionUpdater);
+	if (mContext.getIntent().getBooleanExtra(DEVICE_SELECTED_AUTO_CONNECT, false)) {
+	    mStartButton.performClick();
+	    //Clear auto connect flag;
+	    Intent intent = mContext.getIntent();
+	    intent.putExtra(DEVICE_SELECTED_AUTO_CONNECT, false);
+	    mContext.setIntent(intent);
+	}
     }
 
     @Override
@@ -187,7 +200,6 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	mHandler.removeCallbacks(mConnectionUpdater);
     }
     
-    private Handler mHandler = new Handler(Looper.getMainLooper());
     private Runnable mConnectionUpdater = new Runnable() {
  	@Override
  	public void run() {
@@ -202,23 +214,23 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	    return;
 	switch (MetaWatchService.connectionState) {
 	case MetaWatchService.ConnectionState.DISCONNECTED:
-	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_disconnected));
+	    mActionBar.setTitle(mContext.getString(R.string.watch) + ": " + mContext.getString(R.string.connection_disconnected));
 	    break;
 	case MetaWatchService.ConnectionState.CONNECTING:
-	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_connecting));
+	    mActionBar.setTitle(mContext.getString(R.string.watch) + ": " + mContext.getString(R.string.connection_connecting));
 	    break;
 	case MetaWatchService.ConnectionState.CONNECTED:
-	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_connected));
+	    mActionBar.setTitle(mContext.getString(R.string.watch) + ": " + mContext.getString(R.string.connection_connected));
 	    break;
 	case MetaWatchService.ConnectionState.DISCONNECTING:
-	    mActionBar.setTitle(context.getString(R.string.watch) + ": " + context.getString(R.string.connection_disconnecting));
+	    mActionBar.setTitle(mContext.getString(R.string.watch) + ": " + mContext.getString(R.string.connection_disconnecting));
 	    break;
 	}
     }
 
     private void getStatistics() {
 	mStatisticsText.setGravity(Gravity.CENTER);
-	final Resources res = context.getResources();
+	final Resources res = mContext.getResources();
 	mStatisticsText.setText("");
 	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
 	    if (Monitors.getInstance().weatherData.error) {
@@ -253,13 +265,13 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	    }
 	}
 
-	if (Utils.isAccessibilityEnabled(context)) {
+	if (Utils.isAccessibilityEnabled(mContext)) {
 	    if (MetaWatchAccessibilityService.accessibilityReceived) {
 		mAccessibilityText.setText("\n");
 		Utils.appendColoredText(mAccessibilityText, res.getString(R.string.status_accessibility_working), Color.GREEN);
 		mAccessibilityText.append("\n");
 	    } else {
-		if (startupTime == 0 || System.currentTimeMillis() - startupTime < 10 * 1000) {
+		if (mStartupTime == 0 || System.currentTimeMillis() - mStartupTime < 10 * 1000) {
 		    mAccessibilityText.setText("\n" + res.getString(R.string.status_accessibility_waiting) + "\n");
 		} else {
 		    mAccessibilityText.setText("\n");
@@ -272,7 +284,7 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	    mAccessibilityText.setText("\n" + res.getString(R.string.status_accessibility_disabled) + "\n");
 	}
 
-	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getInstance(context).getQueueLength());
+	mStatisticsText.append("\n" + res.getString(R.string.status_message_queue) + " " + Protocol.getInstance(mContext).getQueueLength());
 	mStatisticsText.append("\n" + res.getString(R.string.status_notification_queue) + " " + Notification.getInstance().getQueueLength() + "\n");
 
 	if (Preferences.showNotificationQueue) {
@@ -285,19 +297,26 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 
     private void printDate(TextView textView, long ticks) {
 	if (ticks == 0) {
-	    textView.append(context.getResources().getString(R.string.status_loading));
+	    textView.append(mContext.getResources().getString(R.string.status_loading));
 	} else {
-	    textView.append(Utils.ticksToText(context, ticks));
+	    textView.append(Utils.ticksToText(mContext, ticks));
 	}
 	textView.append("\n");
     }
 
     void startService() {
+	if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+	    Toast.makeText(mContext, R.string.error_bluetooth_not_enabled, Toast.LENGTH_SHORT).show();
+	    return;
+	} else if (bluetoothAdapter == null) {
+	    Toast.makeText(mContext, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
+	    return;
+	}
 	mShutdownRequested = false;
 	new Thread(new Runnable() {
 	    @Override
 	    public void run() {
-		context.startService(new Intent(context, MetaWatchService.class));
+		mContext.startService(new Intent(mContext, MetaWatchService.class));
 	    }
 	}).start();
     }
@@ -308,7 +327,7 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	    new Thread(new Runnable() {
 		@Override
 		public void run() {
-		    context.stopService(new Intent(context, MetaWatchService.class));
+		    mContext.stopService(new Intent(mContext, MetaWatchService.class));
 		}
 	    }).start();
 	} catch (Throwable e) {

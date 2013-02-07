@@ -45,10 +45,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
-import org.metawatch.manager.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -146,6 +143,8 @@ public class DeviceSelection extends SherlockFragmentActivity {
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "device selected: " + arg2);
 
+		cleanup();
+		
 		Map<String, String> map = list.get(arg2);
 		String mac = map.get("mac");
 
@@ -156,9 +155,12 @@ public class DeviceSelection extends SherlockFragmentActivity {
 		MetaWatchService.saveMac(context, mac);
 
 		sendToast("Selected watch set");
-		startActivity(new Intent(context, MainActivity.class));
+		Intent intent = new Intent(context, MainActivity.class);
+		intent.putExtra(MetaWatchStatus.DEVICE_SELECTED_AUTO_CONNECT, true);
+		startActivity(intent);
 		finish();
 	    }
+
 
 	});
 
@@ -199,6 +201,11 @@ public class DeviceSelection extends SherlockFragmentActivity {
 	processActionBar();
 
     }
+    
+    private void sendToast(String string) {
+	Toast.makeText(context, string, Toast.LENGTH_SHORT).show();
+    }
+
 
     void startDiscovery() {
 	receiver = new Receiver();
@@ -234,32 +241,21 @@ public class DeviceSelection extends SherlockFragmentActivity {
 
 	listView.setAdapter(new SimpleAdapter(this, list, R.layout.list_item, new String[] { "name", "mac" }, new int[] { R.id.text1, R.id.text2 }));
     }
-
-    public void sendToast(String text) {
-	Message m = new Message();
-	m.what = 1;
-	m.obj = text;
-	messageHandler.sendMessage(m);
+    
+    private void cleanup() {
+	if (receiver != null)
+	    try{unregisterReceiver(receiver);} catch (Exception e){}
+	if (bluetoothAdapter != null && bluetoothAdapter.isDiscovering())
+	    bluetoothAdapter.cancelDiscovery();
+	ProgressBar progress = (ProgressBar) findViewById(R.id.progressScanning);
+	if (progress != null)
+	    progress.setVisibility(ProgressBar.INVISIBLE);
     }
-
-    private static Handler messageHandler = new Handler() {
-
-	@Override
-	public void handleMessage(Message msg) {
-	    switch (msg.what) {
-	    case 1:
-		Toast.makeText(context, (CharSequence) msg.obj, Toast.LENGTH_SHORT).show();
-		break;
-	    }
-	}
-
-    };
 
     @Override
     protected void onDestroy() {
 	super.onDestroy();
-	if (receiver != null)
-	    unregisterReceiver(receiver);
+	cleanup();
     }
 
     @Override

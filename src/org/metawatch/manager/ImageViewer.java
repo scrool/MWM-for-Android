@@ -81,6 +81,8 @@ public class ImageViewer extends SherlockFragmentActivity {
 	    is = getContentResolver().openInputStream(u);
 
 	    BitmapFactory.Options options = new BitmapFactory.Options();
+	    //No need for full resolution
+	    options.inSampleSize = 2;
 	    Bitmap bmp = BitmapFactory.decodeStream(is, null, options);
 
 	    if (bmp != null) {
