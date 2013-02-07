@@ -318,7 +318,7 @@ public class MetaWatchService extends Service {
 	Preferences.invertLCD = sharedPreferences.getBoolean("InvertLCD", Preferences.invertLCD);
 	Preferences.notificationCenter = sharedPreferences.getBoolean("notificationCenter", Preferences.notificationCenter);
 	Preferences.notifyLight = sharedPreferences.getBoolean("notifyLight", Preferences.notifyLight);
-	Preferences.stickyNotifications = sharedPreferences.getBoolean("stickyNotifications", Preferences.stickyNotifications);
+//	Preferences.stickyNotifications = sharedPreferences.getBoolean("stickyNotifications", Preferences.stickyNotifications);
 	Preferences.weatherCity = sharedPreferences.getString("WeatherCity", Preferences.weatherCity);
 	Preferences.weatherProvider = Integer.parseInt(sharedPreferences.getString("WeatherProvider", Integer.toString(Preferences.weatherProvider)));
 	Preferences.weatherCelsius = sharedPreferences.getBoolean("WeatherCelsius", Preferences.weatherCelsius);
@@ -361,7 +361,7 @@ public class MetaWatchService extends Service {
 
 	try {
 	    Preferences.fontSize = Integer.valueOf(sharedPreferences.getString("FontSize", Integer.toString(Preferences.fontSize)));
-	    Preferences.packetWait = Integer.valueOf(sharedPreferences.getString("PacketWait", Integer.toString(Preferences.packetWait)));
+//	    Preferences.packetWait = Integer.valueOf(sharedPreferences.getString("PacketWait", Integer.toString(Preferences.packetWait)));
 	    Preferences.smsLoopInterval = Integer.valueOf(sharedPreferences.getString("SmsLoopInterval", Integer.toString(Preferences.smsLoopInterval)));
 	    Preferences.appLaunchMode = Integer.valueOf(sharedPreferences.getString("AppLaunchMode", Integer.toString(Preferences.appLaunchMode)));
 	    Preferences.calendarLookahead = Integer.valueOf(sharedPreferences.getString("CalendarLookahead", Integer.toString(Preferences.calendarLookahead)));
