@@ -203,7 +203,7 @@ public class InternalActions {
 		public void run() {
 		    Idle.getInstance().updateIdle(context, true);
 		}
-	    }, 250);
+	    }, 2000);
 	    return ApplicationBase.BUTTON_USED_DONT_UPDATE;
 	}
 

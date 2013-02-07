@@ -572,7 +572,8 @@ public class Idle {
 	    return;
 	}
 
-	if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE) {
+	if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE ||
+	    MetaWatchService.watchState == MetaWatchService.WatchStates.APPLICATION) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
 	    long timestamp = System.currentTimeMillis();
