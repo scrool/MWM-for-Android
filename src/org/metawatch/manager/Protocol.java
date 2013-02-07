@@ -35,8 +35,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.metawatch.manager.MetaWatchService.ConnectionState;
@@ -60,8 +58,6 @@ public class Protocol {
 
     private volatile BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
     
-    private Executor mSerialExecutor = Executors.newSingleThreadExecutor();
-
     private boolean idleShowClock = true;
 
     private byte[][][] LCDDiffBuffer = new byte[3][48][30];
@@ -81,6 +77,7 @@ public class Protocol {
     }
 
     public void destroy() {
+	protocolSenderRunning = false;
 	mInstance = null;
 	stopProtocolSender();
     }
@@ -151,7 +148,7 @@ public class Protocol {
 	}
     };
 
-    public synchronized void startProtocolSender() {
+    public void startProtocolSender() {
 	if (protocolSenderRunning == false) {
 	    protocolSenderRunning = true;
 	    protocolSenderThread = new Thread(protocolSender, "ProtocolSender");
@@ -162,7 +159,7 @@ public class Protocol {
 	}
     }
 
-    public synchronized void stopProtocolSender() {
+    public void stopProtocolSender() {
 	if (protocolSenderRunning == true) {
 	    /* Stops thread gracefully */
 	    protocolSenderRunning = false;
@@ -260,22 +257,16 @@ public class Protocol {
 
     }
 
-    public synchronized void enqueue(final byte[] bytes) {
-	mSerialExecutor.execute(new Runnable() {
-	    @Override
-	    public void run() {
-		
-		if (MetaWatchService.fakeWatch)
-		    return;
+    public void enqueue(final byte[] bytes) {
+	if (MetaWatchService.fakeWatch)
+	    return;
 
-		sendQueue.add(bytes);
-	    }
-	});
+	sendQueue.add(bytes);
     }
 
     // Force the message packet to the head of the queue
     // this should only be used when really necessary / time critical
-    public synchronized void pushhead(final byte[] bytes) {
+    public void pushhead(final byte[] bytes) {
 	if (MetaWatchService.fakeWatch)
 	    return;
 
@@ -285,7 +276,7 @@ public class Protocol {
 	sendQueue.addAll(temp);
     }
 
-    public synchronized void send(final byte[] bytes) throws IOException {
+    public void send(final byte[] bytes) throws IOException {
 	if (bytes == null)
 	    return;
 	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

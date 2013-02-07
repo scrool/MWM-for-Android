@@ -8,6 +8,7 @@ import java.util.List;
 import org.metawatch.manager.Application;
 import org.metawatch.manager.FontCache;
 import org.metawatch.manager.Idle;
+import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.AppLaunchMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
@@ -28,7 +29,6 @@ import android.graphics.Rect;
 import android.preference.PreferenceManager;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
-import org.metawatch.manager.Log;
 
 public abstract class ApplicationBase {
 
@@ -176,7 +176,6 @@ public abstract class ApplicationBase {
 		page = Idle.getInstance().addAppPage(context, this);
 		Idle.getInstance().toPage(context, page);
 		Idle.getInstance().toIdle(context);
-		Idle.getInstance().updateIdle(context, true);
 	    }
 	}
     }
@@ -190,8 +189,6 @@ public abstract class ApplicationBase {
     }
 
     protected void showMenu(final Context context) {
-
-	final String appId = getId();
 
 	List<Action> actions = getMenuActions();
 	if (actions != null) {
@@ -210,7 +207,7 @@ public abstract class ApplicationBase {
 
 		    @Override
 		    public int performAction(Context context) {
-			AppManager.getInstance(context).getApp(appId).open(context, false);
+			Application.stopAppMode(context);
 			return BUTTON_USED_DONT_UPDATE;
 		    }
 		};

@@ -1,6 +1,7 @@
 package org.metawatch.manager.actions;
 
 import org.metawatch.manager.Call;
+import org.metawatch.manager.Idle;
 import org.metawatch.manager.MediaControl;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchStatus;
@@ -16,6 +17,8 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
+import android.os.Looper;
 
 public class InternalActions {
 
@@ -191,12 +194,17 @@ public class InternalActions {
 	    return wifiMgr != null && wifiMgr.isWifiEnabled();
 	}
 
-	public int performAction(Context context) {
+	public int performAction(final Context context) {
 	    if (wifiMgr != null) {
 		wifiMgr.setWifiEnabled(!wifiMgr.isWifiEnabled());
 	    }
-
-	    return ApplicationBase.BUTTON_USED;
+	    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+		@Override
+		public void run() {
+		    Idle.getInstance().updateIdle(context, true);
+		}
+	    }, 250);
+	    return ApplicationBase.BUTTON_USED_DONT_UPDATE;
 	}
 
     }

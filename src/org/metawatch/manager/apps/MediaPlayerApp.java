@@ -60,7 +60,7 @@ public class MediaPlayerApp extends ApplicationBase {
 	    // -
 	    // immediate
 
-//	    Protocol.getInstance(context).enableButton(2, 1, MENU, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    Protocol.getInstance(context).enableButton(2, 1, MENU, MetaWatchService.WatchBuffers.APPLICATION); // right
 	    // bottom
 	    // -
 	    // press
@@ -331,9 +331,8 @@ public class MediaPlayerApp extends ApplicationBase {
 		    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		    context.startActivity(intent);
 		} catch (ActivityNotFoundException e) {
-		    return BUTTON_NOT_USED;
 		}
-		return BUTTON_USED;
+		return BUTTON_USED_DONT_UPDATE;
 	    }
 
 	});

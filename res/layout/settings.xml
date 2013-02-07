@@ -347,6 +347,7 @@
 			android:key="stickyNotifications"
 			android:summary="@string/settings_sticky_notifications_desc"
 			android:defaultValue="false"
+			android:enabled="false"
 			/>
 			
 		<EditTextPreference
@@ -355,6 +356,7 @@
 			android:summary="@string/settings_sticky_notification_timeout_desc"
 			android:inputType="number"
 			android:defaultValue="120"
+			android:enabled="false"
 			/>
 
 		<CheckBoxPreference
@@ -601,7 +603,8 @@
 			android:key="PacketWait"
 			android:summary="@string/settings_packet_wait_desc"
 			android:inputType="number"
-			android:defaultValue="25"
+			android:defaultValue="30"
+			android:enabled="false"
 			/>
 		<CheckBoxPreference
 			android:title="@string/settings_hide_notification_icon"

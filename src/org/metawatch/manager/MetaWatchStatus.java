@@ -313,23 +313,13 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	    return;
 	}
 	mShutdownRequested = false;
-	new Thread(new Runnable() {
-	    @Override
-	    public void run() {
-		mContext.startService(new Intent(mContext, MetaWatchService.class));
-	    }
-	}).start();
+	mContext.startService(new Intent(mContext, MetaWatchService.class));
     }
 
     void stopService() {
 	try {
 	    mShutdownRequested = true;
-	    new Thread(new Runnable() {
-		@Override
-		public void run() {
-		    mContext.stopService(new Intent(mContext, MetaWatchService.class));
-		}
-	    }).start();
+	    mContext.stopService(new Intent(mContext, MetaWatchService.class));
 	} catch (Throwable e) {
 	    // The service wasn't running
 	    if (Preferences.logging)

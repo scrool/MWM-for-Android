@@ -31,6 +31,8 @@ package org.metawatch.manager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
@@ -57,16 +59,15 @@ import android.preference.PreferenceManager;
 public class Idle {
 
     // final static byte IDLE_DUMMY = 65;
-
+    
+    private Executor mSerialExecutor = Executors.newSingleThreadExecutor();
+    
     final static byte IDLE_NEXT_PAGE = 60;
     final static byte IDLE_OLED_DISPLAY = 61;
     final static byte RIGHT_QUICK_BUTTON = 62;
     final static byte TOGGLE_SILENT = 63;
     final static byte LEFT_QUICK_BUTTON = 64;
 
-    private boolean busy = false;
-    private Object busyObj = new Object();
-    
     int currentPage = 0;
 
     Bitmap oledIdle = null;
@@ -87,26 +88,6 @@ public class Idle {
     }
     
     private Idle(){}
-
-    public boolean isBusy() {
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "Idle.isBusy()");
-	synchronized (busyObj) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Idle.busy=" + busy);
-	    return busy;
-	}
-    }
-
-    private void setBusy(boolean isBusy) {
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "Idle.setBusy()");
-	synchronized (busyObj) {
-	    busy = isBusy;
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Idle.setBusy(" + isBusy + ")");
-	}
-    }
 
     private interface IdlePage {
 	public void activate(Context context, int watchType);
@@ -288,7 +269,7 @@ public class Idle {
 	    idlePages.get(currentPage).deactivate(context, MetaWatchService.watchType);
 	}
 
-	currentPage = (page) % numPages();
+	currentPage = page % numPages();
 
 	if (idlePages != null && idlePages.size() > currentPage) {
 	    idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
@@ -321,7 +302,7 @@ public class Idle {
 	return null;
     }
 
-    public synchronized int addAppPage(final Context context, ApplicationBase app) {
+    public int addAppPage(final Context context, ApplicationBase app) {
 	int page = getAppPage(app.getId());
 
 	if (page == -1) {
@@ -338,7 +319,7 @@ public class Idle {
 	return page;
     }
 
-    public synchronized void removeAppPage(final Context context, ApplicationBase app) {
+    public void removeAppPage(final Context context, ApplicationBase app) {
 	int page = getAppPage(app.getId());
 
 	if (page != -1) {
@@ -363,7 +344,6 @@ public class Idle {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 	try {
-	    setBusy(true);
 
 	    ArrayList<IdlePage> prevList = idlePages;
 
@@ -443,7 +423,6 @@ public class Idle {
 	    }
 
 	} finally {
-	    setBusy(false);
 	}
 
 	if (Preferences.logging)
@@ -457,7 +436,7 @@ public class Idle {
     /*
      * Only this (central) method need to be synchronized, the one above calls this and will be blocked anyway.
      */
-    synchronized Bitmap createIdle(Context context, boolean preview, int page) {
+    Bitmap createIdle(Context context, boolean preview, int page) {
 	final int width = (MetaWatchService.watchType == WatchType.DIGITAL) ? 96 : 80;
 	final int height = (MetaWatchService.watchType == WatchType.DIGITAL) ? 96 : 32;
 	Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
@@ -489,50 +468,49 @@ public class Idle {
 	return mode;
     }
 
-    private void sendLcdIdle(Context context, boolean refresh) {
-	if (MetaWatchService.watchState != MetaWatchService.WatchStates.IDLE) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
-	    return;
-	}
+    private void sendLcdIdle(final Context context, final boolean refresh) {
+	mSerialExecutor.execute(new Runnable() {
+	    @Override
+	    public void run() {
+		if (MetaWatchService.watchState != MetaWatchService.WatchStates.IDLE) {
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
+		    return;
+		}
 
-	if (isBusy()) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as Idle is busy");
-	    return;
-	}
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "sendLcdIdle start");
 
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle start");
+		final int mode = getScreenMode(MetaWatchService.WatchType.DIGITAL);
+		boolean showClock = false;
 
-	final int mode = getScreenMode(MetaWatchService.WatchType.DIGITAL);
-	boolean showClock = false;
+		if (mode == MetaWatchService.WatchBuffers.IDLE || idlePages.get(currentPage) instanceof WidgetPage) {
+		    if (MetaWatchService.silentMode()) {
+			showClock = true;
+		    } else {
+			// Update widgets.
+			// Don't do it while on an AppPage in order to not overwrite any
+			// running app.
+			updateIdlePages(context, refresh);
+			showClock = (currentPage == 0 || Preferences.clockOnEveryPage);
+		    }
+		}
 
-	if (mode == MetaWatchService.WatchBuffers.IDLE || idlePages.get(currentPage) instanceof WidgetPage) {
-	    if (MetaWatchService.silentMode()) {
-		showClock = true;
-	    } else {
-		// Update widgets.
-		// Don't do it while on an AppPage in order to not overwrite any
-		// running app.
-		updateIdlePages(context, refresh);
-		showClock = (currentPage == 0 || Preferences.clockOnEveryPage);
+		Protocol.getInstance(context).sendLcdBitmap(createIdle(context), mode);
+		if (mode == MetaWatchService.WatchBuffers.IDLE)
+		    Protocol.getInstance(context).configureIdleBufferSize(showClock, true);
+
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "sendLcdIdle: Drawing idle screen on buffer " + mode);
+		Protocol.getInstance(context).updateLcdDisplay(mode);
+
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "sendLcdIdle end");		
 	    }
-	}
-
-	Protocol.getInstance(context).sendLcdBitmap(createIdle(context), mode);
-	if (mode == MetaWatchService.WatchBuffers.IDLE)
-	    Protocol.getInstance(context).configureIdleBufferSize(showClock, true);
-
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle: Drawing idle screen on buffer " + mode);
-	Protocol.getInstance(context).updateLcdDisplay(mode);
-
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle end");
+	});
     }
 
-    public synchronized void toIdle(Context context) {
+    public void toIdle(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.toIdle()");
 
@@ -595,43 +573,38 @@ public class Idle {
 	}
 
 	if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE) {
-	    Thread thread = new Thread("UpdateIdle") {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
+	    long timestamp = System.currentTimeMillis();
 
-		@Override
-		public void run() {
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
-		    long timestamp = System.currentTimeMillis();
+	    if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL)
+		sendLcdIdle(context, refresh);
+	    else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
+		updateOledIdle(context, refresh);
 
-		    if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL)
-			sendLcdIdle(context, refresh);
-		    else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
-			updateOledIdle(context, refresh);
-
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "updateIdle took " + (System.currentTimeMillis() - timestamp) + " ms");
-		}
-	    };
-	    thread.start();
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "updateIdle took " + (System.currentTimeMillis() - timestamp) + " ms");
 	}
-
     }
 
-    private void updateOledIdle(Context context, boolean refresh) {
-	if (isBusy())
-	    return;
+    private void updateOledIdle(final Context context, final boolean refresh) {
 
-	final int mode = getScreenMode(MetaWatchService.WatchType.ANALOG);
+	mSerialExecutor.execute(new Runnable() {
+	    @Override
+	    public void run() {
+		final int mode = getScreenMode(MetaWatchService.WatchType.ANALOG);
 
-	if (mode == MetaWatchService.WatchBuffers.IDLE)
-	    updateIdlePages(context, refresh);
+		if (mode == MetaWatchService.WatchBuffers.IDLE)
+		    updateIdlePages(context, refresh);
 
-	// get the 32px full screen
-	oledIdle = createIdle(context);
+		// get the 32px full screen
+		oledIdle = createIdle(context);
+	    }
+	});
     }
 
     // Send oled widgets view on demand
-    public void sendOledIdle(Context context) {
+    public void sendOledIdle(final Context context) {
 	if (oledIdle == null) {
 	    updateOledIdle(context, true);
 	}
@@ -645,7 +618,7 @@ public class Idle {
 	    canvas.drawBitmap(oledIdle, 0, -(i * 16), null);
 	    Protocol.getInstance(context).sendOledBitmap(bitmap, mode, i);
 	}
-	Protocol.getInstance(context).oledChangeMode(mode);
+	Protocol.getInstance(context).oledChangeMode(mode);		
     }
 
     public int appButtonPressed(Context context, int id) {
