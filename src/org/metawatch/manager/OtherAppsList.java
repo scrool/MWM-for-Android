@@ -8,7 +8,6 @@ import java.util.List;
 import org.metawatch.manager.MetaWatchService.Preferences;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -17,7 +16,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import org.metawatch.manager.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,17 +29,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Window;
 
 public class OtherAppsList extends SherlockFragmentActivity {
 
     public static final String DEFAULT_BLACKLIST = "com.android.mms," + "com.google.android.gm," + "com.fsck.k9," + "com.android.alarmclock," + "com.htc.android.worldclock," + "com.android.deskclock," + "com.sonyericsson.alarm," + "com.motorola.blur.alarmclock";
     private List<AppInfo> appInfos;
+    private AppLoader appLoader;
 
     private class AppLoader extends AsyncTask<Void, Void, List<AppInfo>> {
-	private ProgressDialog pdWait;
 
 	protected void onPreExecute() {
-	    pdWait = ProgressDialog.show(OtherAppsList.this, "", "Loading apps, please wait...");
+	    OtherAppsList.this.setProgressBarIndeterminateVisibility(Boolean.TRUE);
 	}
 
 	@Override
@@ -77,13 +76,17 @@ public class OtherAppsList extends SherlockFragmentActivity {
 
 	@Override
 	protected void onPostExecute(List<AppInfo> appInfos) {
-	    ListView listView = (ListView) findViewById(android.R.id.list);
-	    listView.setAdapter(new BlacklistAdapter(appInfos));
-	    OtherAppsList.this.appInfos = appInfos;
-	    pdWait.dismiss();
-
+	    try {
+		ListView listView = (ListView) findViewById(android.R.id.list);
+		listView.setAdapter(new BlacklistAdapter(appInfos));
+		OtherAppsList.this.appInfos = appInfos;
+		OtherAppsList.this.setProgressBarIndeterminateVisibility(Boolean.FALSE);
+	    } catch(NullPointerException e) {
+		e.printStackTrace();
+		//Likely the user closed the activity before this thread finished
+	    }
+	    
 	}
-
     }
 
     public class AppInfo implements Comparable<AppInfo> {
@@ -188,11 +191,18 @@ public class OtherAppsList extends SherlockFragmentActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
-
+	requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 	setContentView(R.layout.other_apps_list);
 
-	AppLoader appLoader = new AppLoader();
+	appLoader = new AppLoader();
 	appLoader.execute((Void[]) null);
+    }
+    
+    @Override
+    public void onDestroy() {
+	super.onDestroy();
+	if (appLoader != null)
+	    appLoader.cancel(true);
     }
 
     @Override
