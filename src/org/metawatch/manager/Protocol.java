@@ -30,14 +30,10 @@ package org.metawatch.manager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import org.metawatch.manager.MetaWatchService.ConnectionState;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchBuffers;
 
@@ -55,18 +51,14 @@ import android.text.TextPaint;
 import android.text.format.DateFormat;
 
 public class Protocol {
-
-    private volatile BlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
+    
     
     private boolean idleShowClock = true;
 
     private byte[][][] LCDDiffBuffer = new byte[3][48][30];
 
     private Context mContext;
-
-    private int sentPackets = 0;
-    private Thread protocolWatchdogThread = null;
-    private volatile boolean protocolSenderRunning = false;
+    
 
     private static Protocol mInstance;
 
@@ -77,9 +69,7 @@ public class Protocol {
     }
 
     public void destroy() {
-	protocolSenderRunning = false;
 	mInstance = null;
-	stopProtocolSender();
     }
 
     private Protocol(Context context) {
@@ -90,86 +80,7 @@ public class Protocol {
 	LCDDiffBuffer = new byte[3][48][30];
     }
 
-    private Runnable protocolSender = new Runnable() {
-	public void run() {
-	    while (protocolSenderRunning) {
-		try {
-		    byte[] message = sendQueue.take();
-		    send(message);
 
-		    Thread.sleep(Preferences.packetWait);
-
-		} catch (InterruptedException ie) {
-		    /* If we've been interrupted, exit gracefully. */
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "ProtocolSender was interrupted waiting for next message, exiting.");
-		    break;
-		} catch (IOException e) {
-		    if (Preferences.logging)
-			Log.e(MetaWatchStatus.TAG, "ProtocolSender encountered an I/O error sending message!");
-		    sendQueue.clear();
-		    break;
-		}
-	    }
-	}
-    };
-    private Thread protocolSenderThread = null;
-
-    private Runnable protocolWatchdog = new Runnable() {
-	public void run() {
-
-	    while (protocolSenderRunning) {
-		try {
-
-		    /* Remember the current queue length */
-		    int prevSentPackets = sentPackets;
-
-		    /* Wait some time */
-		    Thread.sleep(5 * 1000);
-
-		    /* If the queue did not decrease, restart protocol */
-		    if ((sendQueue.size() != 0) && (prevSentPackets == sentPackets)) {
-			if (MetaWatchService.connectionState == ConnectionState.CONNECTED) {
-			    if (Preferences.autoRestart) {
-				stopProtocolSender();
-				startProtocolSender();
-				Log.d(MetaWatchStatus.TAG, "Protocol restarted due to stalled queue");
-				return;
-			    }
-			}
-		    }
-
-		} catch (InterruptedException ioe) {
-		    // if (Preferences.logging) Log.d(MetaWatchStatus.TAG,
-		    // "Timeout aborted");
-		}
-
-	    }
-	}
-    };
-
-    public void startProtocolSender() {
-	if (protocolSenderRunning == false) {
-	    protocolSenderRunning = true;
-	    protocolSenderThread = new Thread(protocolSender, "ProtocolSender");
-	    protocolSenderThread.setDaemon(true);
-	    protocolSenderThread.start();
-	    protocolWatchdogThread = new Thread(protocolWatchdog, "ProtocolWatchdog");
-	    protocolWatchdogThread.start();
-	}
-    }
-
-    public void stopProtocolSender() {
-	if (protocolSenderRunning == true) {
-	    /* Stops thread gracefully */
-	    protocolSenderRunning = false;
-	    protocolSenderThread.interrupt();
-	    protocolWatchdogThread.interrupt();
-	    /* Thread is dead, we can mark it for garbage collection. */
-	    protocolSenderThread = null;
-	    protocolWatchdogThread = null;
-	}
-    }
 
     public boolean sendLcdBitmap(Bitmap bitmap, int bufferType) {
 	if (bitmap == null || bitmap.getWidth() != 96 || bitmap.getHeight() != 96) {
@@ -260,23 +171,10 @@ public class Protocol {
     public void enqueue(final byte[] bytes) {
 	if (MetaWatchService.fakeWatch)
 	    return;
-
-	sendQueue.add(bytes);
+	send(bytes);
     }
 
-    // Force the message packet to the head of the queue
-    // this should only be used when really necessary / time critical
-    public void pushhead(final byte[] bytes) {
-	if (MetaWatchService.fakeWatch)
-	    return;
-
-	ArrayList<byte[]> temp = new ArrayList<byte[]>();
-	sendQueue.drainTo(temp);
-	sendQueue.add(bytes);
-	sendQueue.addAll(temp);
-    }
-
-    public void send(final byte[] bytes) throws IOException {
+    public void send(final byte[] bytes) {
 	if (bytes == null)
 	    return;
 	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -301,9 +199,6 @@ public class Protocol {
 	}
 
 	MetaWatchService.sentBytes(mContext, byteArrayOutputStream.toByteArray());
-	sentPackets++;
-	if (sentPackets < 0)
-	    sentPackets = 1;
     }
 
     public void sendAdvanceHands(int hour, int minute, int second) {
@@ -355,7 +250,7 @@ public class Protocol {
 	    bytes[10] = (byte) calendar.get(Calendar.MINUTE);
 	    bytes[11] = (byte) (calendar.get(Calendar.SECOND) + Monitors.getInstance().rtcOffset);
 
-	    pushhead(bytes);
+	    send(bytes);
 
 	} catch (Exception x) {
 	}
@@ -372,7 +267,7 @@ public class Protocol {
 	bytes[3] = 0;
 
 	Monitors.getInstance().getRTCTimestamp = System.currentTimeMillis();
-	pushhead(bytes);
+	send(bytes);
     }
 
     public byte[] crc(byte[] bytes) {
@@ -1081,9 +976,4 @@ public class Protocol {
 
 	enqueue(bytes);
     }
-
-    public int getQueueLength() {
-	return sendQueue.size();
-    }
-
 }

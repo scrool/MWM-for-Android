@@ -37,8 +37,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.actions.ActionManager;
@@ -59,6 +62,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.ConditionVariable;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -74,8 +78,16 @@ public class MetaWatchService extends Service {
     private InputStream inputStream;
     private OutputStream outputStream;
     private WatchReceiverThread watchReceiverThread;
-    private Executor watchTransmitThread = Executors.newSingleThreadExecutor();
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private Handler pollHandler = new Handler(Looper.getMainLooper());
+    
+    private ScheduledExecutorService watchSenderThread = Executors.newSingleThreadScheduledExecutor();
+    
+    private Future<?> mPendingSend;
+
+    private volatile LinkedBlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
+
+    public static ConditionVariable mPauseQueue = new ConditionVariable(true);
+
 
     private PowerManager powerManager;
     public static PowerManager.WakeLock wakeLock;
@@ -527,50 +539,52 @@ public class MetaWatchService extends Service {
 
     @Override
     public synchronized int onStartCommand(final Intent intent, int flags, int startId) {
-	if (intent != null) {
-	    try {
-		switch (intent.getIntExtra(COMMAND_KEY, 0)) {
-		case SILENT_MODE_ENABLE:
-		    setSilentMode(true);
-		    break;
-		case SILENT_MODE_DISABLE:
-		    setSilentMode(false);
-		    break;
-		case INVERT_SILENT_MODE:
-		    setSilentMode(!silentMode);
-		    break;
-		case SEND_BYTE_ARRAY:
-		    watchTransmitThread.execute(new Runnable() {
-			@Override
-			public void run() {
-			    try {
-				wakeLock.acquire();
-				outputStream.write(intent.getByteArrayExtra(BYTE_ARRAY));
-				outputStream.flush();
-			    } catch (Exception e) {
-				e.printStackTrace();
-				resetConnection();
-			    } finally {
-				if (wakeLock != null && wakeLock.isHeld())
-				    wakeLock.release();
-			    }
-			}
-		    });
-		    break;
-		}
-	    } catch (Exception e) {
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, e.toString());
-		resetConnection();
-	    } finally {
-	    }
-	}
-
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onStartCommand()");
-
+	if (intent != null) {
+	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
+	    case SILENT_MODE_ENABLE:
+		setSilentMode(true);
+		break;
+	    case SILENT_MODE_DISABLE:
+		setSilentMode(false);
+		break;
+	    case INVERT_SILENT_MODE:
+		setSilentMode(!silentMode);
+		break;
+	    case SEND_BYTE_ARRAY:
+		sendQueue.add(intent.getByteArrayExtra(BYTE_ARRAY));
+		break;
+	    }
+	}
 	return START_STICKY;
     }
+    
+    private Runnable protocolSender = new Runnable() {
+	public void run() {
+	    byte[] message = null;
+	    mPauseQueue.block();
+	    message = sendQueue.peek();
+	    if (message != null) {
+		try {
+		    wakeLock.acquire();
+		    outputStream.write(message);
+		    outputStream.flush();
+		    sendQueue.remove(message);
+		} catch (Exception e) {
+		    e.printStackTrace();
+		    //The message was never removed from the queue, now block. The block is released when the connection is reestablished.
+		    //If the connection is not reestablished it's also unblocked in the Service onDestroy, along with the queue being cleared, etc...
+		    mPauseQueue.close();
+		    resetConnection();
+		} finally {
+		    if (wakeLock != null && wakeLock.isHeld())
+			wakeLock.release();
+		}
+	    }
+	    mPendingSend = watchSenderThread.schedule(this, Preferences.packetWait, TimeUnit.MILLISECONDS);
+	}
+    };
 
     @Override
     public void onDestroy() {
@@ -587,27 +601,24 @@ public class MetaWatchService extends Service {
 	    connectionState = ConnectionState.DISCONNECTED;
 	}
 	
-	mHandler.removeCallbacks(pollWeatherBattery);
+	if (mPendingSend != null)
+	    mPendingSend.cancel(true);
+	if (sendQueue != null)
+	    sendQueue.clear();
+	if (mPauseQueue != null)
+	    mPauseQueue.open();
 
-	cleanup();
+	pollHandler.removeCallbacks(pollWeatherBattery);
+
+	cleanupSessionComponents();
 	
-	Idle.getInstance().destroy();
-	removeNotification();
-	
-	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
-	Monitors.getInstance().destroy(this);
-	BitmapCache.getInstance().destroy();
-	
-	AppManager.getInstance(this).destroy();
-	ActionManager.getInstance(this).destroy();
-	WidgetManager.getInstance(this).destroy();
+	destroyServiceLifeComponents();
 	
 	mIsRunning = false;
-
     }
 
     @TargetApi(10)
-    private void connect() {
+    private boolean connect() {
 
 	try {
 
@@ -629,11 +640,8 @@ public class MetaWatchService extends Service {
 
 	    if (!MetaWatchService.fakeWatch) {
 
-		if (bluetoothAdapter == null) {
-		    return;
-		} else if (!bluetoothAdapter.isEnabled()) {
-		    return;
-		}
+		if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled())
+		    return false;
 
 		wakeLock.acquire();
 		
@@ -669,22 +677,16 @@ public class MetaWatchService extends Service {
 	    connectionState = ConnectionState.CONNECTED;
 	    setPreviousConnectionState(this, true);
 	    updateNotification();
-
-	    Protocol.getInstance(MetaWatchService.this).startProtocolSender();
-
-	    // RM: This is disabled for now, as it seems to confuse the watch fw
-	    // (3.1.0S tested)
-	    // and get it into a state where it won't accept any date/time
-	    // format updates :-S
-
-	    // if( Preferences.autoClockFormat )
-	    // Protocol.setTimeDateFormat(this);
-
+	    
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
 	    
 	    Protocol.getInstance(this).setTimeDateFormat(this);
 
 	    Notification.getInstance().startNotificationSender(this);
+	    
+	    mPauseQueue.open();
+	    
+	    return true;
 
 	} catch (IOException ioexception) {
 	    if (Preferences.logging)
@@ -711,9 +713,10 @@ public class MetaWatchService extends Service {
 	    if(wakeLock != null && wakeLock.isHeld()) 
 		wakeLock.release();
 	}
+	return false;
     }
 
-    void cleanup() {
+    void cleanupSessionComponents() {
 	try {
 	    if (outputStream != null)
 		outputStream.close();
@@ -734,6 +737,26 @@ public class MetaWatchService extends Service {
 	Protocol.getInstance(this).destroy();
 	Notification.getInstance().destroy();
 	MediaControl.getInstance().destroy();
+    }
+    
+    private void resetConnection() {
+ 	if (Preferences.logging)
+ 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
+ 	connectionState = ConnectionState.CONNECTING;
+ 	cleanupSessionComponents();
+    }
+    
+    private void destroyServiceLifeComponents() {
+	Idle.getInstance().destroy();
+	removeNotification();
+	
+	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+	Monitors.getInstance().destroy(this);
+	BitmapCache.getInstance().destroy();
+	
+	AppManager.getInstance(this).destroy();
+	ActionManager.getInstance(this).destroy();
+	WidgetManager.getInstance(this).destroy();
     }
 
     private class WatchReceiverThread extends Thread {
@@ -797,11 +820,12 @@ public class MetaWatchService extends Service {
 		Log.d(MetaWatchStatus.TAG, "state: connecting");
 	    // create initial connection or reconnect
 	    updateNotification();
-	    connect();
-	    if (powerManager.isScreenOn()) {
-		result = 1000;
-	    } else {
-		result = 5000;
+	    if (!connect()) {
+		if (powerManager.isScreenOn()) {
+		    result = 1000;
+		} else {
+		    result = 5000;
+		}
 	    }
 	    break;
 	case ConnectionState.CONNECTED:
@@ -837,7 +861,7 @@ public class MetaWatchService extends Service {
 		if (Preferences.logging)
 		    Log.e(MetaWatchStatus.TAG, "MetaWatchService.start(): bad voltage frequency string '" + voltageFrequencyString + "'");
 	    }	
-	    mHandler.postDelayed(this, 60000);
+	    pollHandler.postDelayed(this, 60000);
 	}
     };
 
@@ -847,7 +871,8 @@ public class MetaWatchService extends Service {
 	watchReceiverThread.setPriority(7);
 	watchReceiverThread.start();
 	
-	mHandler.post(pollWeatherBattery);
+	watchSenderThread.execute(protocolSender);
+	pollHandler.post(pollWeatherBattery);
 
 	/* DEBUG */
 //	String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(this).getString("collectWatchVoltage", "0");
@@ -1079,13 +1104,6 @@ public class MetaWatchService extends Service {
 		Log.d(MetaWatchStatus.TAG, e.toString());
 	    resetConnection();
 	}
-    }
-
-    private void resetConnection() {
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
-	connectionState = ConnectionState.CONNECTING;
-	cleanup();
     }
 
     private void broadcastConnection(boolean connected) {

@@ -671,13 +671,13 @@
             android:key="DisplaySplashScreen"
             android:summary="@string/settings_display_splash_desc"
             android:defaultValue="false"
-            />-->
+            />
         <CheckBoxPreference
 			android:title="@string/settings_restart_if_stalled"
 			android:key="AutoRestart"
 			android:summary="@string/settings_restart_if_stalled_desc"
 			android:defaultValue="false"
-			/>	
+			/>-->
 		<CheckBoxPreference
 			android:title="@string/settings_haptic_feedback"
 			android:key="HapticFeedback"
