@@ -84,7 +84,7 @@ public class MetaWatchService extends Service {
     
     private Future<?> mPendingSend;
 
-    private volatile LinkedBlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
+    public static volatile LinkedBlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
 
     public static ConditionVariable mPauseQueue = new ConditionVariable(true);
 
@@ -733,10 +733,6 @@ public class MetaWatchService extends Service {
 	} catch (IOException e) {
 	}
 	broadcastConnection(false);
-	
-	Protocol.getInstance(this).destroy();
-	Notification.getInstance().destroy();
-	MediaControl.getInstance().destroy();
     }
     
     private void resetConnection() {
@@ -751,12 +747,14 @@ public class MetaWatchService extends Service {
 	removeNotification();
 	
 	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+	Protocol.getInstance(this).destroy();
 	Monitors.getInstance().destroy(this);
 	BitmapCache.getInstance().destroy();
-	
 	AppManager.getInstance(this).destroy();
 	ActionManager.getInstance(this).destroy();
 	WidgetManager.getInstance(this).destroy();
+	Notification.getInstance().destroy();
+	MediaControl.getInstance().destroy();
     }
 
     private class WatchReceiverThread extends Thread {
