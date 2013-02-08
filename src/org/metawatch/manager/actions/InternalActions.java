@@ -1,5 +1,6 @@
 package org.metawatch.manager.actions;
 
+import org.metawatch.manager.Application;
 import org.metawatch.manager.Call;
 import org.metawatch.manager.Idle;
 import org.metawatch.manager.MediaControl;
@@ -10,15 +11,15 @@ import org.metawatch.manager.Utils;
 import org.metawatch.manager.apps.ApplicationBase;
 
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
-import android.os.Looper;
 
 public class InternalActions {
 
@@ -196,17 +197,32 @@ public class InternalActions {
 
 	public int performAction(final Context context) {
 	    if (wifiMgr != null) {
+		context.registerReceiver(new WifiReceiver(wifiMgr.isWifiEnabled() ? WifiManager.WIFI_STATE_DISABLED : WifiManager.WIFI_STATE_ENABLED), new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 		wifiMgr.setWifiEnabled(!wifiMgr.isWifiEnabled());
 	    }
-	    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-		@Override
-		public void run() {
-		    Idle.getInstance().updateIdle(context, true);
-		}
-	    }, 2000);
 	    return ApplicationBase.BUTTON_USED_DONT_UPDATE;
 	}
 
+	private class WifiReceiver extends BroadcastReceiver {
+	    private int mLookingFor = WifiManager.WIFI_STATE_ENABLED;
+	    public WifiReceiver(int lookingFor) {
+		mLookingFor = lookingFor;
+	    }
+	    @Override
+	    public void onReceive(final Context context, Intent intent) {
+		int extraWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+		if (extraWifiState == mLookingFor) {
+		    if (MetaWatchService.watchState == MetaWatchService.WatchStates.APPLICATION) {
+			Application.updateAppMode(context);
+		    } else {
+			Idle.getInstance().updateIdle(context, true);
+		    }
+		    try {
+			context.unregisterReceiver(this);
+		    } catch(IllegalArgumentException e){}
+		}
+	    }
+	}
     }
 
     public static class ToggleSilentAction extends ToggleAction {

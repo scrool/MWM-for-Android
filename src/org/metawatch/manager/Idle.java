@@ -31,8 +31,6 @@ package org.metawatch.manager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
@@ -59,8 +57,6 @@ import android.preference.PreferenceManager;
 public class Idle {
 
     // final static byte IDLE_DUMMY = 65;
-    
-    private Executor mSerialExecutor = Executors.newSingleThreadExecutor();
     
     final static byte IDLE_NEXT_PAGE = 60;
     final static byte IDLE_OLED_DISPLAY = 61;
@@ -469,45 +465,40 @@ public class Idle {
     }
 
     private void sendLcdIdle(final Context context, final boolean refresh) {
-	mSerialExecutor.execute(new Runnable() {
-	    @Override
-	    public void run() {
-		if (MetaWatchService.watchState != MetaWatchService.WatchStates.IDLE) {
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
-		    return;
-		}
+	if (MetaWatchService.watchState != MetaWatchService.WatchStates.IDLE) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
+	    return;
+	}
 
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "sendLcdIdle start");
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle start");
 
-		final int mode = getScreenMode(MetaWatchService.WatchType.DIGITAL);
-		boolean showClock = false;
+	final int mode = getScreenMode(MetaWatchService.WatchType.DIGITAL);
+	boolean showClock = false;
 
-		if (mode == MetaWatchService.WatchBuffers.IDLE || idlePages.get(currentPage) instanceof WidgetPage) {
-		    if (MetaWatchService.silentMode()) {
-			showClock = true;
-		    } else {
-			// Update widgets.
-			// Don't do it while on an AppPage in order to not overwrite any
-			// running app.
-			updateIdlePages(context, refresh);
-			showClock = (currentPage == 0 || Preferences.clockOnEveryPage);
-		    }
-		}
-
-		Protocol.getInstance(context).sendLcdBitmap(createIdle(context), mode);
-		if (mode == MetaWatchService.WatchBuffers.IDLE)
-		    Protocol.getInstance(context).configureIdleBufferSize(showClock, true);
-
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "sendLcdIdle: Drawing idle screen on buffer " + mode);
-		Protocol.getInstance(context).updateLcdDisplay(mode);
-
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "sendLcdIdle end");		
+	if (mode == MetaWatchService.WatchBuffers.IDLE || idlePages.get(currentPage) instanceof WidgetPage) {
+	    if (MetaWatchService.silentMode()) {
+		showClock = true;
+	    } else {
+		// Update widgets.
+		// Don't do it while on an AppPage in order to not overwrite any
+		// running app.
+		updateIdlePages(context, refresh);
+		showClock = (currentPage == 0 || Preferences.clockOnEveryPage);
 	    }
-	});
+	}
+
+	Protocol.getInstance(context).sendLcdBitmap(createIdle(context), mode);
+	if (mode == MetaWatchService.WatchBuffers.IDLE)
+	    Protocol.getInstance(context).configureIdleBufferSize(showClock, true);
+
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle: Drawing idle screen on buffer " + mode);
+	Protocol.getInstance(context).updateLcdDisplay(mode);
+
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle end");	
     }
 
     public void toIdle(Context context) {
@@ -572,8 +563,7 @@ public class Idle {
 	    return;
 	}
 
-	if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE ||
-	    MetaWatchService.watchState == MetaWatchService.WatchStates.APPLICATION) {
+	if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
 	    long timestamp = System.currentTimeMillis();
@@ -589,19 +579,13 @@ public class Idle {
     }
 
     private void updateOledIdle(final Context context, final boolean refresh) {
+	final int mode = getScreenMode(MetaWatchService.WatchType.ANALOG);
 
-	mSerialExecutor.execute(new Runnable() {
-	    @Override
-	    public void run() {
-		final int mode = getScreenMode(MetaWatchService.WatchType.ANALOG);
+	if (mode == MetaWatchService.WatchBuffers.IDLE)
+	    updateIdlePages(context, refresh);
 
-		if (mode == MetaWatchService.WatchBuffers.IDLE)
-		    updateIdlePages(context, refresh);
-
-		// get the 32px full screen
-		oledIdle = createIdle(context);
-	    }
-	});
+	// get the 32px full screen
+	oledIdle = createIdle(context);
     }
 
     // Send oled widgets view on demand

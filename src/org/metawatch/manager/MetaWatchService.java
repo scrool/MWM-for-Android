@@ -140,12 +140,12 @@ public class MetaWatchService extends Service {
 	public static final int NOTIFICATION = 2;
     }
 
-    final static class WatchStates {
-	static final int OFF = 0;
-	static final int IDLE = 1;
-	static final int APPLICATION = 2;
-	static final int NOTIFICATION = 3;
-	static final int CALL = 3;
+    public final static class WatchStates {
+	public static final int OFF = 0;
+	public static final int IDLE = 1;
+	public static final int APPLICATION = 2;
+	public static final int NOTIFICATION = 3;
+	public static final int CALL = 3;
     }
 
     final static class Msg {
@@ -1109,7 +1109,7 @@ public class MetaWatchService extends Service {
 	try {
 
 	    if (button > 0 && Preferences.hapticFeedback)
-		Protocol.getInstance(MetaWatchService.this).vibrate(5, 5, 2);
+		Protocol.getInstance(MetaWatchService.this).vibrate(50, 5, 3);
 
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "MetaWatchService.pressedButton(): watchState=" + watchState);
