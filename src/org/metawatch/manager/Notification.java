@@ -142,7 +142,7 @@ public class Notification {
 			synchronized (modeChanged) {
 			    modeChanged.wait(60000);
 			}
-
+			
 			/*
 			 * Ensure we're in NOTIFICATION mode (massive kludge, but it stops the watch rebounding straight out of a notification immediately
 			 */

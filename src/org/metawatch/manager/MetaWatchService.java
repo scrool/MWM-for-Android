@@ -610,9 +610,18 @@ public class MetaWatchService extends Service {
 
 	pollHandler.removeCallbacks(pollWeatherBattery);
 
-	cleanupSessionComponents();
+	cleanup();
 	
-	destroyServiceLifeComponents();
+	Idle.getInstance().destroy();
+	removeNotification();
+	
+	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+	Monitors.getInstance().destroy(this);
+	BitmapCache.getInstance().destroy();
+	
+	AppManager.getInstance(this).destroy();
+	ActionManager.getInstance(this).destroy();
+	WidgetManager.getInstance(this).destroy();
 	
 	mIsRunning = false;
     }
@@ -716,7 +725,7 @@ public class MetaWatchService extends Service {
 	return false;
     }
 
-    void cleanupSessionComponents() {
+    void cleanup() {
 	try {
 	    if (outputStream != null)
 		outputStream.close();
@@ -733,28 +742,17 @@ public class MetaWatchService extends Service {
 	} catch (IOException e) {
 	}
 	broadcastConnection(false);
+	
+	Protocol.getInstance(this).destroy();
+	Notification.getInstance().destroy();
+	MediaControl.getInstance().destroy();
     }
     
     private void resetConnection() {
  	if (Preferences.logging)
  	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
  	connectionState = ConnectionState.CONNECTING;
- 	cleanupSessionComponents();
-    }
-    
-    private void destroyServiceLifeComponents() {
-	Idle.getInstance().destroy();
-	removeNotification();
-	
-	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
-	Protocol.getInstance(this).destroy();
-	Monitors.getInstance().destroy(this);
-	BitmapCache.getInstance().destroy();
-	AppManager.getInstance(this).destroy();
-	ActionManager.getInstance(this).destroy();
-	WidgetManager.getInstance(this).destroy();
-	Notification.getInstance().destroy();
-	MediaControl.getInstance().destroy();
+ 	cleanup();
     }
 
     private class WatchReceiverThread extends Thread {
