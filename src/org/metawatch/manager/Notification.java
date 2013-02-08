@@ -75,7 +75,8 @@ public class Notification {
     }
     
     private void addToNotificationQueue(Context context, NotificationType notification, boolean forceShow) {
-	if (MetaWatchService.connectionState == MetaWatchService.ConnectionState.CONNECTED) {
+	if (MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTED &&
+	    MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTING) {
 	    if (!forceShow && MetaWatchService.silentMode()) {
 		addToHistory(notification);
 	    } else {
@@ -102,6 +103,9 @@ public class Notification {
 	    int currentNotificationPage = 0;
 	    while (notificationSenderRunning) {
 		try {
+		    //If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
+		    MetaWatchService.mPauseQueue.block();
+		    
 		    NotificationType notification;
 		    if (currentNotification != null) {
 			// Something bad happened while showing the last
@@ -116,7 +120,7 @@ public class Notification {
 
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "Notification:" + notification.description + " @ " + Utils.ticksToText(context, notification.timestamp));
-
+		    
 		    if (MetaWatchService.watchType == WatchType.DIGITAL) {
 
 			if (notification.bitmaps != null && notification.bitmaps.length > 0) {
@@ -294,9 +298,6 @@ public class Notification {
 		    if (MetaWatchService.WatchModes.CALL == false) {
 			exitNotification(context);
 		    }
-
-		    /* Leave some space between notifications. */
-		    Thread.sleep(2000);
 
 		} catch (InterruptedException ie) {
 		    /* If we've been interrupted, exit gracefully. */

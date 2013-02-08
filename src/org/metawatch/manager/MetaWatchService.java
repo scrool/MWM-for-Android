@@ -573,9 +573,6 @@ public class MetaWatchService extends Service {
 		    sendQueue.remove(message);
 		} catch (Exception e) {
 		    e.printStackTrace();
-		    //The message was never removed from the queue, now block. The block is released when the connection is reestablished.
-		    //If the connection is not reestablished it's also unblocked in the Service onDestroy, along with the queue being cleared, etc...
-		    mPauseQueue.close();
 		    resetConnection();
 		} finally {
 		    if (wakeLock != null && wakeLock.isHeld())
@@ -608,7 +605,8 @@ public class MetaWatchService extends Service {
 	if (mPauseQueue != null)
 	    mPauseQueue.open();
 
-	pollHandler.removeCallbacks(pollWeatherBattery);
+	if (pollHandler != null)
+	    pollHandler.removeCallbacks(pollWeatherBattery);
 
 	cleanup();
 	
@@ -616,6 +614,7 @@ public class MetaWatchService extends Service {
 	removeNotification();
 	
 	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+	Notification.getInstance().destroy();
 	Monitors.getInstance().destroy(this);
 	BitmapCache.getInstance().destroy();
 	
@@ -689,10 +688,18 @@ public class MetaWatchService extends Service {
 	    
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
 	    
-	    Protocol.getInstance(this).setTimeDateFormat(this);
+	    //In 10 seconds update the date and time format
+	    //Well after the entire connection process, and Idle update on the watch
+	    pollHandler.postDelayed(new Runnable() {
+		@Override
+		public void run() {
+		    Protocol.getInstance(MetaWatchService.this).setTimeDateFormat(MetaWatchService.this);
+		}
+	    }, 10000);
 
 	    Notification.getInstance().startNotificationSender(this);
 	    
+	    //Unblock the message protocol queue, and the notification queue.
 	    mPauseQueue.open();
 	    
 	    return true;
@@ -744,14 +751,16 @@ public class MetaWatchService extends Service {
 	broadcastConnection(false);
 	
 	Protocol.getInstance(this).destroy();
-	Notification.getInstance().destroy();
 	MediaControl.getInstance().destroy();
     }
     
     private void resetConnection() {
  	if (Preferences.logging)
  	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
- 	connectionState = ConnectionState.CONNECTING;
+ 	//The message was never removed from the queue, now block. The block is released when the connection is reestablished.
+ 	//If the connection is not reestablished it's also unblocked in the Service onDestroy, along with the queue being cleared, etc...
+ 	mPauseQueue.close();
+	connectionState = ConnectionState.CONNECTING;
  	cleanup();
     }
 
