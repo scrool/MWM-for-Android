@@ -589,6 +589,7 @@ public class MetaWatchService extends Service {
 	    watchReceiverThread.quit();
 	} else {
 	    connectionState = ConnectionState.DISCONNECTED;
+	    setPreviousConnectionState(MetaWatchService.this, false);
 	}
 	
 	if (mPendingSend != null)
@@ -606,7 +607,9 @@ public class MetaWatchService extends Service {
 	Idle.getInstance().destroy();
 	removeNotification();
 	
-	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+	if (prefChangeListener != null)
+	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+
 	Notification.getInstance().destroy();
 	Monitors.getInstance().destroy(this);
 	BitmapCache.getInstance().destroy();

@@ -245,7 +245,8 @@ public class Monitors {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Monitors.stop()");
 
-	contentResolverMessages.unregisterContentObserver(contentObserverMessages);
+	if (contentResolverMessages != null && contentObserverMessages != null)
+	    contentResolverMessages.unregisterContentObserver(contentObserverMessages);
 	stopAlarmTicker();
 
 	if (batteryLevelReceiver != null) {
@@ -297,7 +298,8 @@ public class Monitors {
     }
 
     void stopAlarmTicker() {
-	alarmManager.cancel(sender);
+	if (alarmManager != null && sender != null)
+	    alarmManager.cancel(sender);
     }
 
     private class ContentObserverMessages extends ContentObserver {

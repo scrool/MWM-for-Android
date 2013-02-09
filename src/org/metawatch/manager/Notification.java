@@ -329,7 +329,8 @@ public class Notification {
 	if (notificationSenderRunning == true) {
 	    /* Stops thread gracefully */
 	    notificationSenderRunning = false;
-	    notificationSenderThread.interrupt();
+	    if (notificationSenderThread != null)
+		notificationSenderThread.interrupt();
 	    /* Thread is dead, we can mark it for garbage collection. */
 	    notificationSenderThread = null;
 	    mInstance = null;
