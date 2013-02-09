@@ -36,6 +36,7 @@ import org.damazio.notifier.event.receivers.mms.PduParser;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.apps.AppManager;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,7 +45,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
-import org.metawatch.manager.Log;
 
 public class IntentReceiver extends BroadcastReceiver {
 
@@ -362,6 +362,14 @@ public class IntentReceiver extends BroadcastReceiver {
 		final String url = intent.getStringExtra("url");
 
 		NotificationBuilder.createNMA(context, app, event, desc, prio, url);
+	    } else if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+	            final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+	            switch (state) {
+	            case BluetoothAdapter.STATE_OFF:
+	        	if (MetaWatchService.mIsRunning)
+	        	    context.stopService(new Intent(context, MetaWatchService.class));
+	        	break;
+	            }
 	    }
 	} catch (android.os.BadParcelableException e) {
 	    e.printStackTrace();

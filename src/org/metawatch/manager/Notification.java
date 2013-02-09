@@ -30,7 +30,11 @@ package org.metawatch.manager;
 
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchBuffers;
@@ -40,7 +44,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
-import org.metawatch.manager.Log;
 
 public class Notification {
 
@@ -55,28 +58,30 @@ public class Notification {
     private int notifyButtonPress = 0;
 
     private BlockingQueue<NotificationType> notificationQueue = new LinkedBlockingQueue<NotificationType>();
-    private volatile boolean notificationSenderRunning = false;
     private ArrayList<NotificationType> notificationHistory = new ArrayList<NotificationType>();
+    private NotificationSender notificationSender;
+    private ScheduledExecutorService mExecutor = Executors.newSingleThreadScheduledExecutor();
+    private Future<?> mFuture;
     final static byte NOTIFICATION_HISTORY_SIZE = 15;
 
     private static Notification mInstance;
-    
-    private Notification(){}
-    
+
+    private Notification() {
+    }
+
     public static Notification getInstance() {
 	if (mInstance == null)
 	    mInstance = new Notification();
 	return mInstance;
     }
-    
+
     public void destroy() {
 	stopNotificationSender();
 	mInstance = null;
     }
-    
+
     private void addToNotificationQueue(Context context, NotificationType notification, boolean forceShow) {
-	if (MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTED &&
-	    MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTING) {
+	if (MetaWatchService.mIsRunning && MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTED && MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTING) {
 	    if (!forceShow && MetaWatchService.silentMode()) {
 		addToHistory(notification);
 	    } else {
@@ -101,240 +106,228 @@ public class Notification {
 
 	public void run() {
 	    int currentNotificationPage = 0;
-	    while (notificationSenderRunning) {
-		try {
-		    //If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
-		    MetaWatchService.mPauseQueue.block();
-		    
-		    NotificationType notification;
-		    if (currentNotification != null) {
-			// Something bad happened while showing the last
-			// notification, show it again.
-			notification = currentNotification;
-		    } else {
-			notification = notificationQueue.take();
-			currentNotification = notification;
-		    }
-		    MetaWatchService.watchState = MetaWatchService.WatchStates.NOTIFICATION;
-		    MetaWatchService.WatchModes.NOTIFICATION = true;
+	    try {
+		NotificationType notification;
+		if (currentNotification != null) {
+		    // Something bad happened while showing the last
+		    // notification, show it again.
+		    notification = currentNotification;
+		} else {
+		    notification = notificationQueue.take();
+		    currentNotification = notification;
+		}
+		MetaWatchService.watchState = MetaWatchService.WatchStates.NOTIFICATION;
+		MetaWatchService.WatchModes.NOTIFICATION = true;
 
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "Notification:" + notification.description + " @ " + Utils.ticksToText(context, notification.timestamp));
-		    
-		    if (MetaWatchService.watchType == WatchType.DIGITAL) {
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "Notification:" + notification.description + " @ " + Utils.ticksToText(context, notification.timestamp));
 
-			if (notification.bitmaps != null && notification.bitmaps.length > 0) {
-			    Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[0], MetaWatchService.WatchBuffers.NOTIFICATION);
-			    currentNotificationPage = 0;
+		if (MetaWatchService.watchType == WatchType.DIGITAL) {
 
-			    if (Preferences.logging)
-				Log.d(MetaWatchStatus.TAG, "Notification contains " + notification.bitmaps.length + " bitmaps.");
-
-			} else if (notification.array != null)
-			    Protocol.getInstance(context).sendLcdArray(notification.array, MetaWatchService.WatchBuffers.NOTIFICATION);
-			else if (notification.buffer != null)
-			    Protocol.getInstance(context).sendLcdBuffer(notification.buffer, MetaWatchService.WatchBuffers.NOTIFICATION);
-			else {
-			    continue;
-			}
-
-			Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
-
-			/*
-			 * Wait until the watch shows the notification before starting the timeout.
-			 */
-			synchronized (modeChanged) {
-			    modeChanged.wait(60000);
-			}
-			
-			/*
-			 * Ensure we're in NOTIFICATION mode (massive kludge, but it stops the watch rebounding straight out of a notification immediately
-			 */
-			Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
-
-			if (notification.vibratePattern.vibrate)
-			    Protocol.getInstance(context).vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
-
-			if (Preferences.notifyLight)
-			    Protocol.getInstance(context).ledChange(true);
+		    if (notification.bitmaps != null && notification.bitmaps.length > 0) {
+			Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[0], MetaWatchService.WatchBuffers.NOTIFICATION);
+			currentNotificationPage = 0;
 
 			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "notif bitmap sent from thread");
+			    Log.d(MetaWatchStatus.TAG, "Notification contains " + notification.bitmaps.length + " bitmaps.");
 
+		    } else if (notification.array != null) {
+			Protocol.getInstance(context).sendLcdArray(notification.array, MetaWatchService.WatchBuffers.NOTIFICATION);
+		    }
+		    else if (notification.buffer != null) {
+			Protocol.getInstance(context).sendLcdBuffer(notification.buffer, MetaWatchService.WatchBuffers.NOTIFICATION);
 		    } else {
+			currentNotification = null;
+		    }
+		    
+		    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
+			
+		    /*
+		     * Wait until the watch shows the notification before starting the timeout.
+		     */
+		    synchronized (modeChanged) {
+			modeChanged.wait(60000);
+		    }
+		    
+		    /*
+		     * Ensure we're in NOTIFICATION mode (massive kludge, but it stops the watch rebounding straight out of a notification immediately
+		     */
+		    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
+		    
+		    if (notification.vibratePattern.vibrate)
+			Protocol.getInstance(context).vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
+		    
+		    if (Preferences.notifyLight)
+			Protocol.getInstance(context).ledChange(true);
+		    
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "notif bitmap sent from thread");
+		} else {
+		    Protocol.getInstance(context).sendOledBuffer(notification.oledTop, WatchBuffers.NOTIFICATION, 0, false);
+		    Protocol.getInstance(context).sendOledBuffer(notification.oledBottom, WatchBuffers.NOTIFICATION, 1, false);
 
-			Protocol.getInstance(context).sendOledBuffer(notification.oledTop, WatchBuffers.NOTIFICATION, 0, false);
-			Protocol.getInstance(context).sendOledBuffer(notification.oledBottom, WatchBuffers.NOTIFICATION, 1, false);
+		    if (notification.vibratePattern.vibrate)
+			Protocol.getInstance(context).vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
 
-			if (notification.vibratePattern.vibrate)
-			    Protocol.getInstance(context).vibrate(notification.vibratePattern.on, notification.vibratePattern.off, notification.vibratePattern.cycles);
+		    if (notification.oledScroll != null) {
 
-			if (notification.oledScroll != null) {
+			if (Preferences.logging)
+			    Log.d(MetaWatchStatus.TAG, "notification.scrollLength = " + notification.scrollLength);
 
+			/*
+			 * If requested, let the notification stay on the screen for a few seconds before starting to scroll.
+			 */
+			SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+			if (sharedPreferences.getBoolean("pauseBeforeScrolling", false)) {
 			    if (Preferences.logging)
-				Log.d(MetaWatchStatus.TAG, "notification.scrollLength = " + notification.scrollLength);
+				Log.d(MetaWatchStatus.TAG, "Pausing before scrolling.");
+			    Thread.sleep(3000);
+			}
 
-			    /*
-			     * If requested, let the notification stay on the screen for a few seconds before starting to scroll.
-			     */
-			    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-			    if (sharedPreferences.getBoolean("pauseBeforeScrolling", false)) {
-				if (Preferences.logging)
-				    Log.d(MetaWatchStatus.TAG, "Pausing before scrolling.");
-				Thread.sleep(3000);
-			    }
+			if (notification.scrollLength >= 240) {
 
-			    if (notification.scrollLength >= 240) {
+			    Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, 0, 240, true, false);
+			    // wait continue with scroll
 
-				Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, 0, 240, true, false);
-				// wait continue with scroll
-
-				for (int i = 240; i < notification.scrollLength; i += 80) {
-				    try {
-					synchronized (scrollRequest) {
-					    scrollRequest.wait(60000);
-					}
-				    } catch (InterruptedException e) {
-					e.printStackTrace();
+			    for (int i = 240; i < notification.scrollLength; i += 80) {
+				try {
+				    synchronized (scrollRequest) {
+					scrollRequest.wait(60000);
 				    }
-
-				    if (i + 80 >= notification.scrollLength)
-					Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, i, 80, false, true);
-				    else
-					Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, i, 80, false, false);
+				} catch (InterruptedException e) {
+				    e.printStackTrace();
 				}
 
-			    } else if (notification.scrollLength > 0) {
-
-				int len = notification.scrollLength / 20 + 1;
-				Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, 0, len * 20, true, true);
-
+				if (i + 80 >= notification.scrollLength)
+				    Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, i, 80, false, true);
+				else
+				    Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, i, 80, false, false);
 			    }
-			}
 
+			} else if (notification.scrollLength > 0) {
+
+			    int len = notification.scrollLength / 20 + 1;
+			    Protocol.getInstance(context).sendOledBufferPart(notification.oledScroll, 0, len * 20, true, true);
+
+			}
 		    }
 
-		    /* Send button configuration for sticky notifications. */
-		    if (notification.timeout < 0) {
-			notifyButtonPress = NOTIFICATION_NONE;
-			if (notification.bitmaps != null & notification.bitmaps.length > 1) {
-			    Protocol.getInstance(context).enableButton(0, 1, NOTIFICATION_UP, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-			    // top
-			    // press
-			    Protocol.getInstance(context).enableButton(1, 1, NOTIFICATION_DOWN, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-			    // middle
-			    // press
-			}
-			Protocol.getInstance(context).enableButton(2, 1, NOTIFICATION_DISMISS, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-			// bottom
+		}
+
+		/* Send button configuration for sticky notifications. */
+		if (notification.timeout < 0) {
+		    notifyButtonPress = NOTIFICATION_NONE;
+		    if (notification.bitmaps != null & notification.bitmaps.length > 1) {
+			Protocol.getInstance(context).enableButton(0, 1, NOTIFICATION_UP, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			// top
+			// press
+			Protocol.getInstance(context).enableButton(1, 1, NOTIFICATION_DOWN, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+			// middle
 			// press
 		    }
-
-		    if (notification.isNew) {
-			addToHistory(notification);
-		    }
-
-		    notification.viewed = true;
-
-		    /* Do the timeout and button handling. */
-		    if (notification.timeout < 0) {
-			long startTicks = System.currentTimeMillis();
-			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Notification sent, waiting for dismiss ");
-
-			int timeout = getStickyNotificationTimeout(context);
-
-			do {
-			    try {
-				synchronized (buttonPressed) {
-				    buttonPressed.wait(timeout);
-				}
-			    } catch (InterruptedException e) {
-				if (Preferences.logging)
-				    Log.d(MetaWatchStatus.TAG, "Button wait interrupted - " + e.getMessage());
-				e.printStackTrace();
-			    }
-
-			    if (notifyButtonPress == NOTIFICATION_UP && currentNotificationPage > 0) {
-				currentNotificationPage--;
-				Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
-			    } else if (notifyButtonPress == NOTIFICATION_DOWN && currentNotificationPage < notification.bitmaps.length - 1) {
-				currentNotificationPage++;
-				Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
-			    }
-
-			    if ((System.currentTimeMillis() - startTicks) > timeout) {
-				notifyButtonPress = NOTIFICATION_DISMISS;
-			    }
-
-			    if (Preferences.logging)
-				Log.d(MetaWatchStatus.TAG, "Displaying page " + currentNotificationPage + " / " + notification.bitmaps.length);
-
-			    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
-			} while (notifyButtonPress != NOTIFICATION_DISMISS);
-
-			Protocol.getInstance(context).disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-			// top
-			Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-			// middle
-			Protocol.getInstance(context).disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-			// bottom
-
-			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Done sleeping.");
-
-		    } else {
-
-			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Notification sent, sleeping for " + notification.timeout + "ms");
-			Thread.sleep(notification.timeout);
-			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Done sleeping.");
-		    }
-
-		    // We're done with this notification.
-		    currentNotification = null;
-
-		    if (MetaWatchService.WatchModes.CALL == false) {
-			exitNotification(context);
-		    }
-
-		} catch (InterruptedException ie) {
-		    /* If we've been interrupted, exit gracefully. */
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "NotificationSender was interrupted waiting for next notification, exiting.");
-		    break;
-		} catch (Exception e) {
-		    if (Preferences.logging)
-			Log.e(MetaWatchStatus.TAG, "Exception in NotificationSender: " + e.toString());
+		    Protocol.getInstance(context).enableButton(2, 1, NOTIFICATION_DISMISS, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+		    // bottom
+		    // press
 		}
+
+		if (notification.isNew) {
+		    addToHistory(notification);
+		}
+
+		notification.viewed = true;
+
+		/* Do the timeout and button handling. */
+		if (notification.timeout < 0) {
+		    long startTicks = System.currentTimeMillis();
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Notification sent, waiting for dismiss ");
+
+		    int timeout = getStickyNotificationTimeout(context);
+
+		    do {
+			try {
+			    synchronized (buttonPressed) {
+				buttonPressed.wait(timeout);
+			    }
+			} catch (InterruptedException e) {
+			    if (Preferences.logging)
+				Log.d(MetaWatchStatus.TAG, "Button wait interrupted - " + e.getMessage());
+			    e.printStackTrace();
+			}
+
+			if (notifyButtonPress == NOTIFICATION_UP && currentNotificationPage > 0) {
+			    currentNotificationPage--;
+			    Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
+			} else if (notifyButtonPress == NOTIFICATION_DOWN && currentNotificationPage < notification.bitmaps.length - 1) {
+			    currentNotificationPage++;
+			    Protocol.getInstance(context).sendLcdBitmap(notification.bitmaps[currentNotificationPage], MetaWatchService.WatchBuffers.NOTIFICATION);
+			}
+
+			if ((System.currentTimeMillis() - startTicks) > timeout) {
+			    notifyButtonPress = NOTIFICATION_DISMISS;
+			}
+
+			if (Preferences.logging)
+			    Log.d(MetaWatchStatus.TAG, "Displaying page " + currentNotificationPage + " / " + notification.bitmaps.length);
+
+			Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
+		    } while (notifyButtonPress != NOTIFICATION_DISMISS);
+
+		    Protocol.getInstance(context).disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+		    // top
+		    Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+		    // middle
+		    Protocol.getInstance(context).disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+		    // bottom
+
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Done sleeping.");
+
+		} else {
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Notification sent, sleeping for " + notification.timeout + "ms");
+		    Thread.sleep(notification.timeout);
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "NotificationSender.run(): Done sleeping.");
+		}
+
+		// We're done with this notification.
+		currentNotification = null;
+
+		if (MetaWatchService.WatchModes.CALL == false) {
+		    exitNotification(context);
+		}
+
+	    } catch (InterruptedException ie) {
+		/* If we've been interrupted, exit gracefully. */
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "NotificationSender was interrupted waiting for next notification, exiting.");
+	    } catch (Exception e) {
+		if (Preferences.logging)
+		    Log.e(MetaWatchStatus.TAG, "Exception in NotificationSender: " + e.toString());
 	    }
+	    mFuture = mExecutor.schedule(notificationSender, 1000, TimeUnit.MILLISECONDS);
+	    // If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
+	    MetaWatchService.mPauseQueue.block();
 	}
 
     };
 
-    private Thread notificationSenderThread = null;
-
     public synchronized void startNotificationSender(Context context) {
-	if (notificationSenderRunning == false) {
-	    notificationSenderRunning = true;
-	    NotificationSender notificationSender = new NotificationSender(context);
-	    notificationSenderThread = new Thread(notificationSender, "NotificationSender");
-	    notificationSenderThread.setDaemon(true);
-	    notificationSenderThread.start();
-	}
+	notificationSender = new NotificationSender(context);
+	mExecutor.execute(notificationSender);
     }
 
     public synchronized void stopNotificationSender() {
-	if (notificationSenderRunning == true) {
-	    /* Stops thread gracefully */
-	    notificationSenderRunning = false;
-	    if (notificationSenderThread != null)
-		notificationSenderThread.interrupt();
-	    /* Thread is dead, we can mark it for garbage collection. */
-	    notificationSenderThread = null;
-	    mInstance = null;
-	}
+	if (mFuture != null)
+	    mFuture.cancel(true);
+	if (notificationQueue != null)
+	    notificationQueue.clear();
+	if (notificationHistory != null)
+	    notificationHistory.clear();
+	if (mExecutor != null)
+	    mExecutor.shutdownNow();
+	mInstance = null;
     }
 
     private static final String NOTIFICATION_TIMEOUT_SETTING = "notificationTimeout";

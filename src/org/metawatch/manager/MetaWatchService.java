@@ -556,7 +556,6 @@ public class MetaWatchService extends Service {
     private Runnable protocolSender = new Runnable() {
 	public void run() {
 	    byte[] message = null;
-	    mPauseQueue.block();
 	    message = sendQueue.peek();
 	    if (message != null) {
 		try {
@@ -573,6 +572,7 @@ public class MetaWatchService extends Service {
 		}
 	    }
 	    mPendingSend = watchSenderThread.schedule(this, Preferences.packetWait, TimeUnit.MILLISECONDS);
+	    mPauseQueue.block();
 	}
     };
 
@@ -596,6 +596,11 @@ public class MetaWatchService extends Service {
 	    mPendingSend.cancel(true);
 	if (sendQueue != null)
 	    sendQueue.clear();
+	if (watchSenderThread != null)
+	    watchSenderThread.shutdownNow();
+	
+	Notification.getInstance().destroy();
+	
 	if (mPauseQueue != null)
 	    mPauseQueue.open();
 
@@ -610,7 +615,6 @@ public class MetaWatchService extends Service {
 	if (prefChangeListener != null)
 	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
 
-	Notification.getInstance().destroy();
 	Monitors.getInstance().destroy(this);
 	BitmapCache.getInstance().destroy();
 	
