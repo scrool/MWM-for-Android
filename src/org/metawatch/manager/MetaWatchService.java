@@ -1147,6 +1147,7 @@ public class MetaWatchService extends Service {
 
 		    case Idle.IDLE_NEXT_PAGE:
 			if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
+			    Idle.getInstance().toIdle(this);
 			    Idle.getInstance().nextPage(this);
 			    Idle.getInstance().updateIdle(this, true);
 			}
