@@ -216,7 +216,7 @@ public class MetaWatchService extends Service {
 	public static String wundergroundKey = "";
 	public static int fontSize = 2;
 	public static int smsLoopInterval = 15;
-	public static int idleMusicControlMethod = MediaControl.MUSICSERVICECOMMAND;
+//	public static int idleMusicControlMethod = MediaControl.MUSICSERVICECOMMAND;
 	public static String quickButtonL = ":launch:org.metawatch.manager.apps.MediaPlayerApp";
 	public static String quickButtonR = "lastNotification";
 	public static boolean notificationLarger = false;
@@ -329,7 +329,7 @@ public class MetaWatchService extends Service {
 	Preferences.weatherCelsius = sharedPreferences.getBoolean("WeatherCelsius", Preferences.weatherCelsius);
 	Preferences.weatherGeolocationMode = Integer.parseInt(sharedPreferences.getString("WeatherGeolocationMode", Integer.toString(Preferences.weatherGeolocationMode)));
 	Preferences.wundergroundKey = sharedPreferences.getString("WundergroundKey", Preferences.wundergroundKey).trim();
-	Preferences.idleMusicControlMethod = Integer.parseInt(sharedPreferences.getString("IdleMusicControlMethod", Integer.toString(Preferences.idleMusicControlMethod)));
+//	Preferences.idleMusicControlMethod = Integer.parseInt(sharedPreferences.getString("IdleMusicControlMethod", Integer.toString(Preferences.idleMusicControlMethod)));
 	Preferences.quickButtonL = sharedPreferences.getString("QuickButtonL", Preferences.quickButtonL);
 	Preferences.quickButtonR = sharedPreferences.getString("QuickButtonR", Preferences.quickButtonR);
 	Preferences.autoConnect = sharedPreferences.getBoolean("AutoConnect", Preferences.autoConnect);
