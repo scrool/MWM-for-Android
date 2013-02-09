@@ -97,6 +97,16 @@ public class Settings extends SherlockPreferenceActivity {
 	    }
 	});
 	
+	CheckBoxPreference inverseMediaPlayerButtons = (CheckBoxPreference) findPreference("InverseMediaPlayerButtons");
+	inverseMediaPlayerButtons.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+	    @Override
+	    public boolean onPreferenceClick(Preference preference) {
+		Idle.getInstance().updateIdle(Settings.this, true);
+		return true;
+	    }
+	    
+	});
+	
 	Preference discovery = findPreference("Discovery");
 	discovery.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
