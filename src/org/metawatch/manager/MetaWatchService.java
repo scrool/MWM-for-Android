@@ -77,36 +77,28 @@ public class MetaWatchService extends Service {
     private BluetoothSocket bluetoothSocket;
     private InputStream inputStream;
     private OutputStream outputStream;
+    
     private WatchReceiverThread watchReceiverThread;
     private Handler pollHandler = new Handler(Looper.getMainLooper());
-    
     private ScheduledExecutorService watchSenderThread = Executors.newSingleThreadScheduledExecutor();
-    
     private Future<?> mPendingSend;
 
+    //These static fields are not modified outside of this class
+    //The only reason sendQueue is static is for the Statistic dialog
+    //mPauseQueue is static to block the Notification queue
     public static volatile LinkedBlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
-
     public static ConditionVariable mPauseQueue = new ConditionVariable(true);
 
-
     private PowerManager powerManager;
-    public static PowerManager.WakeLock wakeLock;
+    public PowerManager.WakeLock wakeLock;
 
+    //These are not modified outside of this class, only read
     public static volatile int connectionState;
     public static int watchType = WatchType.UNKNOWN;
     public static int watchGen = WatchGen.UNKNOWN;
     public static int watchState;
-    public static boolean fakeWatch = false; // Setting this to true disables
-					     // all the bt comms, and just
-					     // pretends its connected to a
-					     // watch. Enable by setting the
-					     // MAC address to ANALOG or
-					     // DIGITAL
-
-    public static TestSmsLoop testSmsLoop;
+    public static boolean fakeWatch = false;
     private boolean lastConnectionState = false;
-
-    private static boolean silentMode = false;
 
     public static final String COMMAND_KEY = "COMMAND_KEY";
     public static final int SILENT_MODE_DISABLE = 0;
@@ -116,6 +108,7 @@ public class MetaWatchService extends Service {
     public static final String BYTE_ARRAY = "BYTE_ARRAY";
     
     public static boolean mIsRunning = false;
+    private static boolean silentMode = false;
     
     public static boolean silentMode() {
 	return silentMode;
@@ -131,7 +124,7 @@ public class MetaWatchService extends Service {
     }
     
     public static void sentBytes(Context context, byte[] bytes) {
-	if (!MetaWatchStatus.mShutdownRequested && MetaWatchService.mIsRunning) {
+	if (!MetaWatchStatus.mShutdownRequested && mIsRunning) {
 	    Intent intent = new Intent(context, MetaWatchService.class);
 	    intent.putExtra(MetaWatchService.COMMAND_KEY, MetaWatchService.SEND_BYTE_ARRAY);
 	    intent.putExtra(MetaWatchService.BYTE_ARRAY, bytes);

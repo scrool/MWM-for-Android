@@ -6,8 +6,6 @@
 	<PreferenceCategory android:title="Notifications">
 	    <Preference android:key="calendar" android:title="Calendar (LCD/OLED)"/>
     	<Preference android:key="notification" android:title="Notification (LCD/OLED)"/>
-    	<Preference android:key="sms_start" android:title="SMS Start (LCD/OLED)"/>
-    	<Preference android:key="sms_stop" android:title="SMS Stop (LCD/OLED)"/>
     	<Preference android:key="sms" android:title="SMS (LCD/OLED)"/>
     	<Preference android:key="sms2" android:title="SMS test wrap (LCD/OLED)"/>
     	<Preference android:key="sms3" android:title="SMS test overflow (LCD/OLED)"/>

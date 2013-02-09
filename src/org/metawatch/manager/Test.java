@@ -109,20 +109,6 @@ public class Test extends SherlockPreferenceActivity {
 	    }
 	});
 
-	preferenceScreen.findPreference("sms_start").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		startSmsTestLoop(context);
-		return true;
-	    }
-	});
-
-	preferenceScreen.findPreference("sms_stop").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		stopSmsTestLoop();
-		return true;
-	    }
-	});
-
 	preferenceScreen.findPreference("application_update").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
 		if (MetaWatchService.watchType == WatchType.DIGITAL)
@@ -453,19 +439,6 @@ public class Test extends SherlockPreferenceActivity {
 	});
 
 	super.onStart();
-    }
-
-    void startSmsTestLoop(final Context context) {
-	if (MetaWatchService.testSmsLoop != null)
-	    MetaWatchService.testSmsLoop.stop();
-	MetaWatchService.testSmsLoop = new TestSmsLoop(context);
-	Thread thread = new Thread(MetaWatchService.testSmsLoop);
-	thread.start();
-    }
-
-    void stopSmsTestLoop() {
-	if (MetaWatchService.testSmsLoop != null)
-	    MetaWatchService.testSmsLoop.stop();
     }
 
     @Override
