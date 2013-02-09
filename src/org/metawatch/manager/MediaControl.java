@@ -44,8 +44,8 @@ import android.view.KeyEvent;
 
 public class MediaControl {
 
-//    final static int MUSICSERVICECOMMAND = 0;
-//    final static int EMULATE_HEADSET = 1;
+    final static int MUSICSERVICECOMMAND = 0;
+    final static int EMULATE_HEADSET = 1;
 
     private final static int TIME_TEN_MINUTES = 10 * 60 * 1000;
 
@@ -97,31 +97,31 @@ public class MediaControl {
     public void next(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.next()");
-//	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
+	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
 	    context.sendBroadcast(new Intent("com.android.music.musicservicecommand.next"));
-//	} else {
-//	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_NEXT);
-//	}
+	} else {
+	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_NEXT);
+	}
     }
 
     public void previous(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.previous()");
-//	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
+	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
 	    context.sendBroadcast(new Intent("com.android.music.musicservicecommand.previous"));
-//	} else {
-//	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
-//	}
+	} else {
+	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+	}
     }
 
     public void togglePause(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MediaControl.togglePause()");
-//	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
+	if (Preferences.idleMusicControlMethod == MediaControl.MUSICSERVICECOMMAND) {
 	    context.sendBroadcast(new Intent("com.android.music.musicservicecommand.togglepause"));
-//	} else {
-//	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
-//	}
+	} else {
+	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+	}
 
 	if (MetaWatchService.watchType == WatchType.ANALOG) {
 	    Idle.getInstance().sendOledIdle(context);
@@ -186,9 +186,9 @@ public class MediaControl {
 	audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
     }
 
-//    private void sendMediaButtonEvent(Context context, int keyCode) {
-//	sendMediaButtonEvent(context, keyCode, null);
-//    }
+    private void sendMediaButtonEvent(Context context, int keyCode) {
+	sendMediaButtonEvent(context, keyCode, null);
+    }
 
     private void sendMediaButtonEvent(Context context, int keyCode, String permission) {
 	long time = SystemClock.uptimeMillis();

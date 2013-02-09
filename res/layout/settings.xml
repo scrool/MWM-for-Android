@@ -559,16 +559,16 @@
  			android:defaultValue="0"
  			/>
 
-		<!--<ListPreference 
+		<ListPreference 
 			android:entries="@array/settings_media_control_method_names" 
 			android:entryValues="@array/settings_media_control_method_values" 
 			android:dialogTitle="@string/settings_media_control_method" 
 			android:key="IdleMusicControlMethod" 
 			android:title="@string/settings_media_control_method" 
 			android:negativeButtonText="@string/settings_CancelButton" 
- 			android:enabled="false" 
+ 			android:enabled="true" 
  			android:defaultValue="0"
- 			/>-->
+ 			/>	
 		
 		<CheckBoxPreference
 			android:title="@string/settings_Inverse_Media_Player_Buttons"
