@@ -60,19 +60,6 @@ public class Application {
     public static void stopAppMode(Context context) {
 	MetaWatchService.WatchModes.APPLICATION = false;
 
-//	int watchType = MetaWatchService.watchType;
-//	disableToggleButton(context, watchType);
-//	if (watchType == MetaWatchService.WatchType.DIGITAL) {
-//	    Protocol.getInstance(context).disableButton(0, 1, MetaWatchService.WatchBuffers.APPLICATION); // right
-//	    // top
-//	    // -
-//	    // press
-//	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-//	    Protocol.getInstance(context).disableButton(1, 1, MetaWatchService.WatchBuffers.APPLICATION); // right
-//	    // middle
-//	    // -
-//	    // press
-//	}
 	if (currentApp != null) {
 	    currentApp.deactivate(context, MetaWatchService.watchType);
 	    currentApp.setInactive();
