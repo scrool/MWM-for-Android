@@ -77,22 +77,22 @@ public class MetaWatchService extends Service {
     private BluetoothSocket bluetoothSocket;
     private InputStream inputStream;
     private OutputStream outputStream;
-    
+
     private WatchReceiverThread watchReceiverThread;
-    private Handler pollHandler = new Handler(Looper.getMainLooper());
+    private Handler weatherBatteryPollHandler = new Handler(Looper.getMainLooper());
     private ScheduledExecutorService watchSenderThread = Executors.newSingleThreadScheduledExecutor();
     private Future<?> mPendingSend;
 
-    //These static fields are not modified outside of this class
-    //The only reason sendQueue is static is for the Statistic dialog
-    //mPauseQueue is static to block the Notification queue
+    // These static fields are not modified outside of this class
+    // The only reason sendQueue is static is for the Statistic dialog
+    // mPauseQueue is static to block the Notification queue
     public static volatile LinkedBlockingQueue<byte[]> sendQueue = new LinkedBlockingQueue<byte[]>();
     public static ConditionVariable mPauseQueue = new ConditionVariable(true);
 
     private PowerManager powerManager;
     public PowerManager.WakeLock wakeLock;
 
-    //These are not modified outside of this class, only read
+    // These are not modified outside of this class, only read
     public static volatile int connectionState;
     public static int watchType = WatchType.UNKNOWN;
     public static int watchGen = WatchGen.UNKNOWN;
@@ -106,10 +106,698 @@ public class MetaWatchService extends Service {
     public static final int INVERT_SILENT_MODE = 2;
     public static final int SEND_BYTE_ARRAY = 3;
     public static final String BYTE_ARRAY = "BYTE_ARRAY";
-    
+
     public static boolean mIsRunning = false;
     private static boolean silentMode = false;
-    
+
+    @Override
+    public void onCreate() {
+	super.onCreate();
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onCreate()");
+
+	if (!Preferences.loaded)
+	    loadPreferences(this);
+
+	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).registerOnSharedPreferenceChangeListener(prefChangeListener);
+
+	createNotification();
+
+	connectionState = ConnectionState.CONNECTING;
+	watchState = WatchStates.OFF;
+	watchType = WatchType.UNKNOWN;
+	watchGen = WatchGen.UNKNOWN;
+	Monitors.getInstance().getRTCTimestamp = 0;
+
+	if (bluetoothAdapter == null)
+	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
+
+	Monitors.getInstance().start(this/* , telephonyManager */);
+
+	// // Initialise theme
+	// BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
+
+	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
+	watchReceiverThread.setPriority(7);
+	watchReceiverThread.start();
+	
+	watchSenderThread.execute(protocolSender);
+	weatherBatteryPollHandler.post(pollWeatherBattery);
+
+	mIsRunning = true;
+    }
+
+    @Override
+    public synchronized int onStartCommand(final Intent intent, int flags, int startId) {
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onStartCommand()");
+	if (intent != null) {
+	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
+	    case SILENT_MODE_ENABLE:
+		setSilentMode(true);
+		break;
+	    case SILENT_MODE_DISABLE:
+		setSilentMode(false);
+		break;
+	    case INVERT_SILENT_MODE:
+		setSilentMode(!silentMode);
+		break;
+	    case SEND_BYTE_ARRAY:
+		sendQueue.add(intent.getByteArrayExtra(BYTE_ARRAY));
+		break;
+	    }
+	}
+	return START_STICKY;
+    }
+
+    private Runnable protocolSender = new Runnable() {
+	public void run() {
+	    byte[] message = null;
+	    message = sendQueue.peek();
+	    if (message != null) {
+		try {
+		    wakeLock.acquire();
+		    outputStream.write(message);
+		    outputStream.flush();
+		    sendQueue.remove(message);
+		} catch (Exception e) {
+		    e.printStackTrace();
+		    resetConnection();
+		} finally {
+		    if (wakeLock != null && wakeLock.isHeld())
+			wakeLock.release();
+		}
+	    }
+	    mPendingSend = watchSenderThread.schedule(this, Preferences.packetWait, TimeUnit.MILLISECONDS);
+	    mPauseQueue.block();
+	}
+    };
+
+    @Override
+    public void onDestroy() {
+	super.onDestroy();
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onDestroy()");
+	connectionState = ConnectionState.DISCONNECTING;
+	setPreviousConnectionState(MetaWatchService.this, false);
+	if (watchReceiverThread != null) {
+	    watchReceiverThread.quit();
+	} else {
+	    connectionState = ConnectionState.DISCONNECTED;
+	    setPreviousConnectionState(MetaWatchService.this, false);
+	}
+	if (mPendingSend != null)
+	    mPendingSend.cancel(true);
+	if (sendQueue != null)
+	    sendQueue.clear();
+	if (watchSenderThread != null)
+	    watchSenderThread.shutdownNow();
+	Notification.getInstance().destroy();
+	if (mPauseQueue != null)
+	    mPauseQueue.open();
+
+	if (weatherBatteryPollHandler != null)
+	    weatherBatteryPollHandler.removeCallbacks(pollWeatherBattery);
+
+	cleanup();
+	Idle.getInstance().destroy();
+
+	stopForeground(true);
+	if (prefChangeListener != null)
+	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+
+	Monitors.getInstance().destroy(this);
+	BitmapCache.getInstance().destroy();
+	AppManager.getInstance(this).destroy();
+	ActionManager.getInstance(this).destroy();
+	WidgetManager.getInstance(this).destroy();
+	mIsRunning = false;
+    }
+
+    @TargetApi(10)
+    private boolean connect() {
+
+	try {
+
+	    if (!Preferences.loaded)
+		loadPreferences(this);
+
+	    MetaWatchService.fakeWatch = false;
+	    if (Preferences.watchMacAddress.equals("DIGITAL")) {
+		MetaWatchService.fakeWatch = true;
+		MetaWatchService.watchType = WatchType.DIGITAL;
+	    }
+	    if (Preferences.watchMacAddress.equals("ANALOG")) {
+		MetaWatchService.fakeWatch = true;
+		MetaWatchService.watchType = WatchType.ANALOG;
+	    }
+
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "Remote device address: '" + Preferences.watchMacAddress + "'");
+
+	    if (!MetaWatchService.fakeWatch) {
+
+		if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled())
+		    return false;
+
+		wakeLock.acquire();
+		BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(Preferences.watchMacAddress);
+
+		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+
+		if (Preferences.skipSDP) {
+		    Method method;
+		    if (Preferences.insecureBtSocket && currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD_MR1) {
+			method = bluetoothDevice.getClass().getMethod("createInsecureRfcommSocket", new Class[] { int.class });
+		    } else {
+			method = bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
+		    }
+		    bluetoothSocket = (BluetoothSocket) method.invoke(bluetoothDevice, 1);
+		} else {
+		    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+		    if (Preferences.insecureBtSocket && currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD_MR1) {
+			bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(uuid);
+		    } else {
+			bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
+		    }
+		}
+
+		bluetoothAdapter.cancelDiscovery();
+		bluetoothSocket.connect();
+
+		inputStream = bluetoothSocket.getInputStream();
+		outputStream = bluetoothSocket.getOutputStream();
+	    }
+
+	    connectionState = ConnectionState.CONNECTED;
+	    setPreviousConnectionState(this, true);
+	    updateNotification();
+
+	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
+
+	    // In 10 seconds update the date and time format
+	    // Well after the entire connection process, and Idle update on the watch
+	    weatherBatteryPollHandler.postDelayed(new Runnable() {
+		@Override
+		public void run() {
+		    Protocol.getInstance(MetaWatchService.this).setTimeDateFormat(MetaWatchService.this);
+		}
+	    }, 10000);
+
+	    Notification.getInstance().startNotificationSender(this);
+
+	    // Unblock the message protocol queue, and the notification queue.
+	    mPauseQueue.open();
+
+	    return true;
+
+	} catch (IOException ioexception) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, ioexception.toString());
+	} catch (SecurityException e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	} catch (NoSuchMethodException e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	} catch (IllegalArgumentException e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	} catch (IllegalAccessException e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	} catch (InvocationTargetException e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	} catch (NullPointerException e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	} finally {
+	    if (wakeLock != null && wakeLock.isHeld())
+		wakeLock.release();
+	}
+	return false;
+    }
+
+    void cleanup() {
+	try {
+	    if (outputStream != null)
+		outputStream.close();
+	} catch (IOException e) {
+	}
+	try {
+	    if (inputStream != null)
+		inputStream.close();
+	} catch (IOException e) {
+	}
+	try {
+	    if (bluetoothSocket != null)
+		bluetoothSocket.close();
+	} catch (IOException e) {
+	}
+	broadcastConnection(false);
+	Protocol.getInstance(this).destroy();
+	MediaControl.getInstance().destroy();
+    }
+
+    private void resetConnection() {
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
+	// The block is released when the connection is reestablished, it blocks the message and notification queues.
+	// If the connection is not reestablished it's also unblocked in the Service onDestroy, along with the queue being cleared and shutdown, etc...
+	mPauseQueue.close();
+	//The receiving thread handles the connection process and by simply setting the connection state to connect, and cleaning up the streams, the connection process will occur
+	connectionState = ConnectionState.CONNECTING;
+	cleanup();
+    }
+
+    //A reasonable implementation.
+    private class WatchReceiverThread extends Thread {
+	private Handler handler;
+	private Looper looper;
+
+	public WatchReceiverThread(String name) {
+	    super(name);
+	}
+
+	@Override
+	public void run() {
+	    try {
+		Looper.prepare();
+		looper = Looper.myLooper();
+		handler = new Handler();
+		Runnable ProcessState = new Runnable() {
+		    public void run() {
+			int delay = processState();
+			if (delay >= 0) {
+			    handler.postDelayed(this, delay);
+			} else {
+			    connectionState = ConnectionState.DISCONNECTED;
+			    updateNotification();
+			    handler.removeCallbacks(this);
+			    looper.quit();
+			}
+		    }
+		};
+		handler.post(ProcessState);
+		Looper.loop();
+	    } catch (Throwable T) {
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "serviceThread: " + T.getMessage());
+	    } finally {
+		connectionState = ConnectionState.DISCONNECTED;
+		updateNotification();
+		stopSelf();
+	    }
+	}
+
+	public void quit() {
+	    if (looper != null)
+		looper.quit();
+	}
+    }
+
+    int processState() {
+	int result = 0;
+	switch (connectionState) {
+	case ConnectionState.DISCONNECTED:
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "state: disconnected");
+	    break;
+	case ConnectionState.CONNECTING:
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "state: connecting");
+	    // create initial connection or reconnect
+	    updateNotification();
+	    if (!connect()) {
+		if (powerManager.isScreenOn()) {
+		    result = 1000;
+		} else {
+		    result = 5000;
+		}
+	    }
+	    break;
+	case ConnectionState.CONNECTED:
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "state: connected");
+	    // read from input stream
+	    readFromDevice();
+	    break;
+	case ConnectionState.DISCONNECTING:
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "state: disconnecting");
+	    // exit
+	    result = -1;
+	    break;
+	}
+
+	return result;
+    }
+
+    private Runnable pollWeatherBattery = new Runnable() {
+	@Override
+	public void run() {
+	    String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).getString("collectWatchVoltage", "0");
+	    try {
+		final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
+		if (voltageFrequency > 0) {
+
+		    Intent intent = new Intent(MetaWatchService.this, AlarmReceiver.class);
+		    intent.putExtra("action_poll_voltage", "poll_voltage");
+		    MetaWatchService.this.sendBroadcast(intent);
+		}
+	    } catch (NumberFormatException nfe) {
+		if (Preferences.logging)
+		    Log.e(MetaWatchStatus.TAG, "MetaWatchService.start(): bad voltage frequency string '" + voltageFrequencyString + "'");
+	    }
+	    weatherBatteryPollHandler.postDelayed(this, 360000/*Five Minutes*/);
+	}
+    };
+
+    private void readFromDevice() {
+
+	if (MetaWatchService.fakeWatch) {
+	    try {
+		Thread.sleep(10000);
+	    } catch (InterruptedException e) {
+	    }
+	    return;
+	}
+
+	try {
+	    byte[] bytes = new byte[256];
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "before blocking read");
+	    // Do a proper read loop
+	    int haveread = 0;
+	    int lengthtoread = 4;
+	    while ((lengthtoread - haveread) != 0) {
+		haveread += inputStream.read(bytes, haveread, lengthtoread - haveread);
+		if (haveread > 1) {
+		    lengthtoread = bytes[1];
+		}
+	    }
+
+	    // print received
+	    String str = "received: ";
+	    int len = (bytes[1] & 0xFF);
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "packet length: " + len);
+
+	    for (int i = 0; i < len; i++) {
+		// str+= Byte.toString(bytes[i]) + ", ";
+		str += "0x" + Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1) + ", ";
+	    }
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, str);
+	    /*
+	     * switch (bytes[2]) { case eMessageType.GetDeviceTypeResponse.msg: if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: device type response"); break; case eMessageType.NvalOperationResponseMsg.msg: if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: nval response"); break; case eMessageType.StatusChangeEvent.msg: if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: status change event"); break; }
+	     */
+	    /*
+	     * if (bytes[2] == 0x31) { // nval response if (bytes[3] == 0x00) // success if (bytes[4] == 0x00) // set to 12 hour format Protocol.setNvalTime(true); }
+	     */
+	    if (bytes[2] == eMessageType.NvalOperationResponseMsg.msg) {
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): NvalOperationResponseMsg");
+		// Do something here?
+	    } else if (bytes[2] == eMessageType.StatusChangeEvent.msg) { // status
+	    // change
+	    // event
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): status change");
+		if (bytes[4] == 0x01) {
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): mode changed");
+		    synchronized (Notification.getInstance().modeChanged) {
+			Notification.getInstance().modeChanged.notify();
+		    }
+		} else if (bytes[4] == 0x11) {
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): scroll request notification");
+
+		    synchronized (Notification.getInstance().scrollRequest) {
+			Notification.getInstance().scrollRequest.notify();
+		    }
+		} else if (bytes[4] == 0x10) {
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): scroll complete.");
+		} else if (bytes[4] == 0x02) {
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): mode timeout.");
+		    // The watch switches back to idle mode (showing the initial
+		    // page) after 10 minutes
+		    // Activate the last used idle page in this case
+		    Idle.getInstance().toIdle(MetaWatchService.this);
+		}
+	    }
+
+	    else if (bytes[2] == eMessageType.ButtonEventMsg.msg) { // button
+		// press
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): button event");
+		pressedButton(bytes[3] & 0xFF); //
+	    }
+
+	    else if (bytes[2] == eMessageType.GetDeviceTypeResponse.msg) { // device
+		// type
+		if (bytes[4] == 1 || bytes[4] == 4) {
+		    watchType = WatchType.ANALOG;
+		    watchGen = WatchGen.GEN1;
+		    if (Preferences.logging)
+			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; analog watch (gen1)");
+
+		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
+			Idle.getInstance().toIdle(this);
+			Idle.getInstance().updateIdle(this, true);
+		    }
+
+		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		    boolean displaySplash = sharedPreferences.getBoolean("DisplaySplashScreen", false);
+		    if (displaySplash) {
+			Protocol.getInstance(MetaWatchService.this).sendOledBitmap(Utils.getBitmap(this, "splash_16_0.bmp"), WatchBuffers.NOTIFICATION, 0);
+			Protocol.getInstance(MetaWatchService.this).sendOledBitmap(Utils.getBitmap(this, "splash_16_1.bmp"), WatchBuffers.NOTIFICATION, 1);
+		    }
+
+		} else {
+		    watchType = WatchType.DIGITAL;
+
+		    if (bytes[4] == 5 || bytes[4] == 6) {
+			watchGen = WatchGen.GEN2;
+			if (Preferences.logging)
+			    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; Strata/Frame (gen2)");
+		    } else {
+			watchGen = WatchGen.GEN1;
+			if (Preferences.logging)
+			    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; digital watch (gen1)");
+		    }
+
+		    Protocol.getInstance(MetaWatchService.this).configureMode();
+		    Protocol.getInstance(MetaWatchService.this).setNvalLcdInvert(Preferences.invertLCD);
+
+		    Protocol.getInstance(MetaWatchService.this).configureIdleBufferSize(true, true);
+
+		    // Disable built in action for Right top immediate
+		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, WatchBuffers.IDLE);
+		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, WatchBuffers.APPLICATION);
+		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, WatchBuffers.NOTIFICATION);
+
+		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
+			Idle.getInstance().toIdle(this);
+			Idle.getInstance().updateIdle(this, true);
+		    }
+
+		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		    boolean displaySplash = sharedPreferences.getBoolean("DisplaySplashScreen", false);
+		    if (displaySplash) {
+			Notification.getInstance().addBitmapNotification(this, Utils.getBitmap(this, "splash.png"), new VibratePattern(false, 0, 0, 0), 10000, "Splash");
+		    }
+
+		}
+
+		Protocol.getInstance(MetaWatchService.this).getRealTimeClock();
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this);
+
+		/* Notify watch on connection if requested. */
+		boolean notifyOnConnect = sharedPreferences.getBoolean("NotifyWatchOnConnect", false);
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.connect(): notifyOnConnect=" + notifyOnConnect);
+		if (notifyOnConnect) {
+		    NotificationBuilder.createOtherNotification(MetaWatchService.this, null, "MetaWatch", getResources().getString(R.string.connection_connected), 1);
+		}
+
+		Idle.getInstance().activateButtons(this);
+
+	    } else if (bytes[2] == eMessageType.ReadBatteryVoltageResponse.msg) {
+		boolean powerGood = bytes[4] > 0;
+		boolean batteryCharging = bytes[5] > 0;
+		float batterySense = (((int) bytes[7] << 8) + (int) bytes[6]) / 1000.0f;
+		float batteryAverage = (((int) bytes[9] << 8) + (int) bytes[8]) / 1000.0f;
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received battery voltage response." + " power_good=" + powerGood + " battery_charging=" + batteryCharging + " battery_sense=" + batterySense + " battery_average=" + batteryAverage);
+		String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(this).getString("collectWatchVoltage", "0");
+		final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
+		if (voltageFrequency > 0) {
+		    File sdcard = Environment.getExternalStorageDirectory();
+		    File csv = new File(sdcard, "metawatch_voltage.csv");
+		    boolean fileExists = csv.exists();
+		    FileWriter fw = new FileWriter(csv, true);
+		    if (fileExists == false) {
+			fw.write("Date,Sense,Average\n");
+		    }
+		    Date date = new Date();
+		    fw.write("\"" + date.toString() + "\"," + batterySense + "," + batteryAverage + "\n");
+		    fw.flush();
+		    fw.close();
+		}
+	    } else if (bytes[2] == eMessageType.ReadLightSensorResponse.msg) {
+		float lightSense = (((int) bytes[1] << 8) + (int) bytes[0]) / 1000.0f;
+		float lightAverage = (((int) bytes[3] << 8) + (int) bytes[2]) / 1000.0f;
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received light sensor response." + " light_sense=" + lightSense + " light_average=" + lightAverage);
+	    } else if (bytes[2] == eMessageType.GetRealTimeClockResponse.msg) {
+		long timeNow = System.currentTimeMillis();
+		long roundTrip = timeNow - Monitors.getInstance().getRTCTimestamp;
+
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received rtc response." + " round trip= " + roundTrip);
+
+		Monitors.getInstance().rtcOffset = (int) (roundTrip / 2000);
+
+		Protocol.getInstance(MetaWatchService.this).setRealTimeClock(MetaWatchService.this);
+
+	    } else {
+		if (Preferences.logging)
+		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): Unknown message : 0x" + Integer.toString((bytes[2] & 0xff) + 0x100, 16).substring(1) + ", ");
+	    }
+
+	} catch (IOException e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	    resetConnection();
+	} catch (Exception e) {
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, e.toString());
+	    resetConnection();
+	}
+    }
+
+    private void broadcastConnection(boolean connected) {
+	if (connected != lastConnectionState) {
+	    lastConnectionState = connected;
+	    Intent intent = new Intent("org.metawatch.manager.CONNECTION_CHANGE");
+	    intent.putExtra("state", connected);
+	    sendBroadcast(intent);
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "MetaWatchService.broadcastConnection(): Broadcast connection change: state='" + connected + "'");
+	    Protocol.getInstance(MetaWatchService.this).resetLCDDiffBuffer();
+	}
+    }
+
+    static long lastOledCrownPress = 0;
+
+    private void pressedButton(int button) {
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "button code: " + Integer.toString(button));
+
+	try {
+
+	    if (button > 0 && Preferences.hapticFeedback)
+		Protocol.getInstance(MetaWatchService.this).vibrate(50, 5, 3);
+
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "MetaWatchService.pressedButton(): watchState=" + watchState);
+	    switch (watchState) {
+	    case WatchStates.IDLE: {
+
+		int idleAppButton = Idle.getInstance().appButtonPressed(this, button);
+		if (idleAppButton == ApplicationBase.BUTTON_NOT_USED) {
+
+		    switch (button) {
+
+		    case Idle.LEFT_QUICK_BUTTON:
+			Idle.getInstance().quickButtonAction(MetaWatchService.this, Preferences.quickButtonL);
+			break;
+
+		    case Idle.RIGHT_QUICK_BUTTON:
+			Idle.getInstance().quickButtonAction(MetaWatchService.this, Preferences.quickButtonR);
+			break;
+
+		    case Idle.IDLE_NEXT_PAGE:
+			if (MetaWatchService.watchType == WatchType.DIGITAL) {
+			    if (WatchModes.APPLICATION) {
+				Application.stopAppMode(this);
+			    } else {
+				Idle.getInstance().nextPage(this);
+				Idle.getInstance().updateIdle(this, true);
+			    }
+			}
+			break;
+
+		    case Idle.TOGGLE_SILENT:
+			setSilentMode(!silentMode);
+			Protocol.getInstance(MetaWatchService.this).vibrate(500, 500, 2);
+			break;
+
+		    case Idle.IDLE_OLED_DISPLAY:
+			long time = System.currentTimeMillis();
+
+			if (time - lastOledCrownPress < 1000 * 5) {
+			    Idle.getInstance().nextPage(this);
+			    Idle.getInstance().updateIdle(this, true);
+			}
+
+			lastOledCrownPress = time;
+			Idle.getInstance().sendOledIdle(this);
+			break;
+
+		    case Application.TOGGLE_APP:
+			Application.toggleApp(MetaWatchService.this, Idle.getInstance().getCurrentApp());
+			break;
+		    }
+		} else if (idleAppButton != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
+		    if (WatchModes.APPLICATION) {
+			Application.updateAppMode(this);
+		    } if (MetaWatchService.watchType == WatchType.ANALOG)
+			Idle.getInstance().sendOledIdle(this);
+		    else {
+			Idle.getInstance().updateIdle(this, false);
+		    }
+		}
+		break;
+	    }
+
+	    case WatchStates.APPLICATION:
+		Application.buttonPressed(this, button);
+		break;
+
+	    case WatchStates.NOTIFICATION:
+
+		switch (button) {
+		case Call.CALL_ANSWER:
+		    MediaControl.getInstance().answerCall(this);
+		    break;
+		case Call.CALL_DISMISS:
+		    MediaControl.getInstance().ignoreCall(this);
+		    break;
+		case Call.CALL_MENU:
+		    ActionManager.getInstance(this).displayCallActions(this);
+		    break;
+		default:
+		    Notification.getInstance().buttonPressed(button);
+		    break;
+		}
+		break;
+	    }
+
+	} finally {
+	}
+    }
+
     public static boolean silentMode() {
 	return silentMode;
     }
@@ -122,7 +810,7 @@ public class MetaWatchService extends Service {
 	editor.putBoolean("SilentMode", silentMode);
 	editor.commit();
     }
-    
+
     public static void sentBytes(Context context, byte[] bytes) {
 	if (!MetaWatchStatus.mShutdownRequested && mIsRunning) {
 	    Intent intent = new Intent(context, MetaWatchService.class);
@@ -130,6 +818,244 @@ public class MetaWatchService extends Service {
 	    intent.putExtra(MetaWatchService.BYTE_ARRAY, bytes);
 	    context.startService(intent);
 	}
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+	return null;
+    }
+
+    private OnSharedPreferenceChangeListener prefChangeListener = new OnSharedPreferenceChangeListener() {
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+	    if (Preferences.logging)
+		Log.d(MetaWatchStatus.TAG, "onSharedPreferenceChanged " + key);
+
+	    loadPreferences(MetaWatchService.this);
+
+	    if (key.contains("Weather")) {
+		Monitors.getInstance().restart(MetaWatchService.this);
+	    }
+
+	    if (key.contains("Idle") || key.contains(".app_enabled")) {
+		Idle.getInstance().reset(MetaWatchService.this);
+	    }
+
+	    if (key.contains("Widget") || (key.equals("SilentMode")) || key.equals("ClockOnAppBuffers")) {
+		Idle.getInstance().updateIdle(MetaWatchService.this, true);
+	    }
+
+	    if (key.equals("InvertLCD")) {
+		Protocol.getInstance(MetaWatchService.this).setNvalLcdInvert(Preferences.invertLCD);
+		if (watchState == WatchStates.IDLE) {
+		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(WatchBuffers.NOTIFICATION);
+		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(WatchBuffers.IDLE);
+		}
+	    }
+
+	    if (key.contains("Calendar")) {
+		Monitors.getInstance().calendarChangedTimestamp = System.currentTimeMillis();
+		Idle.getInstance().updateIdle(MetaWatchService.this, true);
+	    }
+	}
+    };
+
+    public static void loadPreferences(Context context) {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+	Preferences.logging = sharedPreferences.getBoolean("logging", Preferences.logging);
+	Preferences.notifyCall = sharedPreferences.getBoolean("NotifyCall", Preferences.notifyCall);
+	Preferences.notifySMS = sharedPreferences.getBoolean("NotifySMS", Preferences.notifySMS);
+	Preferences.notifyGmail = sharedPreferences.getBoolean("NotifyGmail", Preferences.notifyGmail);
+	Preferences.notifyK9 = sharedPreferences.getBoolean("NotifyK9", Preferences.notifyK9);
+	Preferences.notifyTD = sharedPreferences.getBoolean("NotifyTD", Preferences.notifyTD);
+	Preferences.notifyAlarm = sharedPreferences.getBoolean("NotifyAlarm", Preferences.notifyAlarm);
+	Preferences.notifyMusic = sharedPreferences.getBoolean("NotifyMusic", Preferences.notifyMusic);
+	Preferences.notifyCalendar = sharedPreferences.getBoolean("NotifyCalendar", Preferences.notifyCalendar);
+	Preferences.notifyNMA = sharedPreferences.getBoolean("notifyNMA", Preferences.notifyNMA);
+	Preferences.notifyNewVoicemail = sharedPreferences.getBoolean("NotifyNewVoicemail", Preferences.notifyNewVoicemail);
+	Preferences.watchMacAddress = sharedPreferences.getString("MAC", Preferences.watchMacAddress).trim();
+	Preferences.skipSDP = sharedPreferences.getBoolean("SkipSDP", Preferences.skipSDP);
+	Preferences.insecureBtSocket = sharedPreferences.getBoolean("InsecureBtSocket", Preferences.insecureBtSocket);
+	Preferences.invertLCD = sharedPreferences.getBoolean("InvertLCD", Preferences.invertLCD);
+	Preferences.notificationCenter = sharedPreferences.getBoolean("notificationCenter", Preferences.notificationCenter);
+	Preferences.notifyLight = sharedPreferences.getBoolean("notifyLight", Preferences.notifyLight);
+	// Preferences.stickyNotifications = sharedPreferences.getBoolean("stickyNotifications", Preferences.stickyNotifications);
+	Preferences.weatherCity = sharedPreferences.getString("WeatherCity", Preferences.weatherCity);
+	Preferences.weatherProvider = Integer.parseInt(sharedPreferences.getString("WeatherProvider", Integer.toString(Preferences.weatherProvider)));
+	Preferences.weatherCelsius = sharedPreferences.getBoolean("WeatherCelsius", Preferences.weatherCelsius);
+	Preferences.weatherGeolocationMode = Integer.parseInt(sharedPreferences.getString("WeatherGeolocationMode", Integer.toString(Preferences.weatherGeolocationMode)));
+	Preferences.wundergroundKey = sharedPreferences.getString("WundergroundKey", Preferences.wundergroundKey).trim();
+	Preferences.idleMusicControlMethod = Integer.parseInt(sharedPreferences.getString("IdleMusicControlMethod", Integer.toString(Preferences.idleMusicControlMethod)));
+	Preferences.quickButtonL = sharedPreferences.getString("QuickButtonL", Preferences.quickButtonL);
+	Preferences.quickButtonR = sharedPreferences.getString("QuickButtonR", Preferences.quickButtonR);
+	Preferences.autoConnect = sharedPreferences.getBoolean("AutoConnect", Preferences.autoConnect);
+	Preferences.autoRestart = sharedPreferences.getBoolean("AutoRestart", Preferences.autoRestart);
+	Preferences.autoClockFormat = sharedPreferences.getBoolean("AutoClockFormat", Preferences.autoClockFormat);
+	Preferences.hapticFeedback = sharedPreferences.getBoolean("HapticFeedback", Preferences.hapticFeedback);
+	Preferences.readCalendarDuringMeeting = sharedPreferences.getBoolean("ReadCalendarDuringMeeting", Preferences.readCalendarDuringMeeting);
+	Preferences.readCalendarMinDurationToMeetingEnd = Integer.parseInt(sharedPreferences.getString("ReadCalendarMinDurationToMeetingEnd", Integer.toString(Preferences.readCalendarMinDurationToMeetingEnd)));
+	Preferences.displayLocationInSmallCalendarWidget = sharedPreferences.getBoolean("DisplayLocationInSmallCalendarWidget", Preferences.displayLocationInSmallCalendarWidget);
+	Preferences.eventDateInCalendarWidget = sharedPreferences.getBoolean("EventDateInCalendarWidget", Preferences.eventDateInCalendarWidget);
+	Preferences.displayWidgetRowSeparator = sharedPreferences.getBoolean("DisplayWidgetRowSeparator", Preferences.displayWidgetRowSeparator);
+	Preferences.overlayWeatherText = sharedPreferences.getBoolean("OverlayWeatherText", Preferences.overlayWeatherText);
+	Preferences.clockOnEveryPage = sharedPreferences.getBoolean("ClockOnEveryPage", Preferences.clockOnEveryPage);
+	Preferences.appBufferForClocklessPages = sharedPreferences.getBoolean("AppBufferForClocklessPages", Preferences.appBufferForClocklessPages);
+	Preferences.showNotificationQueue = sharedPreferences.getBoolean("ShowNotificationQueue", Preferences.showNotificationQueue);
+	Preferences.dumpWatchScreenshots = sharedPreferences.getBoolean("DumpWatchScreenshots", Preferences.dumpWatchScreenshots);
+	Preferences.autoSpeakerphone = sharedPreferences.getBoolean("autoSpeakerphone", Preferences.autoSpeakerphone);
+	Preferences.showActionsInCall = sharedPreferences.getBoolean("showActionsInCall", Preferences.showActionsInCall);
+	Preferences.themeName = sharedPreferences.getString("ThemeName", Preferences.themeName);
+	Preferences.hideEmptyWidgets = sharedPreferences.getBoolean("HideEmptyWidgets", Preferences.hideEmptyWidgets);
+	Preferences.inverseMediaPlayerButtons = sharedPreferences.getBoolean("InverseMediaPlayerButtons", Preferences.inverseMediaPlayerButtons);
+	Preferences.clockOnAppScreens = sharedPreferences.getBoolean("ClockOnAppBuffers", Preferences.clockOnAppScreens);
+	Preferences.showTestWidgets = sharedPreferences.getBoolean("TestWidgets", Preferences.showTestWidgets);
+	Preferences.hiddenWidgetsReserveSpace = sharedPreferences.getBoolean("HiddenWidgetsReserveSpace", Preferences.hiddenWidgetsReserveSpace);
+	Preferences.alignWidgetRowToBottom = sharedPreferences.getBoolean("AlignWidgetRowToBottom", Preferences.alignWidgetRowToBottom);
+	Preferences.displayWidgetIconOnTop = sharedPreferences.getBoolean("DisplayWidgetIconOnTop", Preferences.displayWidgetIconOnTop);
+	Preferences.displayCalendars = sharedPreferences.getString("DisplayCalendars", Preferences.displayCalendars);
+	Preferences.animations = sharedPreferences.getBoolean("animations", true);
+	Preferences.smsWithAlert = sharedPreferences.getBoolean("NotifySMSAlert", true);
+
+	boolean silent = sharedPreferences.getBoolean("SilentMode", silentMode);
+	if (silent != silentMode)
+	    silentMode = silent;
+
+	try {
+	    Preferences.fontSize = Integer.valueOf(sharedPreferences.getString("FontSize", Integer.toString(Preferences.fontSize)));
+	    // Preferences.packetWait = Integer.valueOf(sharedPreferences.getString("PacketWait", Integer.toString(Preferences.packetWait)));
+	    Preferences.smsLoopInterval = Integer.valueOf(sharedPreferences.getString("SmsLoopInterval", Integer.toString(Preferences.smsLoopInterval)));
+	    Preferences.appLaunchMode = Integer.valueOf(sharedPreferences.getString("AppLaunchMode", Integer.toString(Preferences.appLaunchMode)));
+	    Preferences.calendarLookahead = Integer.valueOf(sharedPreferences.getString("CalendarLookahead", Integer.toString(Preferences.calendarLookahead)));
+
+	} catch (NumberFormatException e) {
+	}
+
+    }
+
+    public static boolean getPreviousConnectionState(Context context) {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+	return sharedPreferences.getBoolean("PreviousConnectionState", false);
+    }
+
+    public static void setPreviousConnectionState(Context context, boolean connected) {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+	Editor editor = sharedPreferences.edit();
+
+	editor.putBoolean("PreviousConnectionState", connected);
+	editor.commit();
+    }
+
+    public static void saveMac(Context context, String mac) {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+	Editor editor = sharedPreferences.edit();
+
+	editor.putString("MAC", mac);
+	editor.commit();
+    }
+
+    public static void saveTheme(Context context, String theme) {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+	Editor editor = sharedPreferences.edit();
+
+	editor.putString("ThemeName", theme);
+	editor.commit();
+    }
+
+    public static String getWidgets(Context context) {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+	if (watchType == WatchType.DIGITAL) {
+	    return sharedPreferences.getString("widgets", WidgetManager.getInstance(context).defaultWidgetsDigital);
+	} else if (watchType == WatchType.ANALOG) {
+	    return sharedPreferences.getString("widgetsAnalog", WidgetManager.getInstance(context).defaultWidgetsAnalog);
+	}
+
+	return "";
+    }
+
+    public static void saveWidgets(Context context, String widgets) {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+	Editor editor = sharedPreferences.edit();
+
+	if (watchType == WatchType.ANALOG) {
+	    editor.putString("widgetsAnalog", widgets);
+	} else {
+	    editor.putString("widgets", widgets);
+	}
+	editor.commit();
+    }
+
+    public static void autoStartService(Context context) {
+	if (connectionState != ConnectionState.DISCONNECTED)
+	    return;
+
+	if (!Preferences.loaded)
+	    loadPreferences(context);
+
+	if (Preferences.autoConnect && getPreviousConnectionState(context) == true) {
+	    context.startService(new Intent(context, MetaWatchService.class));
+	    if (Preferences.logging)
+		Log.v(MetaWatchStatus.TAG, "Service auto started");
+	}
+    }
+
+    public void createNotification() {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+	boolean hideNotificationIcon = sharedPreferences.getBoolean("HideNotificationIcon", false);
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.createNotification(): hideNotificationIcon=" + hideNotificationIcon);
+
+	NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+	builder.setTicker(getResources().getString(R.string.app_name));
+	builder.setContentTitle(getResources().getString(R.string.app_name));
+	builder.setContentIntent(createNotificationPendingIntent());
+	builder.setOngoing(true);
+	builder.setOnlyAlertOnce(true);
+	switch (connectionState) {
+	case ConnectionState.CONNECTING:
+	    builder.setContentText(getResources().getString(R.string.connection_connecting));
+	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
+	    builder.setProgress(0, 0, true);
+	    broadcastConnection(false);
+	    break;
+	case ConnectionState.CONNECTED:
+	    builder.setContentText(getResources().getString(R.string.connection_connected));
+	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.connected));
+	    broadcastConnection(true);
+	    break;
+	default:
+	    builder.setContentText(getResources().getString(R.string.connection_disconnected));
+	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
+	    broadcastConnection(false);
+	    break;
+	}
+	startForeground(1, builder.build());
+    }
+
+    private PendingIntent createNotificationPendingIntent() {
+	return PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+    }
+
+    public void updateNotification() {
+	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+	boolean hideNotificationIcon = sharedPreferences.getBoolean("HideNotificationIcon", false);
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.updateNotification(): hideNotificationIcon=" + hideNotificationIcon);
+	createNotification();
+    }
+
+    @Override
+    public void onLowMemory() {
+	MemoryInfo mi = new MemoryInfo();
+	ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+	activityManager.getMemoryInfo(mi);
+	long availableMegs = mi.availMem / 1048576L;
+
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onLowMemory(): " + availableMegs + "Mb free");
+
+	super.onLowMemory();
     }
 
     final static class ConnectionState {
@@ -263,972 +1189,4 @@ public class MetaWatchService extends Service {
 	public static final int GEN2 = 2; // Strata / Frame
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-	return null;
-    }
-
-    private OnSharedPreferenceChangeListener prefChangeListener = new OnSharedPreferenceChangeListener() {
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "onSharedPreferenceChanged " + key);
-
-	    loadPreferences(MetaWatchService.this);
-
-	    if (key.contains("Weather")) {
-		Monitors.getInstance().restart(MetaWatchService.this);
-	    }
-
-	    if (key.contains("Idle") || key.contains(".app_enabled")) {
-		Idle.getInstance().reset(MetaWatchService.this);
-	    }
-
-	    if (key.contains("Widget") || (key.equals("SilentMode")) || key.equals("ClockOnAppBuffers")) {
-		Idle.getInstance().updateIdle(MetaWatchService.this, true);
-	    }
-
-	    if (key.equals("InvertLCD")) {
-		Protocol.getInstance(MetaWatchService.this).setNvalLcdInvert(Preferences.invertLCD);
-		if (watchState == WatchStates.IDLE) {
-		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
-		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(MetaWatchService.WatchBuffers.IDLE);
-		}
-	    }
-
-	    if (key.contains("Calendar")) {
-		Monitors.getInstance().calendarChangedTimestamp = System.currentTimeMillis();
-		Idle.getInstance().updateIdle(MetaWatchService.this, true);
-	    }
-	}
-    };
-
-    public static void loadPreferences(Context context) {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-	Preferences.logging = sharedPreferences.getBoolean("logging", Preferences.logging);
-	Preferences.notifyCall = sharedPreferences.getBoolean("NotifyCall", Preferences.notifyCall);
-	Preferences.notifySMS = sharedPreferences.getBoolean("NotifySMS", Preferences.notifySMS);
-	Preferences.notifyGmail = sharedPreferences.getBoolean("NotifyGmail", Preferences.notifyGmail);
-	Preferences.notifyK9 = sharedPreferences.getBoolean("NotifyK9", Preferences.notifyK9);
-	Preferences.notifyTD = sharedPreferences.getBoolean("NotifyTD", Preferences.notifyTD);
-	Preferences.notifyAlarm = sharedPreferences.getBoolean("NotifyAlarm", Preferences.notifyAlarm);
-	Preferences.notifyMusic = sharedPreferences.getBoolean("NotifyMusic", Preferences.notifyMusic);
-	Preferences.notifyCalendar = sharedPreferences.getBoolean("NotifyCalendar", Preferences.notifyCalendar);
-	Preferences.notifyNMA = sharedPreferences.getBoolean("notifyNMA", Preferences.notifyNMA);
-	Preferences.notifyNewVoicemail = sharedPreferences.getBoolean("NotifyNewVoicemail", Preferences.notifyNewVoicemail);
-	Preferences.watchMacAddress = sharedPreferences.getString("MAC", Preferences.watchMacAddress).trim();
-	Preferences.skipSDP = sharedPreferences.getBoolean("SkipSDP", Preferences.skipSDP);
-	Preferences.insecureBtSocket = sharedPreferences.getBoolean("InsecureBtSocket", Preferences.insecureBtSocket);
-	Preferences.invertLCD = sharedPreferences.getBoolean("InvertLCD", Preferences.invertLCD);
-	Preferences.notificationCenter = sharedPreferences.getBoolean("notificationCenter", Preferences.notificationCenter);
-	Preferences.notifyLight = sharedPreferences.getBoolean("notifyLight", Preferences.notifyLight);
-//	Preferences.stickyNotifications = sharedPreferences.getBoolean("stickyNotifications", Preferences.stickyNotifications);
-	Preferences.weatherCity = sharedPreferences.getString("WeatherCity", Preferences.weatherCity);
-	Preferences.weatherProvider = Integer.parseInt(sharedPreferences.getString("WeatherProvider", Integer.toString(Preferences.weatherProvider)));
-	Preferences.weatherCelsius = sharedPreferences.getBoolean("WeatherCelsius", Preferences.weatherCelsius);
-	Preferences.weatherGeolocationMode = Integer.parseInt(sharedPreferences.getString("WeatherGeolocationMode", Integer.toString(Preferences.weatherGeolocationMode)));
-	Preferences.wundergroundKey = sharedPreferences.getString("WundergroundKey", Preferences.wundergroundKey).trim();
-	Preferences.idleMusicControlMethod = Integer.parseInt(sharedPreferences.getString("IdleMusicControlMethod", Integer.toString(Preferences.idleMusicControlMethod)));
-	Preferences.quickButtonL = sharedPreferences.getString("QuickButtonL", Preferences.quickButtonL);
-	Preferences.quickButtonR = sharedPreferences.getString("QuickButtonR", Preferences.quickButtonR);
-	Preferences.autoConnect = sharedPreferences.getBoolean("AutoConnect", Preferences.autoConnect);
-	Preferences.autoRestart = sharedPreferences.getBoolean("AutoRestart", Preferences.autoRestart);
-	Preferences.autoClockFormat = sharedPreferences.getBoolean("AutoClockFormat", Preferences.autoClockFormat);
-	Preferences.hapticFeedback = sharedPreferences.getBoolean("HapticFeedback", Preferences.hapticFeedback);
-	Preferences.readCalendarDuringMeeting = sharedPreferences.getBoolean("ReadCalendarDuringMeeting", Preferences.readCalendarDuringMeeting);
-	Preferences.readCalendarMinDurationToMeetingEnd = Integer.parseInt(sharedPreferences.getString("ReadCalendarMinDurationToMeetingEnd", Integer.toString(Preferences.readCalendarMinDurationToMeetingEnd)));
-	Preferences.displayLocationInSmallCalendarWidget = sharedPreferences.getBoolean("DisplayLocationInSmallCalendarWidget", Preferences.displayLocationInSmallCalendarWidget);
-	Preferences.eventDateInCalendarWidget = sharedPreferences.getBoolean("EventDateInCalendarWidget", Preferences.eventDateInCalendarWidget);
-	Preferences.displayWidgetRowSeparator = sharedPreferences.getBoolean("DisplayWidgetRowSeparator", Preferences.displayWidgetRowSeparator);
-	Preferences.overlayWeatherText = sharedPreferences.getBoolean("OverlayWeatherText", Preferences.overlayWeatherText);
-	Preferences.clockOnEveryPage = sharedPreferences.getBoolean("ClockOnEveryPage", Preferences.clockOnEveryPage);
-	Preferences.appBufferForClocklessPages = sharedPreferences.getBoolean("AppBufferForClocklessPages", Preferences.appBufferForClocklessPages);
-	Preferences.showNotificationQueue = sharedPreferences.getBoolean("ShowNotificationQueue", Preferences.showNotificationQueue);
-	Preferences.dumpWatchScreenshots = sharedPreferences.getBoolean("DumpWatchScreenshots", Preferences.dumpWatchScreenshots);
-	Preferences.autoSpeakerphone = sharedPreferences.getBoolean("autoSpeakerphone", Preferences.autoSpeakerphone);
-	Preferences.showActionsInCall = sharedPreferences.getBoolean("showActionsInCall", Preferences.showActionsInCall);
-	Preferences.themeName = sharedPreferences.getString("ThemeName", Preferences.themeName);
-	Preferences.hideEmptyWidgets = sharedPreferences.getBoolean("HideEmptyWidgets", Preferences.hideEmptyWidgets);
-	Preferences.inverseMediaPlayerButtons = sharedPreferences.getBoolean("InverseMediaPlayerButtons", Preferences.inverseMediaPlayerButtons);
-	Preferences.clockOnAppScreens = sharedPreferences.getBoolean("ClockOnAppBuffers", Preferences.clockOnAppScreens);
-	Preferences.showTestWidgets = sharedPreferences.getBoolean("TestWidgets", Preferences.showTestWidgets);
-	Preferences.hiddenWidgetsReserveSpace = sharedPreferences.getBoolean("HiddenWidgetsReserveSpace", Preferences.hiddenWidgetsReserveSpace);
-	Preferences.alignWidgetRowToBottom = sharedPreferences.getBoolean("AlignWidgetRowToBottom", Preferences.alignWidgetRowToBottom);
-	Preferences.displayWidgetIconOnTop = sharedPreferences.getBoolean("DisplayWidgetIconOnTop", Preferences.displayWidgetIconOnTop);
-	Preferences.displayCalendars = sharedPreferences.getString("DisplayCalendars", Preferences.displayCalendars);
-	Preferences.animations = sharedPreferences.getBoolean("animations", true);
-	Preferences.smsWithAlert = sharedPreferences.getBoolean("NotifySMSAlert", true);
-
-	boolean silent = sharedPreferences.getBoolean("SilentMode", silentMode);
-	if (silent != silentMode)
-	    silentMode = silent;
-
-	try {
-	    Preferences.fontSize = Integer.valueOf(sharedPreferences.getString("FontSize", Integer.toString(Preferences.fontSize)));
-//	    Preferences.packetWait = Integer.valueOf(sharedPreferences.getString("PacketWait", Integer.toString(Preferences.packetWait)));
-	    Preferences.smsLoopInterval = Integer.valueOf(sharedPreferences.getString("SmsLoopInterval", Integer.toString(Preferences.smsLoopInterval)));
-	    Preferences.appLaunchMode = Integer.valueOf(sharedPreferences.getString("AppLaunchMode", Integer.toString(Preferences.appLaunchMode)));
-	    Preferences.calendarLookahead = Integer.valueOf(sharedPreferences.getString("CalendarLookahead", Integer.toString(Preferences.calendarLookahead)));
-
-	} catch (NumberFormatException e) {
-	}
-
-    }
-
-    public static boolean getPreviousConnectionState(Context context) {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-	return sharedPreferences.getBoolean("PreviousConnectionState", false);
-    }
-
-    public static void setPreviousConnectionState(Context context, boolean connected) {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-	Editor editor = sharedPreferences.edit();
-
-	editor.putBoolean("PreviousConnectionState", connected);
-	editor.commit();
-    }
-
-    public static void saveMac(Context context, String mac) {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-	Editor editor = sharedPreferences.edit();
-
-	editor.putString("MAC", mac);
-	editor.commit();
-    }
-
-    public static void saveTheme(Context context, String theme) {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-	Editor editor = sharedPreferences.edit();
-
-	editor.putString("ThemeName", theme);
-	editor.commit();
-    }
-
-    public static String getWidgets(Context context) {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-	if (watchType == WatchType.DIGITAL) {
-	    return sharedPreferences.getString("widgets", WidgetManager.getInstance(context).defaultWidgetsDigital);
-	} else if (watchType == WatchType.ANALOG) {
-	    return sharedPreferences.getString("widgetsAnalog", WidgetManager.getInstance(context).defaultWidgetsAnalog);
-	}
-
-	return "";
-    }
-
-    public static void saveWidgets(Context context, String widgets) {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-	Editor editor = sharedPreferences.edit();
-
-	if (watchType == WatchType.ANALOG) {
-	    editor.putString("widgetsAnalog", widgets);
-	} else {
-	    editor.putString("widgets", widgets);
-	}
-	editor.commit();
-    }
-
-    public static void autoStartService(Context context) {
-	if (connectionState != ConnectionState.DISCONNECTED)
-	    return;
-
-	if (!Preferences.loaded)
-	    loadPreferences(context);
-
-	if (Preferences.autoConnect && getPreviousConnectionState(context) == true) {
-	    context.startService(new Intent(context, MetaWatchService.class));
-	    if (Preferences.logging)
-		Log.v(MetaWatchStatus.TAG, "Service auto started");
-	}
-    }
-
-    public void createNotification() {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-	boolean hideNotificationIcon = sharedPreferences.getBoolean("HideNotificationIcon", false);
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.createNotification(): hideNotificationIcon=" + hideNotificationIcon);
-
-	NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-	builder.setTicker(getResources().getString(R.string.app_name));
-	builder.setContentTitle(getResources().getString(R.string.app_name));
-	builder.setContentIntent(createNotificationPendingIntent());
-	builder.setOngoing(true);
-	builder.setOnlyAlertOnce(true);
-	switch (connectionState) {
-	case ConnectionState.CONNECTING:
-	    builder.setContentText(getResources().getString(R.string.connection_connecting));
-	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
-	    builder.setProgress(0, 0, true);
-	    broadcastConnection(false);
-	    break;
-	case ConnectionState.CONNECTED:
-	    builder.setContentText(getResources().getString(R.string.connection_connected));
-	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.connected));
-	    broadcastConnection(true);
-	    break;
-	default:
-	    builder.setContentText(getResources().getString(R.string.connection_disconnected));
-	    builder.setSmallIcon((hideNotificationIcon ? R.drawable.transparent_square : R.drawable.disconnected));
-	    broadcastConnection(false);
-	    break;
-	}
-	startForeground(1, builder.build());
-    }
-
-    private PendingIntent createNotificationPendingIntent() {
-	return PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
-    }
-
-    public void updateNotification() {
-	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-	boolean hideNotificationIcon = sharedPreferences.getBoolean("HideNotificationIcon", false);
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.updateNotification(): hideNotificationIcon=" + hideNotificationIcon);
-	createNotification();
-    }
-
-    public void removeNotification() {
-	stopForeground(true);
-    }
-
-    @Override
-    public void onCreate() {
-	super.onCreate();
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onCreate()");
-	initialize();
-	mIsRunning = true;
-    }
-
-    private void initialize() {
-	if (!Preferences.loaded)
-	    loadPreferences(this);
-
-	PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).registerOnSharedPreferenceChangeListener(prefChangeListener);
-
-	createNotification();
-
-	connectionState = ConnectionState.CONNECTING;
-	watchState = WatchStates.OFF;
-	watchType = WatchType.UNKNOWN;
-	watchGen = WatchGen.UNKNOWN;
-	Monitors.getInstance().getRTCTimestamp = 0;
-
-	if (bluetoothAdapter == null)
-	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
-
-	Monitors.getInstance().start(this/* , telephonyManager */);
-
-	// Initialise theme
-	BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
-
-	start();
-
-    }
-
-    @Override
-    public synchronized int onStartCommand(final Intent intent, int flags, int startId) {
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onStartCommand()");
-	if (intent != null) {
-	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
-	    case SILENT_MODE_ENABLE:
-		setSilentMode(true);
-		break;
-	    case SILENT_MODE_DISABLE:
-		setSilentMode(false);
-		break;
-	    case INVERT_SILENT_MODE:
-		setSilentMode(!silentMode);
-		break;
-	    case SEND_BYTE_ARRAY:
-		sendQueue.add(intent.getByteArrayExtra(BYTE_ARRAY));
-		break;
-	    }
-	}
-	return START_STICKY;
-    }
-    
-    private Runnable protocolSender = new Runnable() {
-	public void run() {
-	    byte[] message = null;
-	    message = sendQueue.peek();
-	    if (message != null) {
-		try {
-		    wakeLock.acquire();
-		    outputStream.write(message);
-		    outputStream.flush();
-		    sendQueue.remove(message);
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    resetConnection();
-		} finally {
-		    if (wakeLock != null && wakeLock.isHeld())
-			wakeLock.release();
-		}
-	    }
-	    mPendingSend = watchSenderThread.schedule(this, Preferences.packetWait, TimeUnit.MILLISECONDS);
-	    mPauseQueue.block();
-	}
-    };
-
-    @Override
-    public void onDestroy() {
-	super.onDestroy();
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onDestroy()");
-	
-	connectionState = ConnectionState.DISCONNECTING;
-	setPreviousConnectionState(MetaWatchService.this, false);
-	
-	if (watchReceiverThread != null) {
-	    watchReceiverThread.quit();
-	} else {
-	    connectionState = ConnectionState.DISCONNECTED;
-	    setPreviousConnectionState(MetaWatchService.this, false);
-	}
-	
-	if (mPendingSend != null)
-	    mPendingSend.cancel(true);
-	if (sendQueue != null)
-	    sendQueue.clear();
-	if (watchSenderThread != null)
-	    watchSenderThread.shutdownNow();
-	
-	Notification.getInstance().destroy();
-	
-	if (mPauseQueue != null)
-	    mPauseQueue.open();
-
-	if (pollHandler != null)
-	    pollHandler.removeCallbacks(pollWeatherBattery);
-
-	cleanup();
-	
-	Idle.getInstance().destroy();
-	removeNotification();
-	
-	if (prefChangeListener != null)
-	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
-
-	Monitors.getInstance().destroy(this);
-	BitmapCache.getInstance().destroy();
-	
-	AppManager.getInstance(this).destroy();
-	ActionManager.getInstance(this).destroy();
-	WidgetManager.getInstance(this).destroy();
-	
-	mIsRunning = false;
-    }
-
-    @TargetApi(10)
-    private boolean connect() {
-
-	try {
-
-	    if (!Preferences.loaded)
-		loadPreferences(this);
-
-	    MetaWatchService.fakeWatch = false;
-	    if (Preferences.watchMacAddress.equals("DIGITAL")) {
-		MetaWatchService.fakeWatch = true;
-		MetaWatchService.watchType = MetaWatchService.WatchType.DIGITAL;
-	    }
-	    if (Preferences.watchMacAddress.equals("ANALOG")) {
-		MetaWatchService.fakeWatch = true;
-		MetaWatchService.watchType = MetaWatchService.WatchType.ANALOG;
-	    }
-
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Remote device address: '" + Preferences.watchMacAddress + "'");
-
-	    if (!MetaWatchService.fakeWatch) {
-
-		if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled())
-		    return false;
-
-		wakeLock.acquire();
-		
-		BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(Preferences.watchMacAddress);
-
-		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-
-		if (Preferences.skipSDP) {
-		    Method method;
-		    if (Preferences.insecureBtSocket && currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD_MR1) {
-			method = bluetoothDevice.getClass().getMethod("createInsecureRfcommSocket", new Class[] { int.class });
-		    } else {
-			method = bluetoothDevice.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
-		    }
-		    bluetoothSocket = (BluetoothSocket) method.invoke(bluetoothDevice, 1);
-		} else {
-		    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
-		    if (Preferences.insecureBtSocket && currentapiVersion >= android.os.Build.VERSION_CODES.GINGERBREAD_MR1) {
-			bluetoothSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(uuid);
-		    } else {
-			bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
-		    }
-		}
-
-		bluetoothAdapter.cancelDiscovery();
-		bluetoothSocket.connect();
-
-		inputStream = bluetoothSocket.getInputStream();
-		outputStream = bluetoothSocket.getOutputStream();
-	    }
-
-	    connectionState = ConnectionState.CONNECTED;
-	    setPreviousConnectionState(this, true);
-	    updateNotification();
-	    
-	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
-	    
-	    //In 10 seconds update the date and time format
-	    //Well after the entire connection process, and Idle update on the watch
-	    pollHandler.postDelayed(new Runnable() {
-		@Override
-		public void run() {
-		    Protocol.getInstance(MetaWatchService.this).setTimeDateFormat(MetaWatchService.this);
-		}
-	    }, 10000);
-
-	    Notification.getInstance().startNotificationSender(this);
-	    
-	    //Unblock the message protocol queue, and the notification queue.
-	    mPauseQueue.open();
-	    
-	    return true;
-
-	} catch (IOException ioexception) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, ioexception.toString());
-	} catch (SecurityException e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	} catch (NoSuchMethodException e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	} catch (IllegalArgumentException e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	} catch (IllegalAccessException e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	} catch (InvocationTargetException e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	} catch (NullPointerException e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	} finally {
-	    if(wakeLock != null && wakeLock.isHeld()) 
-		wakeLock.release();
-	}
-	return false;
-    }
-
-    void cleanup() {
-	try {
-	    if (outputStream != null)
-		outputStream.close();
-	} catch (IOException e) {
-	}
-	try {
-	    if (inputStream != null)
-		inputStream.close();
-	} catch (IOException e) {
-	}
-	try {
-	    if (bluetoothSocket != null)
-		bluetoothSocket.close();
-	} catch (IOException e) {
-	}
-	broadcastConnection(false);
-	
-	Protocol.getInstance(this).destroy();
-	MediaControl.getInstance().destroy();
-    }
-    
-    private void resetConnection() {
- 	if (Preferences.logging)
- 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.resetConnection()");
- 	//The message was never removed from the queue, now block. The block is released when the connection is reestablished.
- 	//If the connection is not reestablished it's also unblocked in the Service onDestroy, along with the queue being cleared, etc...
- 	mPauseQueue.close();
-	connectionState = ConnectionState.CONNECTING;
- 	cleanup();
-    }
-
-    private class WatchReceiverThread extends Thread {
-	private Handler handler;
-	private Looper looper;
-
-	public WatchReceiverThread(String name) {
-	    super(name);
-	}
-
-	@Override
-	public void run() {
-
-	    try {
-
-		Looper.prepare();
-		looper = Looper.myLooper();
-		handler = new Handler();
-
-		Runnable ProcessState = new Runnable() {
-		    public void run() {
-			int delay = processState();
-			if (delay >= 0) {
-			    handler.postDelayed(this, delay);
-			} else {
-			    connectionState = ConnectionState.DISCONNECTED;
-			    updateNotification();
-			    handler.removeCallbacks(this);
-			    looper.quit();
-			}
-		    }
-		};
-
-		handler.post(ProcessState);
-		Looper.loop();
-	    } catch (Throwable T) {
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "serviceThread: " + T.getMessage());
-	    } finally {
-		connectionState = ConnectionState.DISCONNECTED;
-		updateNotification();
-		stopSelf();
-	    }
-	}
-
-	public void quit() {
-	    if (looper != null)
-		looper.quit();
-	}
-    }
-
-    int processState() {
-	int result = 0;
-	switch (connectionState) {
-	case ConnectionState.DISCONNECTED:
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "state: disconnected");
-	    break;
-	case ConnectionState.CONNECTING:
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "state: connecting");
-	    // create initial connection or reconnect
-	    updateNotification();
-	    if (!connect()) {
-		if (powerManager.isScreenOn()) {
-		    result = 1000;
-		} else {
-		    result = 5000;
-		}
-	    }
-	    break;
-	case ConnectionState.CONNECTED:
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "state: connected");
-	    // read from input stream
-	    readFromDevice();
-	    break;
-	case ConnectionState.DISCONNECTING:
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "state: disconnecting");
-	    // exit
-	    result = -1;
-	    break;
-	}
-
-	return result;
-    }
-    
-    private Runnable pollWeatherBattery = new Runnable() {
-	@Override
-	public void run() {
-	    String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).getString("collectWatchVoltage", "0");
-	    try {
-		final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
-		if (voltageFrequency > 0) {
-		    
-		    Intent intent = new Intent(MetaWatchService.this, AlarmReceiver.class);
-		    intent.putExtra("action_poll_voltage", "poll_voltage");
-		    MetaWatchService.this.sendBroadcast(intent);
-		}
-	    } catch (NumberFormatException nfe) {
-		if (Preferences.logging)
-		    Log.e(MetaWatchStatus.TAG, "MetaWatchService.start(): bad voltage frequency string '" + voltageFrequencyString + "'");
-	    }	
-	    pollHandler.postDelayed(this, 60000);
-	}
-    };
-
-    private void start() {
-
-	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
-	watchReceiverThread.setPriority(7);
-	watchReceiverThread.start();
-	
-	watchSenderThread.execute(protocolSender);
-	pollHandler.post(pollWeatherBattery);
-
-	/* DEBUG */
-//	String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(this).getString("collectWatchVoltage", "0");
-//	try {
-//
-//	    final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
-//	    if (voltageFrequency > 0) {
-//
-//		AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-//		Intent intent = new Intent(this, AlarmReceiver.class);
-//		intent.putExtra("action_poll_voltage", "poll_voltage");
-//		PendingIntent sender = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-//		long sleep = voltageFrequency * 60 * 1000;
-//		alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, sleep, sender);
-//		if (Preferences.logging)
-//		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.start(): Set voltage reading every " + sleep + "ms");
-//	    }
-//
-//	} catch (NumberFormatException nfe) {
-//	    if (Preferences.logging)
-//		Log.e(MetaWatchStatus.TAG, "MetaWatchService.start(): bad voltage frequency string '" + voltageFrequencyString + "'");
-//	}
-
-    }
-
-    private void readFromDevice() {
-
-	if (MetaWatchService.fakeWatch) {
-	    try {
-		Thread.sleep(10000);
-	    } catch (InterruptedException e) {
-	    }
-	    return;
-	}
-
-	try {
-	    byte[] bytes = new byte[256];
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "before blocking read");
-	    // Do a proper read loop
-	    int haveread = 0;
-	    int lengthtoread = 4;
-	    while ((lengthtoread - haveread) != 0) {
-		haveread += inputStream.read(bytes, haveread, lengthtoread - haveread);
-		if (haveread > 1) {
-		    lengthtoread = bytes[1];
-		}
-	    }
-
-	    // print received
-	    String str = "received: ";
-	    int len = (bytes[1] & 0xFF);
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "packet length: " + len);
-
-	    for (int i = 0; i < len; i++) {
-		// str+= Byte.toString(bytes[i]) + ", ";
-		str += "0x" + Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1) + ", ";
-	    }
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, str);
-	    /*
-	     * switch (bytes[2]) { case eMessageType.GetDeviceTypeResponse.msg: if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: device type response"); break; case eMessageType.NvalOperationResponseMsg.msg: if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: nval response"); break; case eMessageType.StatusChangeEvent.msg: if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "received: status change event"); break; }
-	     */
-	    /*
-	     * if (bytes[2] == 0x31) { // nval response if (bytes[3] == 0x00) // success if (bytes[4] == 0x00) // set to 12 hour format Protocol.setNvalTime(true); }
-	     */
-	    if (bytes[2] == eMessageType.NvalOperationResponseMsg.msg) {
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): NvalOperationResponseMsg");
-		// Do something here?
-	    } else if (bytes[2] == eMessageType.StatusChangeEvent.msg) { // status
-		// change
-		// event
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): status change");
-		if (bytes[4] == 0x01) {
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): mode changed");
-		    synchronized (Notification.getInstance().modeChanged) {
-			Notification.getInstance().modeChanged.notify();
-		    }
-		} else if (bytes[4] == 0x11) {
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): scroll request notification");
-
-		    synchronized (Notification.getInstance().scrollRequest) {
-			Notification.getInstance().scrollRequest.notify();
-		    }
-		} else if (bytes[4] == 0x10) {
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): scroll complete.");
-		} else if (bytes[4] == 0x02) {
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): mode timeout.");
-		    // The watch switches back to idle mode (showing the initial
-		    // page) after 10 minutes
-		    // Activate the last used idle page in this case
-		    Idle.getInstance().toIdle(MetaWatchService.this);
-		}
-	    }
-
-	    else if (bytes[2] == eMessageType.ButtonEventMsg.msg) { // button
-								    // press
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): button event");
-		pressedButton(bytes[3] & 0xFF); //
-	    }
-
-	    else if (bytes[2] == eMessageType.GetDeviceTypeResponse.msg) { // device
-									   // type
-		if (bytes[4] == 1 || bytes[4] == 4) {
-		    watchType = WatchType.ANALOG;
-		    watchGen = WatchGen.GEN1;
-		    if (Preferences.logging)
-			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; analog watch (gen1)");
-
-		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
-			Idle.getInstance().toIdle(this);
-			Idle.getInstance().updateIdle(this, true);
-		    }
-
-		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		    boolean displaySplash = sharedPreferences.getBoolean("DisplaySplashScreen", false);
-		    if (displaySplash) {
-			Protocol.getInstance(MetaWatchService.this).sendOledBitmap(Utils.getBitmap(this, "splash_16_0.bmp"), MetaWatchService.WatchBuffers.NOTIFICATION, 0);
-			Protocol.getInstance(MetaWatchService.this).sendOledBitmap(Utils.getBitmap(this, "splash_16_1.bmp"), MetaWatchService.WatchBuffers.NOTIFICATION, 1);
-		    }
-
-		} else {
-		    watchType = WatchType.DIGITAL;
-
-		    if (bytes[4] == 5 || bytes[4] == 6) {
-			watchGen = WatchGen.GEN2;
-			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; Strata/Frame (gen2)");
-		    } else {
-			watchGen = WatchGen.GEN1;
-			if (Preferences.logging)
-			    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; digital watch (gen1)");
-		    }
-
-		    Protocol.getInstance(MetaWatchService.this).configureMode();
-		    Protocol.getInstance(MetaWatchService.this).setNvalLcdInvert(Preferences.invertLCD);
-
-		    Protocol.getInstance(MetaWatchService.this).configureIdleBufferSize(true, true);
-
-		    // Disable built in action for Right top immediate
-		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, MetaWatchService.WatchBuffers.IDLE);
-		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, MetaWatchService.WatchBuffers.APPLICATION);
-		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION);
-
-		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
-			Idle.getInstance().toIdle(this);
-			Idle.getInstance().updateIdle(this, true);
-		    }
-
-		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		    boolean displaySplash = sharedPreferences.getBoolean("DisplaySplashScreen", false);
-		    if (displaySplash) {
-			Notification.getInstance().addBitmapNotification(this, Utils.getBitmap(this, "splash.png"), new VibratePattern(false, 0, 0, 0), 10000, "Splash");
-		    }
-
-		}
-
-		Protocol.getInstance(MetaWatchService.this).getRealTimeClock();
-
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this);
-
-		/* Notify watch on connection if requested. */
-		boolean notifyOnConnect = sharedPreferences.getBoolean("NotifyWatchOnConnect", false);
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.connect(): notifyOnConnect=" + notifyOnConnect);
-		if (notifyOnConnect) {
-		    NotificationBuilder.createOtherNotification(MetaWatchService.this, null, "MetaWatch", getResources().getString(R.string.connection_connected), 1);
-		}
-
-		Idle.getInstance().activateButtons(this);
-
-	    } else if (bytes[2] == eMessageType.ReadBatteryVoltageResponse.msg) {
-		boolean powerGood = bytes[4] > 0;
-		boolean batteryCharging = bytes[5] > 0;
-		float batterySense = (((int) bytes[7] << 8) + (int) bytes[6]) / 1000.0f;
-		float batteryAverage = (((int) bytes[9] << 8) + (int) bytes[8]) / 1000.0f;
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received battery voltage response." + " power_good=" + powerGood + " battery_charging=" + batteryCharging + " battery_sense=" + batterySense + " battery_average=" + batteryAverage);
-		String voltageFrequencyString = PreferenceManager.getDefaultSharedPreferences(this).getString("collectWatchVoltage", "0");
-		final int voltageFrequency = Integer.parseInt(voltageFrequencyString);
-		if (voltageFrequency > 0) {
-		    File sdcard = Environment.getExternalStorageDirectory();
-		    File csv = new File(sdcard, "metawatch_voltage.csv");
-		    boolean fileExists = csv.exists();
-		    FileWriter fw = new FileWriter(csv, true);
-		    if (fileExists == false) {
-			fw.write("Date,Sense,Average\n");
-		    }
-		    Date date = new Date();
-		    fw.write("\"" + date.toString() + "\"," + batterySense + "," + batteryAverage + "\n");
-		    fw.flush();
-		    fw.close();
-		}
-	    } else if (bytes[2] == eMessageType.ReadLightSensorResponse.msg) {
-		float lightSense = (((int) bytes[1] << 8) + (int) bytes[0]) / 1000.0f;
-		float lightAverage = (((int) bytes[3] << 8) + (int) bytes[2]) / 1000.0f;
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received light sensor response." + " light_sense=" + lightSense + " light_average=" + lightAverage);
-	    } else if (bytes[2] == eMessageType.GetRealTimeClockResponse.msg) {
-		long timeNow = System.currentTimeMillis();
-		long roundTrip = timeNow - Monitors.getInstance().getRTCTimestamp;
-
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): received rtc response." + " round trip= " + roundTrip);
-
-		Monitors.getInstance().rtcOffset = (int) (roundTrip / 2000);
-
-		Protocol.getInstance(MetaWatchService.this).setRealTimeClock(MetaWatchService.this);
-
-	    } else {
-		if (Preferences.logging)
-		    Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): Unknown message : 0x" + Integer.toString((bytes[2] & 0xff) + 0x100, 16).substring(1) + ", ");
-	    }
-
-	} catch (IOException e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	    resetConnection();
-	} catch (Exception e) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, e.toString());
-	    resetConnection();
-	}
-    }
-
-    private void broadcastConnection(boolean connected) {
-	if (connected != lastConnectionState) {
-	    lastConnectionState = connected;
-	    Intent intent = new Intent("org.metawatch.manager.CONNECTION_CHANGE");
-	    intent.putExtra("state", connected);
-	    sendBroadcast(intent);
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "MetaWatchService.broadcastConnection(): Broadcast connection change: state='" + connected + "'");
-	    Protocol.getInstance(MetaWatchService.this).resetLCDDiffBuffer();
-	}
-    }
-
-    static long lastOledCrownPress = 0;
-
-    private void pressedButton(int button) {
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "button code: " + Integer.toString(button));
-
-	try {
-
-	    if (button > 0 && Preferences.hapticFeedback)
-		Protocol.getInstance(MetaWatchService.this).vibrate(50, 5, 3);
-
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "MetaWatchService.pressedButton(): watchState=" + watchState);
-	    switch (watchState) {
-	    case WatchStates.IDLE: {
-
-		int idleAppButton = Idle.getInstance().appButtonPressed(this, button);
-		if (idleAppButton == ApplicationBase.BUTTON_NOT_USED) {
-
-		    switch (button) {
-
-		    case Idle.LEFT_QUICK_BUTTON:
-			Idle.getInstance().quickButtonAction(MetaWatchService.this, Preferences.quickButtonL);
-			break;
-
-		    case Idle.RIGHT_QUICK_BUTTON:
-			Idle.getInstance().quickButtonAction(MetaWatchService.this, Preferences.quickButtonR);
-			break;
-
-		    case Idle.IDLE_NEXT_PAGE:
-			if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
-			    if(MetaWatchService.WatchModes.APPLICATION) {
-				Application.stopAppMode(this);
-			    } else {
-				Idle.getInstance().nextPage(this);
-				Idle.getInstance().updateIdle(this, true);
-			    }
-			}
-			break;
-
-		    case Idle.TOGGLE_SILENT:
-			setSilentMode(!silentMode);
-			Protocol.getInstance(MetaWatchService.this).vibrate(500, 500, 2);
-			break;
-
-		    case Idle.IDLE_OLED_DISPLAY:
-			long time = System.currentTimeMillis();
-
-			if (time - lastOledCrownPress < 1000 * 5) {
-			    Idle.getInstance().nextPage(this);
-			    Idle.getInstance().updateIdle(this, true);
-			}
-
-			lastOledCrownPress = time;
-			Idle.getInstance().sendOledIdle(this);
-			break;
-
-		    case Application.TOGGLE_APP:
-			Application.toggleApp(MetaWatchService.this, Idle.getInstance().getCurrentApp());
-			break;
-		    }
-		} else if (idleAppButton != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
-		    Idle.getInstance().updateIdle(this, false);
-		    if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
-			Idle.getInstance().sendOledIdle(this);
-		}
-		break;
-	    }
-
-	    case WatchStates.APPLICATION:
-		Application.buttonPressed(this, button);
-		break;
-
-	    case WatchStates.NOTIFICATION:
-
-		switch (button) {
-		case Call.CALL_ANSWER:
-		    MediaControl.getInstance().answerCall(this);
-		    break;
-		case Call.CALL_DISMISS:
-		    MediaControl.getInstance().ignoreCall(this);
-		    break;
-		case Call.CALL_MENU:
-		    ActionManager.getInstance(this).displayCallActions(this);
-		    break;
-		default:
-		    Notification.getInstance().buttonPressed(button);
-		    break;
-		}
-		break;
-	    }
-
-	} finally {
-	}
-    }
-
-    @Override
-    public void onLowMemory() {
-	MemoryInfo mi = new MemoryInfo();
-	ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-	activityManager.getMemoryInfo(mi);
-	long availableMegs = mi.availMem / 1048576L;
-
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onLowMemory(): " + availableMegs + "Mb free");
-
-	super.onLowMemory();
-    }
 }
