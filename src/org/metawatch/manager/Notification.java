@@ -33,8 +33,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchBuffers;
@@ -60,7 +60,7 @@ public class Notification {
     private BlockingQueue<NotificationType> notificationQueue = new LinkedBlockingQueue<NotificationType>();
     private ArrayList<NotificationType> notificationHistory = new ArrayList<NotificationType>();
     private NotificationSender notificationSender;
-    private ScheduledExecutorService mExecutor = Executors.newSingleThreadScheduledExecutor();
+    private ThreadPoolExecutor mExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
     private Future<?> mFuture;
     final static byte NOTIFICATION_HISTORY_SIZE = 15;
 
@@ -107,6 +107,9 @@ public class Notification {
 	public void run() {
 	    int currentNotificationPage = 0;
 	    try {
+		//The delay is now up here to account for potentially paused states resulting from disconnection
+		Thread.sleep(1000);
+		
 		NotificationType notification;
 		if (currentNotification != null) {
 		    // Something bad happened while showing the last
@@ -306,7 +309,12 @@ public class Notification {
 		if (Preferences.logging)
 		    Log.e(MetaWatchStatus.TAG, "Exception in NotificationSender: " + e.toString());
 	    }
-	    mFuture = mExecutor.schedule(notificationSender, 1000, TimeUnit.MILLISECONDS);
+	    try {
+		mFuture = mExecutor.submit(notificationSender);
+	    } catch(RejectedExecutionException e) {
+		e.printStackTrace();
+		//Shutting down
+	    }
 	    // If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
 	    MetaWatchService.mPauseQueue.block();
 	}

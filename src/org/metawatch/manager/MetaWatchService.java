@@ -40,6 +40,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -191,7 +192,12 @@ public class MetaWatchService extends Service {
 			wakeLock.release();
 		}
 	    }
-	    mPendingSend = watchSenderThread.schedule(this, Preferences.packetWait, TimeUnit.MILLISECONDS);
+	    try {
+		mPendingSend = watchSenderThread.schedule(this, Preferences.packetWait, TimeUnit.MILLISECONDS);
+	    } catch(RejectedExecutionException e) {
+		e.printStackTrace();
+		//Shutting down
+	    }
 	    mPauseQueue.block();
 	}
     };
@@ -215,6 +221,8 @@ public class MetaWatchService extends Service {
 	    sendQueue.clear();
 	if (watchSenderThread != null)
 	    watchSenderThread.shutdownNow();
+	
+	//This will cancel the Notification's Future because unblocking from a potentially pauses state
 	Notification.getInstance().destroy();
 	if (mPauseQueue != null)
 	    mPauseQueue.open();

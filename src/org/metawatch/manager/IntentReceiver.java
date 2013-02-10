@@ -363,13 +363,13 @@ public class IntentReceiver extends BroadcastReceiver {
 
 		NotificationBuilder.createNMA(context, app, event, desc, prio, url);
 	    } else if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-	            final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-	            switch (state) {
-	            case BluetoothAdapter.STATE_OFF:
-	        	if (MetaWatchService.mIsRunning)
-	        	    context.stopService(new Intent(context, MetaWatchService.class));
-	        	break;
-	            }
+		final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+		switch (state) {
+		case BluetoothAdapter.STATE_OFF:
+		    if (MetaWatchService.mIsRunning)
+			context.stopService(new Intent(context, MetaWatchService.class));
+		    break;
+		}
 	    }
 	} catch (android.os.BadParcelableException e) {
 	    e.printStackTrace();
