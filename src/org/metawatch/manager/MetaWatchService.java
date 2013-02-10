@@ -1108,7 +1108,7 @@ public class MetaWatchService extends Service {
 	public static final int ALWAYSGOOGLE = 2;
     }
 
-    final static class WatchModes {
+    public final static class WatchModes {
 	public static volatile boolean IDLE = false;
 	public static volatile boolean APPLICATION = false;
 	public static volatile boolean NOTIFICATION = false;

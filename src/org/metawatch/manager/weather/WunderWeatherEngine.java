@@ -18,6 +18,8 @@ import org.metawatch.manager.Idle;
 import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.Application;
+import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Monitors;
 import org.metawatch.manager.Utils;
@@ -182,7 +184,11 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		weatherData.error = false;
 		weatherData.errorString = "";
 
-		Idle.getInstance().updateIdle(context, true);
+		if (MetaWatchService.WatchModes.APPLICATION) {
+		    Application.updateAppMode(context);
+		} else {
+		    Idle.getInstance().updateIdle(context, true);
+		}
 	    }
 
 	} catch (Exception e) {
