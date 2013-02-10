@@ -15,6 +15,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -353,7 +354,11 @@ public class InternalActions {
     }
 
     public static class VoiceSearchAction extends AndroidAppAction {
-
+	Context mContext;
+	public VoiceSearchAction(Context context) {
+	    mContext = context;
+	}
+	
 	protected String getPackage() {
 	    return "com.google.android.voicesearch";
 	}
@@ -365,9 +370,14 @@ public class InternalActions {
 	}
 
 	public String getName() {
-	    return "Voice Search";
+	    try {
+		PackageManager pm = mContext.getPackageManager();
+		pm.getApplicationInfo("com.facebook.android", 0 );
+		return "Voice Search";
+	    } catch( PackageManager.NameNotFoundException e ){
+		return "Voice Search not Installed";
+	    }
 	}
-
     }
 
     public static class PhoneSettingsAction extends ContainerAction {

@@ -150,7 +150,7 @@ public class ActionManager {
 	    addAction(new InternalActions.PingAction());
 	    addAction(new InternalActions.WeatherRefreshAction());
 	    // addAction(new InternalActions.ClickerAction());
-	    addAction(new InternalActions.VoiceSearchAction());
+	    addAction(new InternalActions.VoiceSearchAction(context));
 	    addAction(new InternalActions.ToggleWatchSilentAction());
 
 	    lastNotificationAction = new Action() {
