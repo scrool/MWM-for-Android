@@ -104,7 +104,7 @@ public class Test extends SherlockPreferenceActivity {
 	preferenceScreen.findPreference("application_start").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
 		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Application.startAppMode(context);
+		    Application.toApp(context, null);
 		return true;
 	    }
 	});
@@ -268,61 +268,6 @@ public class Test extends SherlockPreferenceActivity {
 		// of the round trip, so we can try and correct for that
 		// when setting the time
 		Protocol.getInstance(context).getRealTimeClock();
-		return true;
-	    }
-	});
-
-	preferenceScreen.findPreference("load_template").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Protocol.getInstance(context).loadTemplate(MetaWatchService.WatchBuffers.IDLE);
-
-		return true;
-	    }
-	});
-
-	preferenceScreen.findPreference("update_display").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.IDLE);
-		return true;
-	    }
-	});
-
-	preferenceScreen.findPreference("write_buffer").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Protocol.getInstance(context).writeBuffer();
-		return true;
-	    }
-	});
-
-	preferenceScreen.findPreference("test").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		// Protocol.test(context);
-		// NotificationBuilder.createSMS(context,
-		// "555-123-4567",
-		// "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20.");
-		// Protocol.setNvalTime(true);
-		// Protocol.configureMode();
-		// Protocol.readButtonConfiguration();
-		// Protocol.enableMediaButtons();
-		// Protocol.queryNvalTime();
-		/*
-		 * if (Preferences.logging) Log.d(MetaWatchStatus.TAG, "sending notif test"); Protocol.loadTemplate(2); Protocol .sendLcdBitmap(Protocol.createTextBitmap(context, "abc"), true); Protocol.updateDisplay(2);
-		 */
-
-		// Intent intent = new
-		// Intent(Intent.ACTION_MEDIA_BUTTON, null);
-		// KeyEvent event = new KeyEvent(KeyEvent.ACTION_DOWN,
-		// KeyEvent.KEYCODE_MEDIA_NEXT);
-		// intent.putExtra(Intent.EXTRA_KEY_EVENT, event);
-		// sendOrderedBroadcast(intent, null);
-
-		// Protocol.stopProtocolSender();
-
-		Idle.getInstance().sendOledIdle(context);
-
 		return true;
 	    }
 	});

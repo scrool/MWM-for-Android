@@ -7,10 +7,8 @@ import java.util.List;
 
 import org.metawatch.manager.Application;
 import org.metawatch.manager.FontCache;
-import org.metawatch.manager.Idle;
 import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
-import org.metawatch.manager.MetaWatchService.AppLaunchMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchStatus;
 import org.metawatch.manager.Utils;
@@ -151,33 +149,9 @@ public abstract class ApplicationBase {
 		Log.d(MetaWatchStatus.TAG, "InternalApp.open(): Ignored, app is not active.");
 	    return;
 	}
-
-	int page = Idle.getInstance().getAppPage(getInfo().id);
-
-	// Open the existing Idle app page.
-	if (page != -1) {
-	    Idle.getInstance().toPage(context, page);
-	    Idle.getInstance().toIdle(context);
-
-	    // Open new app.
-	} else {
-	    if (forcePopup || Preferences.appLaunchMode == AppLaunchMode.POPUP) {
-		appState = ACTIVE_POPUP;
-		int watchType = MetaWatchService.watchType;
-		if (watchType == MetaWatchService.WatchType.DIGITAL) {
-		    Application.startAppMode(context, this);
-		    Application.toApp(context); // Will call update() to draw
-						// app screen.
-		} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-		    // FIXME
-		}
-
-	    } else if (Preferences.appLaunchMode == AppLaunchMode.APP_PAGE) {
-		page = Idle.getInstance().addAppPage(context, this);
-		Idle.getInstance().toPage(context, page);
-		Idle.getInstance().toIdle(context);
-	    }
-	}
+	
+	appState = ACTIVE_POPUP;
+	Application.toApp(context, this);
     }
 
     public void setInactive() {

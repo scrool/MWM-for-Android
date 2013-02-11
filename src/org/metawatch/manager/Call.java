@@ -31,6 +31,7 @@ package org.metawatch.manager;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Notification.VibratePattern;
+import org.metawatch.manager.apps.ApplicationBase;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -155,11 +156,18 @@ public class Call {
 
 	MetaWatchService.WatchModes.CALL = false;
 
-	if (MetaWatchService.WatchModes.NOTIFICATION == true)
+	if (MetaWatchService.WatchModes.NOTIFICATION)
 	    Notification.getInstance().replay(context);
-	else if (MetaWatchService.WatchModes.APPLICATION == true)
-	    Application.toApp(context);
-	else if (MetaWatchService.WatchModes.IDLE == true)
+	else if (MetaWatchService.WatchModes.APPLICATION) {
+	    ApplicationBase app = Application.getCurrentApp();
+	    if (app != null) {
+		Application.toApp(context, Application.getCurrentApp());
+	    } else {
+		Application.stopAppMode(context);
+		Idle.getInstance().toIdle(context);
+	    }
+	}
+	else if (MetaWatchService.WatchModes.IDLE)
 	    Idle.getInstance().toIdle(context);
     }
 

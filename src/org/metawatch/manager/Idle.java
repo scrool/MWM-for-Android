@@ -230,16 +230,13 @@ public class Idle {
 	}
 
 	public void activate(final Context context, int watchType) {
-	    app.appState = ApplicationBase.ACTIVE_IDLE;
+	    app.appState = ApplicationBase.ACTIVE_POPUP;
 	    app.activate(context, watchType);
-	    if (app.isToggleable())
-		Application.enableToggleButton(context, watchType);
 	}
 
 	public void deactivate(final Context context, int watchType) {
 	    app.setInactive();
 	    app.deactivate(context, watchType);
-	    Application.disableToggleButton(context, watchType);
 	}
 
 	public Bitmap draw(final Context context, boolean preview, Bitmap bitmap, int watchType) {

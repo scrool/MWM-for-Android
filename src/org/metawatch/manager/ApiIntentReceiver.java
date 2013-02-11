@@ -73,7 +73,6 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		    else if (app.appState == ApplicationBase.ACTIVE_POPUP)
 			Application.updateAppMode(context);
 		}
-
 	    }
 	    return;
 	}

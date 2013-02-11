@@ -762,10 +762,6 @@ public class MetaWatchService extends Service {
 			lastOledCrownPress = time;
 			Idle.getInstance().sendOledIdle(this);
 			break;
-
-		    case Application.TOGGLE_APP:
-			Application.toggleApp(MetaWatchService.this, Idle.getInstance().getCurrentApp());
-			break;
 		    }
 		} else if (idleAppButton != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
 		    if (WatchModes.APPLICATION) {
