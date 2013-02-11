@@ -489,10 +489,13 @@ public class Idle {
 	    }
 	}
 
+	//Send the Idle screen
 	Protocol.getInstance(context).sendLcdBitmap(createIdle(context), mode);
-	if (mode == MetaWatchService.WatchBuffers.IDLE)
-	    Protocol.getInstance(context).configureIdleBufferSize(showClock, true);
 
+	//Update the buffers for the sent Idle screen
+	Protocol.getInstance(context).configureIdleBufferSize(showClock);
+
+	//Draw the sent Idle screen on the buffer
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "sendLcdIdle: Drawing idle screen on buffer " + mode);
 	Protocol.getInstance(context).updateLcdDisplay(mode);

@@ -559,6 +559,7 @@ public class MetaWatchService extends Service {
 		    // The watch switches back to idle mode (showing the initial
 		    // page) after 10 minutes
 		    // Activate the last used idle page in this case
+		    Idle.getInstance().toPage(MetaWatchService.this, 0);
 		    Idle.getInstance().toIdle(MetaWatchService.this);
 		}
 	    }
@@ -606,7 +607,7 @@ public class MetaWatchService extends Service {
 		    Protocol.getInstance(MetaWatchService.this).configureMode();
 		    Protocol.getInstance(MetaWatchService.this).setNvalLcdInvert(Preferences.invertLCD);
 
-		    Protocol.getInstance(MetaWatchService.this).configureIdleBufferSize(true, true);
+		    Protocol.getInstance(MetaWatchService.this).configureIdleBufferSize(true);
 
 		    // Disable built in action for Right top immediate
 		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, WatchBuffers.IDLE);
@@ -615,7 +616,6 @@ public class MetaWatchService extends Service {
 
 		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
 			Idle.getInstance().toIdle(this);
-			Idle.getInstance().updateIdle(this, true);
 		    }
 
 		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

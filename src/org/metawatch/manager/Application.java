@@ -93,6 +93,7 @@ public class Application {
 
 	    if (MetaWatchService.watchState == MetaWatchService.WatchStates.APPLICATION) {
 		Protocol.getInstance(context).sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.APPLICATION);
+		Protocol.getInstance(context).configureIdleBufferSize(false);
 		Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
 	    }
 	}

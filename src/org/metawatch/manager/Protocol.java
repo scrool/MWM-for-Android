@@ -52,13 +52,9 @@ import android.text.format.DateFormat;
 
 public class Protocol {
     
-    
-    private boolean idleShowClock = true;
-
     private byte[][][] LCDDiffBuffer = new byte[3][48][30];
 
     private Context mContext;
-    
 
     private static Protocol mInstance;
 
@@ -79,8 +75,6 @@ public class Protocol {
     public void resetLCDDiffBuffer() {
 	LCDDiffBuffer = new byte[3][48][30];
     }
-
-
 
     public boolean sendLcdBitmap(Bitmap bitmap, int bufferType) {
 	if (bitmap == null || bitmap.getWidth() != 96 || bitmap.getHeight() != 96) {
@@ -161,11 +155,6 @@ public class Protocol {
 	    Log.d(MetaWatchStatus.TAG, "Sent " + sentLines + "/96");
 
 	return (sentLines > 0);
-    }
-
-    public void idleShowClock(boolean show) {
-	idleShowClock = show;
-
     }
 
     public void enqueue(final byte[] bytes) {
@@ -520,24 +509,19 @@ public class Protocol {
 	enqueue(bytes);
     }
 
-    public void configureIdleBufferSize(boolean showClock, boolean force) {
-
-	if (idleShowClock != showClock || force) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Protocol.configureIdleBufferSize(" + showClock + ")");
-
-	    idleShowClock = showClock;
-
-	    byte[] bytes = new byte[5];
-
-	    bytes[0] = eMessageType.start;
-	    bytes[1] = (byte) (bytes.length + 2); // length
-	    bytes[2] = eMessageType.ConfigureIdleBufferSize.msg;
-	    bytes[3] = 0;
-	    bytes[4] = (byte) (idleShowClock ? 0 : 1);
-
-	    enqueue(bytes);
-	}
+    public void configureIdleBufferSize(boolean showClock) {
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "Protocol.configureIdleBufferSize(" + showClock + ")");
+	
+	byte[] bytes = new byte[5];
+	
+	bytes[0] = eMessageType.start;
+	bytes[1] = (byte) (bytes.length + 2); // length
+	bytes[2] = eMessageType.ConfigureIdleBufferSize.msg;
+	bytes[3] = 0;
+	bytes[4] = (byte) (showClock ? 0 : 1);
+	
+	enqueue(bytes);
     }
 
     public void getDeviceType() {
