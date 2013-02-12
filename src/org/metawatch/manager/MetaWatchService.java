@@ -740,6 +740,7 @@ public class MetaWatchService extends Service {
 			    if (WatchModes.APPLICATION) {
 				Application.stopAppMode(this);
 				Idle.getInstance().toIdle(this);
+				Idle.getInstance().updateIdle(this, true);
 			    } else {
 				Idle.getInstance().nextPage(this);
 				Idle.getInstance().updateIdle(this, true);

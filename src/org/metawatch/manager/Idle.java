@@ -333,7 +333,7 @@ public class Idle {
 	idlePages = null;
     }
 
-    private void updateIdlePages(Context context, boolean refresh) {
+    void updateIdlePages(Context context, boolean refresh) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 	try {
