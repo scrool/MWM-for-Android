@@ -231,17 +231,13 @@ public class MetaWatchService extends Service {
 	    weatherBatteryPollHandler.removeCallbacks(pollWeatherBattery);
 
 	cleanup();
-	Idle.getInstance().destroy();
 
 	stopForeground(true);
 	if (prefChangeListener != null)
 	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
 
 	Monitors.getInstance().destroy(this);
-	BitmapCache.getInstance().destroy();
-	AppManager.getInstance(this).destroy();
-	ActionManager.getInstance(this).destroy();
-	WidgetManager.getInstance(this).destroy();
+
 	mIsRunning = false;
     }
 
@@ -370,6 +366,11 @@ public class MetaWatchService extends Service {
 	broadcastConnection(false);
 	Protocol.getInstance(this).destroy();
 	MediaControl.getInstance().destroy();
+	Idle.getInstance().destroy();
+	BitmapCache.getInstance().destroy();
+	AppManager.getInstance(this).destroy();
+	ActionManager.getInstance(this).destroy();
+	WidgetManager.getInstance(this).destroy();
     }
 
     private void resetConnection() {
