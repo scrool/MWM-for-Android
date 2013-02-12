@@ -101,32 +101,6 @@ public class Test extends SherlockPreferenceActivity {
 	    }
 	});
 
-	preferenceScreen.findPreference("application_start").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		if (MetaWatchService.watchType == WatchType.DIGITAL) {
-		    Application.startAppMode(context, null);
-		    Application.toApp(context);
-		}
-		return true;
-	    }
-	});
-
-	preferenceScreen.findPreference("application_update").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Application.updateAppMode(context);
-		return true;
-	    }
-	});
-
-	preferenceScreen.findPreference("application_stop").setOnPreferenceClickListener(new OnPreferenceClickListener() {
-	    public boolean onPreferenceClick(Preference arg0) {
-		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Application.stopAppMode(context);
-		return true;
-	    }
-	});
-
 	preferenceScreen.findPreference("sms").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
 		String smsText = "";

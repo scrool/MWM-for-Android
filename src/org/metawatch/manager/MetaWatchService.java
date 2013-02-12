@@ -739,6 +739,7 @@ public class MetaWatchService extends Service {
 			if (MetaWatchService.watchType == WatchType.DIGITAL) {
 			    if (WatchModes.APPLICATION) {
 				Application.stopAppMode(this);
+				Idle.getInstance().toIdle(this);
 			    } else {
 				Idle.getInstance().nextPage(this);
 				Idle.getInstance().updateIdle(this, true);
@@ -852,6 +853,7 @@ public class MetaWatchService extends Service {
 	    if (key.equals("InvertLCD")) {
 		Protocol.getInstance(MetaWatchService.this).setNvalLcdInvert(Preferences.invertLCD);
 		if (watchState == WatchStates.IDLE) {
+		    Protocol.getInstance(MetaWatchService.this).configureIdleBufferSize(false);
 		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(WatchBuffers.NOTIFICATION);
 		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(WatchBuffers.IDLE);
 		}

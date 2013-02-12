@@ -218,6 +218,13 @@ public class Settings extends SherlockPreferenceActivity {
 		Log.d(MetaWatchStatus.TAG, "Adding setting for " + appEntry.id);
 
 	    CheckBoxPreference test = new CheckBoxPreference(this);
+	    test.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+		@Override
+		public boolean onPreferenceClick(Preference preference) {
+		    Idle.getInstance().updateIdle(Settings.this, true);
+		    return false;
+		}
+	    });
 	    test.setKey(appEntry.getPageSettingName());
 	    test.setTitle(appEntry.name);
 

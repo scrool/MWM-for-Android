@@ -151,23 +151,13 @@ public abstract class ApplicationBase {
 	    return;
 	}
 
-	int page = Idle.getInstance().getAppPage(getInfo().id);
-
-	// Open the existing Idle app page.
-	if (page != -1) {
-	    Idle.getInstance().toPage(context, page);
-	    Idle.getInstance().toIdle(context);
-
-	    // Open new app.
-	} else {
-	    appState = ACTIVE_POPUP;
-	    int watchType = MetaWatchService.watchType;
-	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
-		Application.startAppMode(context, this);
-		Application.toApp(context);
-	    } else if (watchType == MetaWatchService.WatchType.ANALOG) {
-		// FIXME
-	    }
+	appState = ACTIVE_POPUP;
+	int watchType = MetaWatchService.watchType;
+	if (watchType == MetaWatchService.WatchType.DIGITAL) {
+	    Application.startAppMode(context, this);
+	    Application.toApp(context);
+	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
+	    // FIXME
 	}
     }
 
@@ -199,6 +189,7 @@ public abstract class ApplicationBase {
 		    @Override
 		    public int performAction(Context context) {
 			Application.stopAppMode(context);
+			Idle.getInstance().toIdle(context);
 			return BUTTON_USED_DONT_UPDATE;
 		    }
 		};

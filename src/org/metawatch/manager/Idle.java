@@ -333,7 +333,7 @@ public class Idle {
 	idlePages = null;
     }
 
-    public void updateIdlePages(Context context, boolean refresh) {
+    private void updateIdlePages(Context context, boolean refresh) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 	try {
@@ -511,16 +511,14 @@ public class Idle {
 	MetaWatchService.WatchModes.IDLE = true;
 	MetaWatchService.watchState = MetaWatchService.WatchStates.IDLE;
 
-	if (idlePages != null) {
-	    if (currentPage >= idlePages.size()) {
-		currentPage = 0;
-	    }
-	    idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
-	}
+	if (idlePages == null)
+	    updateIdlePages(context, true);
+
+	idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
 
 	if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
 	    sendLcdIdle(context, true);
-
+	    
 	    if (numPages() > 1) {
 		Protocol.getInstance(context).enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right
 		// top

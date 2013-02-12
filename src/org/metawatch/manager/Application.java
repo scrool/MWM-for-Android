@@ -42,13 +42,10 @@ public class Application {
 
     private static ApplicationBase currentApp = null;
 
-    public static void startAppMode(Context context) {
-	startAppMode(context, null);
-    }
-
     public static void startAppMode(Context context, ApplicationBase internalApp) {
 	if (currentApp != null) {
 	    stopAppMode(context);
+	    Idle.getInstance().toIdle(context);
 	}
 
 	MetaWatchService.WatchModes.APPLICATION = true;
@@ -63,8 +60,6 @@ public class Application {
 	    currentApp.setInactive();
 	}
 	currentApp = null;
-
-	Idle.getInstance().toIdle(context);
     }
 
     public static void updateAppMode(Context context) {
@@ -124,12 +119,11 @@ public class Application {
     public static void buttonPressed(Context context, int button) {
 	if (button == EXIT_APP) {
 	    stopAppMode(context);
-
+	    Idle.getInstance().toIdle(context);
 	} else if (currentApp != null) {
 	    if (currentApp.buttonPressed(context, button) != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
 		updateAppMode(context);
 	    }
-
 	} else {
 	    // Broadcast button to external app
 	    Intent intent = new Intent("org.metawatch.manager.BUTTON_PRESS");

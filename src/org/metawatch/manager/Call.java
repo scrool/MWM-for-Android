@@ -112,6 +112,7 @@ public class Call {
 	    canvas.drawBitmap(Utils.getBitmap(context, "menu.bmp"), 87, 87, null);
 
 	    Protocol.getInstance(context).sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.NOTIFICATION);
+	    Protocol.getInstance(context).configureIdleBufferSize(false);
 	    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.NOTIFICATION);
 	} else {
 	    Bitmap icon = Utils.getBitmap(context, "phone.bmp");
@@ -160,6 +161,7 @@ public class Call {
 	else if (MetaWatchService.WatchModes.APPLICATION) {
 	    if (!Application.toApp(context)) {
 		Application.stopAppMode(context);
+		Idle.getInstance().toIdle(context);
 	    }
 	}
 	else if (MetaWatchService.WatchModes.IDLE)
