@@ -97,26 +97,26 @@ public class Application {
 	}
     }
 
-    public static void toApp(final Context context) {
-	MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
-
-	// Idle app pages uses the same button mode, so disable those buttons.
-	Idle.getInstance().deactivateButtons(context);
-
-	int watchType = MetaWatchService.watchType;
+    public static boolean toApp(final Context context) {
 	if (currentApp != null) {
+	    MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
+	    
+	    // Idle app pages uses the same button mode, so disable those buttons.
+	    Idle.getInstance().deactivateButtons(context);
+	    
+	    int watchType = MetaWatchService.watchType;
+	    
+	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
+		Protocol.getInstance(context).enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    } else if (watchType == MetaWatchService.WatchType.ANALOG) {
+		Protocol.getInstance(context).enableButton(1, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	    }
+
 	    currentApp.activate(context, watchType);
 	    updateAppMode(context);
-	}
-	if (watchType == MetaWatchService.WatchType.DIGITAL) {
-	    Protocol.getInstance(context).enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
-	    Protocol.getInstance(context).enableButton(1, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-	}
-	
-	Protocol.getInstance(context).configureIdleBufferSize(false);
-	// update screen with cached buffer
-	Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
+	    return true;
+	}	
+	return false;
     }
 
     public static void buttonPressed(Context context, int button) {
