@@ -503,10 +503,12 @@ public class Notification {
 
 	if (MetaWatchService.WatchModes.CALL)
 	    return;
-	else if (MetaWatchService.WatchModes.APPLICATION)
+	else if (MetaWatchService.WatchModes.APPLICATION) {
 	    if (!Application.toApp(context)) {
 		Application.stopAppMode(context);
+		Idle.getInstance().toIdle(context);
 	    }
+	}
 	else if (MetaWatchService.WatchModes.IDLE)
 	    Idle.getInstance().toIdle(context);
     }

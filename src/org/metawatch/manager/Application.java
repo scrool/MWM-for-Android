@@ -64,9 +64,7 @@ public class Application {
 	}
 	currentApp = null;
 
-	if (MetaWatchService.WatchModes.IDLE == true) {
-	    Idle.getInstance().toIdle(context);
-	}
+	Idle.getInstance().toIdle(context);
     }
 
     public static void updateAppMode(Context context) {
@@ -98,25 +96,29 @@ public class Application {
     }
 
     public static boolean toApp(final Context context) {
-	if (currentApp != null) {
-	    MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
-	    
-	    // Idle app pages uses the same button mode, so disable those buttons.
-	    Idle.getInstance().deactivateButtons(context);
-	    
-	    int watchType = MetaWatchService.watchType;
-	    
-	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
-		Protocol.getInstance(context).enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-	    } else if (watchType == MetaWatchService.WatchType.ANALOG) {
-		Protocol.getInstance(context).enableButton(1, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-	    }
 
-	    currentApp.activate(context, watchType);
+	MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
+	
+	// Idle app pages uses the same button mode, so disable those buttons.
+//	Idle.getInstance().deactivateButtons(context);
+	
+	int watchType = MetaWatchService.watchType;
+
+	boolean toApp = false;
+	
+	if (currentApp != null) {
 	    updateAppMode(context);
-	    return true;
+	    currentApp.activate(context, watchType);
+	    toApp = true;
 	}	
-	return false;
+	
+	if (watchType == MetaWatchService.WatchType.DIGITAL) {
+	    Protocol.getInstance(context).enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
+	    Protocol.getInstance(context).enableButton(1, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
+	}
+	
+	return toApp;
     }
 
     public static void buttonPressed(Context context, int button) {
