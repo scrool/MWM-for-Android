@@ -39,7 +39,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchBuffers;
 import org.metawatch.manager.MetaWatchService.WatchType;
-import org.metawatch.manager.apps.ApplicationBase;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -502,18 +501,11 @@ public class Notification {
 	// disable notification mode
 	MetaWatchService.WatchModes.NOTIFICATION = false;
 
-	if (MetaWatchService.WatchModes.CALL == true)
+	if (MetaWatchService.WatchModes.CALL)
 	    return;
-	else if (MetaWatchService.WatchModes.APPLICATION == true) {
-	    ApplicationBase app = Application.getCurrentApp();
-	    if (app != null) {
-		Application.toApp(context, Application.getCurrentApp());
-	    } else {
-		Application.stopAppMode(context);
-		Idle.getInstance().toIdle(context);
-	    }
-	}
-	else if (MetaWatchService.WatchModes.IDLE == true)
+	else if (MetaWatchService.WatchModes.APPLICATION)
+	    Application.toApp(context);
+	else if (MetaWatchService.WatchModes.IDLE)
 	    Idle.getInstance().toIdle(context);
     }
 

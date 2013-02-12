@@ -230,7 +230,7 @@ public class Idle {
 	}
 
 	public void activate(final Context context, int watchType) {
-	    app.appState = ApplicationBase.ACTIVE_POPUP;
+	    app.appState = ApplicationBase.ACTIVE_IDLE;
 	    app.activate(context, watchType);
 	}
 

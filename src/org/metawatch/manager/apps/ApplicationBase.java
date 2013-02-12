@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.metawatch.manager.Application;
 import org.metawatch.manager.FontCache;
+import org.metawatch.manager.Idle;
 import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
@@ -149,9 +150,25 @@ public abstract class ApplicationBase {
 		Log.d(MetaWatchStatus.TAG, "InternalApp.open(): Ignored, app is not active.");
 	    return;
 	}
-	
-	appState = ACTIVE_POPUP;
-	Application.toApp(context, this);
+
+	int page = Idle.getInstance().getAppPage(getInfo().id);
+
+	// Open the existing Idle app page.
+	if (page != -1) {
+	    Idle.getInstance().toPage(context, page);
+	    Idle.getInstance().toIdle(context);
+
+	    // Open new app.
+	} else {
+	    appState = ACTIVE_POPUP;
+	    int watchType = MetaWatchService.watchType;
+	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
+		Application.startAppMode(context, this);
+		Application.toApp(context);
+	    } else if (watchType == MetaWatchService.WatchType.ANALOG) {
+		// FIXME
+	    }
+	}
     }
 
     public void setInactive() {

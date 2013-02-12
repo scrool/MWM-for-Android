@@ -38,14 +38,15 @@ public class Application {
     // FIXME This class has next to NO support for analog watches...
 
     public final static byte EXIT_APP = 100;
+    public final static byte TOGGLE_APP = 101;
 
     private static ApplicationBase currentApp = null;
 
-    public static ApplicationBase getCurrentApp() {
-	return currentApp;
+    public static void startAppMode(Context context) {
+	startAppMode(context, null);
     }
-    
-    private static void startAppMode(Context context, ApplicationBase internalApp) {
+
+    public static void startAppMode(Context context, ApplicationBase internalApp) {
 	if (currentApp != null) {
 	    stopAppMode(context);
 	}
@@ -76,36 +77,46 @@ public class Application {
 	    bitmap = Protocol.getInstance(context).createTextBitmap(context, "Starting application mode ...");
 	}
 
-	Protocol.getInstance(context).sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.APPLICATION);
-	Protocol.getInstance(context).configureIdleBufferSize(false);
-	Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
+	updateAppMode(context, bitmap);
     }
 
-    public static void toApp(final Context context, ApplicationBase internalApp) {
-	startAppMode(context, internalApp);
-	
+    public static void updateAppMode(Context context, Bitmap bitmap) {
+	MetaWatchService.WatchModes.APPLICATION = true;
+
+	if (MetaWatchService.WatchModes.APPLICATION == true) {
+
+	    // enable app mode if there is no parent mode currently active
+	    if (MetaWatchService.watchState < MetaWatchService.WatchStates.APPLICATION)
+		MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
+
+	    if (MetaWatchService.watchState == MetaWatchService.WatchStates.APPLICATION) {
+		Protocol.getInstance(context).sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.APPLICATION);
+		Protocol.getInstance(context).configureIdleBufferSize(false);
+		Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
+	    }
+	}
+    }
+
+    public static void toApp(final Context context) {
 	MetaWatchService.watchState = MetaWatchService.WatchStates.APPLICATION;
-	    
+
 	// Idle app pages uses the same button mode, so disable those buttons.
 	Idle.getInstance().deactivateButtons(context);
-	
+
 	int watchType = MetaWatchService.watchType;
-	
-	if (currentApp != null)
+	if (currentApp != null) {
 	    currentApp.activate(context, watchType);
-	updateAppMode(context);
-	
+	    updateAppMode(context);
+	}
 	if (watchType == MetaWatchService.WatchType.DIGITAL) {
 	    Protocol.getInstance(context).enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-	    // top
-	    // -
-	    // press
 	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
 	    Protocol.getInstance(context).enableButton(1, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
-	    // middle
-	    // -
-	    // press
 	}
+	
+	Protocol.getInstance(context).configureIdleBufferSize(false);
+	// update screen with cached buffer
+	Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
     }
 
     public static void buttonPressed(Context context, int button) {
@@ -116,6 +127,7 @@ public class Application {
 	    if (currentApp.buttonPressed(context, button) != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
 		updateAppMode(context);
 	    }
+
 	} else {
 	    // Broadcast button to external app
 	    Intent intent = new Intent("org.metawatch.manager.BUTTON_PRESS");

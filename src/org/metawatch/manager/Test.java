@@ -103,8 +103,10 @@ public class Test extends SherlockPreferenceActivity {
 
 	preferenceScreen.findPreference("application_start").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 	    public boolean onPreferenceClick(Preference arg0) {
-		if (MetaWatchService.watchType == WatchType.DIGITAL)
-		    Application.toApp(context, null);
+		if (MetaWatchService.watchType == WatchType.DIGITAL) {
+		    Application.startAppMode(context, null);
+		    Application.toApp(context);
+		}
 		return true;
 	    }
 	});
