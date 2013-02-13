@@ -128,15 +128,12 @@ public class MetaWatchService extends Service {
 	watchState = WatchStates.OFF;
 	watchType = WatchType.UNKNOWN;
 	watchGen = WatchGen.UNKNOWN;
-	Monitors.getInstance().getRTCTimestamp = 0;
 
 	if (bluetoothAdapter == null)
 	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
-
-	Monitors.getInstance().start(this/* , telephonyManager */);
 
 	// // Initialise theme
 	// BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
@@ -236,8 +233,6 @@ public class MetaWatchService extends Service {
 	if (prefChangeListener != null)
 	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
 
-	Monitors.getInstance().destroy(this);
-
 	mIsRunning = false;
     }
 
@@ -249,6 +244,9 @@ public class MetaWatchService extends Service {
 	    if (!Preferences.loaded)
 		loadPreferences(this);
 
+	    Monitors.getInstance().getRTCTimestamp = 0;
+	    Monitors.getInstance().start(this/* , telephonyManager */);
+	    
 	    MetaWatchService.fakeWatch = false;
 	    if (Preferences.watchMacAddress.equals("DIGITAL")) {
 		MetaWatchService.fakeWatch = true;
@@ -371,6 +369,7 @@ public class MetaWatchService extends Service {
 	AppManager.getInstance(this).destroy();
 	ActionManager.getInstance(this).destroy();
 	WidgetManager.getInstance(this).destroy();
+	Monitors.getInstance().destroy(this);
     }
 
     private void resetConnection() {
