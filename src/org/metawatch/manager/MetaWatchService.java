@@ -561,6 +561,7 @@ public class MetaWatchService extends Service {
 		    // Activate the last used idle page in this case
 		    Idle.getInstance().toPage(MetaWatchService.this, 0);
 		    Idle.getInstance().toIdle(MetaWatchService.this);
+		    Idle.getInstance().updateIdle(this, true);
 		}
 	    }
 
