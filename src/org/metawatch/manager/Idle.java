@@ -512,7 +512,7 @@ public class Idle {
 	MetaWatchService.watchState = MetaWatchService.WatchStates.IDLE;
 
 	if (idlePages == null)
-	    updateIdlePages(context, true);
+	    updateIdle(context, true);
 
 	idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
 

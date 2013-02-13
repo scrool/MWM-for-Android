@@ -79,6 +79,26 @@ public class Notification {
 	stopNotificationSender();
 	mInstance = null;
     }
+    
+    public synchronized void startNotificationSender(Context context) {
+	if (notificationSender == null) {
+	    notificationSender = new NotificationSender(context);
+	    mExecutor.execute(notificationSender);
+	}
+    }
+
+    public synchronized void stopNotificationSender() {
+	if (mFuture != null)
+	    mFuture.cancel(true);
+	if (notificationQueue != null)
+	    notificationQueue.clear();
+	if (notificationHistory != null)
+	    notificationHistory.clear();
+	if (mExecutor != null)
+	    mExecutor.shutdownNow();
+	mInstance = null;
+    }
+
 
     private void addToNotificationQueue(Context context, NotificationType notification, boolean forceShow) {
 	if (MetaWatchService.mIsRunning && MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTED && MetaWatchService.connectionState != MetaWatchService.ConnectionState.DISCONNECTING) {
@@ -322,23 +342,6 @@ public class Notification {
 	}
 
     };
-
-    public synchronized void startNotificationSender(Context context) {
-	notificationSender = new NotificationSender(context);
-	mExecutor.execute(notificationSender);
-    }
-
-    public synchronized void stopNotificationSender() {
-	if (mFuture != null)
-	    mFuture.cancel(true);
-	if (notificationQueue != null)
-	    notificationQueue.clear();
-	if (notificationHistory != null)
-	    notificationHistory.clear();
-	if (mExecutor != null)
-	    mExecutor.shutdownNow();
-	mInstance = null;
-    }
 
     private static final String NOTIFICATION_TIMEOUT_SETTING = "notificationTimeout";
     private static final String DEFAULT_NOTIFICATION_TIMEOUT_STRING = "5";

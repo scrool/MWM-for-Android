@@ -227,7 +227,7 @@ public class MetaWatchService extends Service {
 	if (weatherBatteryPollHandler != null)
 	    weatherBatteryPollHandler.removeCallbacks(pollWeatherBattery);
 
-	cleanup();
+	closeConnecton();
 	
 	Protocol.getInstance(this).destroy();
 	MediaControl.getInstance().destroy();
@@ -308,17 +308,10 @@ public class MetaWatchService extends Service {
 	    updateNotification();
 
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
-
-	    // In 10 seconds update the date and time format
-	    // Well after the entire connection process, and Idle update on the watch
-	    weatherBatteryPollHandler.postDelayed(new Runnable() {
-		@Override
-		public void run() {
-		    Protocol.getInstance(MetaWatchService.this).setTimeDateFormat(MetaWatchService.this);
-		}
-	    }, 15000);
-
+	    
 	    Notification.getInstance().startNotificationSender(this);
+
+	    Protocol.getInstance(MetaWatchService.this).setTimeDateFormat(MetaWatchService.this);
 
 	    // Unblock the message protocol queue, and the notification queue.
 	    mPauseQueue.open();
@@ -353,7 +346,7 @@ public class MetaWatchService extends Service {
 	return false;
     }
 
-    void cleanup() {
+    void closeConnecton() {
 	try {
 	    if (outputStream != null)
 		outputStream.close();
@@ -369,7 +362,6 @@ public class MetaWatchService extends Service {
 		bluetoothSocket.close();
 	} catch (IOException e) {
 	}
-	broadcastConnection(false);
     }
 
     private void resetConnection() {
@@ -380,7 +372,7 @@ public class MetaWatchService extends Service {
 	mPauseQueue.close();
 	//The receiving thread handles the connection process and by simply setting the connection state to connect, and cleaning up the streams, the connection process will occur
 	connectionState = ConnectionState.CONNECTING;
-	cleanup();
+	closeConnecton();
     }
 
     //A reasonable implementation.
@@ -617,6 +609,7 @@ public class MetaWatchService extends Service {
 
 		    if (watchState == WatchStates.OFF || watchState == WatchStates.IDLE) {
 			Idle.getInstance().toIdle(this);
+			Idle.getInstance().updateIdle(this, true);
 		    }
 
 		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
