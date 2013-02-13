@@ -508,12 +508,13 @@ public class Idle {
 	if (Notification.getInstance().isActive())
 	    return;
 
+	if (idlePages == null)
+	    updateIdlePages(context, true);
+
 	MetaWatchService.WatchModes.IDLE = true;
 	MetaWatchService.watchState = MetaWatchService.WatchStates.IDLE;
 
-	if (idlePages == null)
-	    updateIdle(context, true);
-
+	    
 	idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
 
 	if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {

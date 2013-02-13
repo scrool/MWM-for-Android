@@ -66,11 +66,10 @@ class CallStateListener extends PhoneStateListener {
 	    Call.startRinging(context, incomingNumber);
 	    break;
 	case TelephonyManager.CALL_STATE_IDLE:
-
-	    Call.phoneNumber = null;
-	    Call.endRinging(context);
-
 	    if (Call.inCall) {
+		Call.phoneNumber = null;
+		Call.endRinging(context);
+
 		if (Preferences.autoSpeakerphone) {
 		    MediaControl.getInstance().setSpeakerphone(context, Call.previousSpeakerphoneState);
 		}
@@ -82,15 +81,15 @@ class CallStateListener extends PhoneStateListener {
 		    as.setRingerMode(Call.previousRingerMode);
 		    Call.previousRingerMode = -1;
 		}
+		Call.inCall = false;
 	    }
-
-	    Call.inCall = false;
 	    break;
 	case TelephonyManager.CALL_STATE_OFFHOOK:
 	    if (Preferences.showActionsInCall) {
 		ActionManager.getInstance(context).displayCallActions(context);
 	    } else {
 		Call.endRinging(context);
+		Call.inCall = false;
 	    }
 	    break;
 	}

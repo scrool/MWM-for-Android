@@ -128,12 +128,16 @@ public class MetaWatchService extends Service {
 	watchState = WatchStates.OFF;
 	watchType = WatchType.UNKNOWN;
 	watchGen = WatchGen.UNKNOWN;
+	Monitors.getInstance().getRTCTimestamp = 0;
 
 	if (bluetoothAdapter == null)
 	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
+
+	Notification.getInstance().startNotificationSender(this);
+	Monitors.getInstance().start(this/* , telephonyManager */);
 
 	// // Initialise theme
 	// BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
@@ -227,20 +231,18 @@ public class MetaWatchService extends Service {
 	if (weatherBatteryPollHandler != null)
 	    weatherBatteryPollHandler.removeCallbacks(pollWeatherBattery);
 
-	closeConnecton();
-	
-	Protocol.getInstance(this).destroy();
-	MediaControl.getInstance().destroy();
+	cleanup();
 	Idle.getInstance().destroy();
+
+	stopForeground(true);
+	if (prefChangeListener != null)
+	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
+
+	Monitors.getInstance().destroy(this);
 	BitmapCache.getInstance().destroy();
 	AppManager.getInstance(this).destroy();
 	ActionManager.getInstance(this).destroy();
 	WidgetManager.getInstance(this).destroy();
-	Monitors.getInstance().destroy(this);
-	if (prefChangeListener != null)
-	    PreferenceManager.getDefaultSharedPreferences(MetaWatchService.this).unregisterOnSharedPreferenceChangeListener(prefChangeListener);
-
-	stopForeground(true);
 	mIsRunning = false;
     }
 
@@ -252,9 +254,6 @@ public class MetaWatchService extends Service {
 	    if (!Preferences.loaded)
 		loadPreferences(this);
 
-	    Monitors.getInstance().getRTCTimestamp = 0;
-	    Monitors.getInstance().start(this/* , telephonyManager */);
-	    
 	    MetaWatchService.fakeWatch = false;
 	    if (Preferences.watchMacAddress.equals("DIGITAL")) {
 		MetaWatchService.fakeWatch = true;
@@ -308,10 +307,6 @@ public class MetaWatchService extends Service {
 	    updateNotification();
 
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
-	    
-	    Notification.getInstance().startNotificationSender(this);
-
-	    Protocol.getInstance(MetaWatchService.this).setTimeDateFormat(MetaWatchService.this);
 
 	    // Unblock the message protocol queue, and the notification queue.
 	    mPauseQueue.open();
@@ -346,7 +341,7 @@ public class MetaWatchService extends Service {
 	return false;
     }
 
-    void closeConnecton() {
+    void cleanup() {
 	try {
 	    if (outputStream != null)
 		outputStream.close();
@@ -362,6 +357,9 @@ public class MetaWatchService extends Service {
 		bluetoothSocket.close();
 	} catch (IOException e) {
 	}
+	broadcastConnection(false);
+	Protocol.getInstance(this).destroy();
+	MediaControl.getInstance().destroy();
     }
 
     private void resetConnection() {
@@ -372,7 +370,7 @@ public class MetaWatchService extends Service {
 	mPauseQueue.close();
 	//The receiving thread handles the connection process and by simply setting the connection state to connect, and cleaning up the streams, the connection process will occur
 	connectionState = ConnectionState.CONNECTING;
-	closeConnecton();
+	cleanup();
     }
 
     //A reasonable implementation.
@@ -553,7 +551,6 @@ public class MetaWatchService extends Service {
 		    // Activate the last used idle page in this case
 		    Idle.getInstance().toPage(MetaWatchService.this, 0);
 		    Idle.getInstance().toIdle(MetaWatchService.this);
-		    Idle.getInstance().updateIdle(this, true);
 		}
 	    }
 
@@ -618,6 +615,15 @@ public class MetaWatchService extends Service {
 			Notification.getInstance().addBitmapNotification(this, Utils.getBitmap(this, "splash.png"), new VibratePattern(false, 0, 0, 0), 10000, "Splash");
 		    }
 
+		    // In 10 seconds update the date and time format
+		    // Well after the entire connection process, and Idle update on the watch
+		    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+			@Override
+			public void run() {
+			    Protocol.getInstance(MetaWatchService.this).setTimeDateFormat(MetaWatchService.this);
+			}
+		    }, 10000);
+		    
 		}
 
 		Protocol.getInstance(MetaWatchService.this).getRealTimeClock();
