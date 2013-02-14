@@ -285,9 +285,8 @@ public class Settings extends SherlockPreferenceActivity {
     void showAbout() {
 
 	WebView webView = new WebView(this);
-	String html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>About</title></head><body><center>" + "<img src=\"icon.png\" >" + "<p>Version " + Utils.getVersion(this) + ".</p>" + "<b>MetaWatch Mgr - Noah Edition</b><br>" + "Noah Seidman<br>Graphics - Nathanel Titane<br><br>" + "<b>MetaWatch Community Team</b><br>" + "Joakim Andersson<br>Chris Boyle<br>Garth Bushell<br>Prash D<br>Matthias Gruenewald<br>" + "Richard Munn<br>Diogo Neves<br>Craig Oliver<br>Didi Pfeifle<br>Thierry Schork<br>" + "Kyle Schroeder<br>Chris Sewell<br>Geoff Willingham<br>Dobie Wollert<p>" + "<b>Translation Team</b><br>" + "Miguel Branco<br>Didi Pfeifle<br>Geurt Pieter Maassen van den Brink<br>Thierry Schork<br>" + "Kamosan Software<br>Erisi Roberto<p>" + "<p>&copy; Copyright 2011-2012 Meta Watch Ltd.</p>" + "</center></body></html>";
+	String html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /><title>About</title></head><body><center>" + "<img src=\"icon.png\" >" + "<p>Version " + Utils.getVersion(this) + ".</p>" + "<b>MetaWatch Mgr - Noah Edition</b><br>" + "Noah Seidman<br>Graphics - Nathanel Titane<br><br>" + "<b>MetaWatch Community Team</b><br>" + "Joakim Andersson<br>Chris Boyle<br>Garth Bushell<br>Prash D<br>Matthias Gruenewald<br>" + "Richard Munn<br>Diogo Neves<br>Craig Oliver<br>Didi Pfeifle<br>Thierry Schork<br>" + "Kyle Schroeder<br>Chris Sewell<br>Geoff Willingham<br>Dobie Wollert<p>" + "<b>Translation Team</b><br>" + "Miguel Branco<br>Didi Pfeifle<br>Geurt Pieter Maassen van den Brink<br>Thierry Schork<br>" + "Kamosan Software<br>Erisi Roberto<p>" + "<p>&copy; Copyright 2011-2013 Meta Watch Ltd.</p>" + "</center></body></html>";
 	webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", null);
-
 	new AlertDialog.Builder(this).setView(webView).setCancelable(true).setPositiveButton("OK", new DialogInterface.OnClickListener() {
 	    // @Override
 	    public void onClick(DialogInterface dialog, int which) {
