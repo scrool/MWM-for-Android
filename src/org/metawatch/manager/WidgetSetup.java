@@ -324,12 +324,11 @@ public class WidgetSetup extends SherlockFragment {
 	    Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() start");
 	Idle.getInstance().updateIdlePages(mActivity, true);
 	int pages = Idle.getInstance().numPages();
-	if (mCurrentNumberOfPages > pages)
+	if (mCurrentNumberOfPages != pages)
 	    mIdlePreviews.removeAllViews();
 	mCurrentNumberOfPages = pages;
 	for (int i = 0; i < pages; ++i) {
 	    Bitmap bmp = Idle.getInstance().createIdle(mActivity, true, i);
-	    ;
 	    if (bmp != null) {
 		int backCol = Color.LTGRAY;
 		int viewId = (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) ? R.layout.idle_screen_preview_oled : R.layout.idle_screen_preview;
