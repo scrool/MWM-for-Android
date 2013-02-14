@@ -31,6 +31,7 @@ package org.metawatch.manager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
@@ -68,7 +69,7 @@ public class Idle {
 
     Bitmap oledIdle = null;
     
-    private ArrayList<IdlePage> idlePages = null;
+    Vector<IdlePage> idlePages = null;
     private Map<String, WidgetData> widgetData = null;
     
     private static Idle mInstance = null;
@@ -302,7 +303,7 @@ public class Idle {
 	    AppPage aPage = new AppPage(app);
 
 	    if (idlePages == null)
-		idlePages = new ArrayList<IdlePage>();
+		idlePages = new Vector<IdlePage>();
 	    idlePages.add(aPage);
 	    page = idlePages.indexOf(aPage);
 
@@ -333,12 +334,12 @@ public class Idle {
 	idlePages = null;
     }
 
-    void updateIdlePages(Context context, boolean refresh) {
+    synchronized void updateIdlePages(Context context, boolean refresh) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 	try {
 
-	    ArrayList<IdlePage> prevList = idlePages;
+	    Vector<IdlePage> prevList = idlePages;
 
 	    List<WidgetRow> rows = WidgetManager.getInstance(context).getDesiredWidgetsFromPrefs(context);
 
@@ -364,7 +365,7 @@ public class Idle {
 		maxScreenSize = 32;
 
 	    // Bucket rows into pages
-	    ArrayList<IdlePage> screens = new ArrayList<IdlePage>();
+	    Vector<IdlePage> screens = new Vector<IdlePage>();
 
 	    int screenSize = 0;
 	    if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {

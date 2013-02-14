@@ -243,6 +243,9 @@ public class MetaWatchService extends Service {
 	AppManager.getInstance(this).destroy();
 	ActionManager.getInstance(this).destroy();
 	WidgetManager.getInstance(this).destroy();
+	
+	Protocol.getInstance(this).destroy();
+	MediaControl.getInstance().destroy();
 	mIsRunning = false;
     }
 
@@ -308,6 +311,15 @@ public class MetaWatchService extends Service {
 
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
 
+	    if (WatchModes.APPLICATION) {
+		Application.stopAppMode(this);
+		Idle.getInstance().toIdle(this);
+		Idle.getInstance().updateIdle(this, true);
+	    } else if (WatchModes.IDLE) {
+		Idle.getInstance().toIdle(this);
+		Idle.getInstance().updateIdle(this, true);
+	    }
+	    
 	    // Unblock the message protocol queue, and the notification queue.
 	    mPauseQueue.open();
 
@@ -358,8 +370,6 @@ public class MetaWatchService extends Service {
 	} catch (IOException e) {
 	}
 	broadcastConnection(false);
-	Protocol.getInstance(this).destroy();
-	MediaControl.getInstance().destroy();
     }
 
     private void resetConnection() {
@@ -741,7 +751,7 @@ public class MetaWatchService extends Service {
 				Application.stopAppMode(this);
 				Idle.getInstance().toIdle(this);
 				Idle.getInstance().updateIdle(this, true);
-			    } else {
+			    } else if (WatchModes.IDLE) {
 				Idle.getInstance().nextPage(this);
 				Idle.getInstance().updateIdle(this, true);
 			    }
@@ -856,6 +866,7 @@ public class MetaWatchService extends Service {
 		if (watchState == WatchStates.IDLE) {
 		    Protocol.getInstance(MetaWatchService.this).configureIdleBufferSize(false);
 		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(WatchBuffers.NOTIFICATION);
+		    Protocol.getInstance(MetaWatchService.this).configureIdleBufferSize(false);
 		    Protocol.getInstance(MetaWatchService.this).updateLcdDisplay(WatchBuffers.IDLE);
 		}
 	    }

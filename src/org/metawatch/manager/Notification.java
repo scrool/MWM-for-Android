@@ -139,6 +139,9 @@ public class Notification {
 		    notification = notificationQueue.take();
 		    currentNotification = notification;
 		}
+		// If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
+		MetaWatchService.mPauseQueue.block();
+		
 		MetaWatchService.watchState = MetaWatchService.WatchStates.NOTIFICATION;
 		MetaWatchService.WatchModes.NOTIFICATION = true;
 
@@ -174,6 +177,8 @@ public class Notification {
 			modeChanged.wait(60000);
 		    }
 		    
+		    
+		    Protocol.getInstance(context).configureIdleBufferSize(false);
 		    /*
 		     * Ensure we're in NOTIFICATION mode (massive kludge, but it stops the watch rebounding straight out of a notification immediately
 		     */
@@ -337,8 +342,6 @@ public class Notification {
 		e.printStackTrace();
 		//Shutting down
 	    }
-	    // If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
-	    MetaWatchService.mPauseQueue.block();
 	}
 
     };
