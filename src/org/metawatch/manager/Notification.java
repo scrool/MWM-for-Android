@@ -38,6 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchBuffers;
+import org.metawatch.manager.MetaWatchService.WatchModes;
 import org.metawatch.manager.MetaWatchService.WatchType;
 
 import android.content.Context;
@@ -142,8 +143,7 @@ public class Notification {
 		// If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
 		MetaWatchService.mPauseQueue.block();
 		
-		MetaWatchService.watchState = MetaWatchService.WatchStates.NOTIFICATION;
-		MetaWatchService.WatchModes.NOTIFICATION = true;
+		MetaWatchService.watchMode.push(WatchModes.NOTIFICATION);
 
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "Notification:" + notification.description + " @ " + Utils.ticksToText(context, notification.timestamp));
@@ -323,11 +323,7 @@ public class Notification {
 
 		// We're done with this notification.
 		currentNotification = null;
-
-		if (MetaWatchService.WatchModes.CALL == false) {
-		    exitNotification(context);
-		}
-
+		exitNotification(context);
 	    } catch (InterruptedException ie) {
 		/* If we've been interrupted, exit gracefully. */
 		if (Preferences.logging)
@@ -505,18 +501,25 @@ public class Notification {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Notification.exitNotification()");
 	// disable notification mode
-	MetaWatchService.WatchModes.NOTIFICATION = false;
-
-	if (MetaWatchService.WatchModes.CALL)
-	    return;
-	else if (MetaWatchService.WatchModes.APPLICATION) {
+	MetaWatchService.watchMode.pop();
+	WatchModes mode = MetaWatchService.watchMode.peek();
+	switch(mode) {
+	case APPLICATION:
 	    if (!Application.toApp(context)) {
 		Application.stopAppMode(context);
 		Idle.getInstance().toIdle(context);
 	    }
-	}
-	else if (MetaWatchService.WatchModes.IDLE)
+	    break;
+	case CALL:
+	    break;
+	case IDLE:
 	    Idle.getInstance().toIdle(context);
+	    break;
+	case NOTIFICATION:
+	    break;
+	default:
+	    break;
+	}
     }
 
     public void replay(Context context) {

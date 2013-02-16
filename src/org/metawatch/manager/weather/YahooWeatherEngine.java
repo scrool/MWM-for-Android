@@ -15,7 +15,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.metawatch.manager.Application;
 import org.metawatch.manager.Idle;
 import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
@@ -145,9 +144,7 @@ public class YahooWeatherEngine extends AbstractWeatherEngine {
 
 		weatherData.error = false;
 		weatherData.errorString = "";
-		if (MetaWatchService.WatchModes.APPLICATION) {
-		    Application.updateAppMode(context);
-		} else {
+		if (MetaWatchService.watchMode.peek() == MetaWatchService.WatchModes.IDLE) {
 		    Idle.getInstance().updateIdle(context, true);
 		}
 	    }

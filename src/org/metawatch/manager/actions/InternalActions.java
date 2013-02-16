@@ -213,7 +213,7 @@ public class InternalActions {
 	    public void onReceive(final Context context, Intent intent) {
 		int extraWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 		if (extraWifiState == mLookingFor) {
-		    if (MetaWatchService.watchState == MetaWatchService.WatchStates.APPLICATION) {
+		    if (MetaWatchService.watchMode.peek() == MetaWatchService.WatchModes.APPLICATION) {
 			Application.updateAppMode(context);
 		    } else {
 			Idle.getInstance().updateIdle(context, true);

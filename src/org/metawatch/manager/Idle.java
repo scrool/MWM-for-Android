@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchService.WatchModes;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.actions.Action;
 import org.metawatch.manager.actions.ActionManager;
@@ -463,7 +464,7 @@ public class Idle {
     }
 
     private void sendLcdIdle(final Context context, final boolean refresh) {
-	if (MetaWatchService.watchState != MetaWatchService.WatchStates.IDLE) {
+	if (MetaWatchService.watchMode.peek() != MetaWatchService.WatchModes.IDLE) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
 	    return;
@@ -512,10 +513,9 @@ public class Idle {
 	if (idlePages == null)
 	    updateIdlePages(context, true);
 
-	MetaWatchService.WatchModes.IDLE = true;
-	MetaWatchService.watchState = MetaWatchService.WatchStates.IDLE;
-
-	    
+	MetaWatchService.watchMode.clear();
+	MetaWatchService.watchMode.push(WatchModes.IDLE);
+	
 	idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
 
 	if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
@@ -563,7 +563,7 @@ public class Idle {
 	    return;
 	}
 
-	if (MetaWatchService.watchState == MetaWatchService.WatchStates.IDLE) {
+	if (MetaWatchService.watchMode.peek() == MetaWatchService.WatchModes.IDLE) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
 	    long timestamp = System.currentTimeMillis();

@@ -29,6 +29,7 @@
 package org.metawatch.manager;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchService.WatchModes;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Notification.VibratePattern;
 
@@ -129,9 +130,7 @@ public class Call {
     }
 
     static void toCall(Context context) {
-	MetaWatchService.watchState = MetaWatchService.WatchStates.CALL;
-	MetaWatchService.WatchModes.CALL = true;
-
+	MetaWatchService.watchMode.push(WatchModes.CALL);
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Protocol.getInstance(context).enableButton(0, 0, CALL_ANSWER, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // top
@@ -140,7 +139,6 @@ public class Call {
 	    Protocol.getInstance(context).enableButton(2, 0, CALL_MENU, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // bottom
 	}
-
     }
 
     static void exitCall(Context context) {
@@ -153,19 +151,28 @@ public class Call {
 	    Protocol.getInstance(context).disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // bottom
 	}
-
-	MetaWatchService.WatchModes.CALL = false;
-
-	if (MetaWatchService.WatchModes.NOTIFICATION)
-	    Notification.getInstance().replay(context);
-	else if (MetaWatchService.WatchModes.APPLICATION) {
+	
+	MetaWatchService.watchMode.pop();
+	WatchModes mode = MetaWatchService.watchMode.peek();
+	switch(mode) {
+	case APPLICATION:
 	    if (!Application.toApp(context)) {
 		Application.stopAppMode(context);
 		Idle.getInstance().toIdle(context);
 	    }
-	}
-	else if (MetaWatchService.WatchModes.IDLE)
+	    break;
+	case CALL:
+	    break;
+	case IDLE:
 	    Idle.getInstance().toIdle(context);
+	    break;
+	case NOTIFICATION:
+	    Notification.getInstance().replay(context);
+	    break;
+	default:
+	    break;
+	
+	}
     }
 
 }
