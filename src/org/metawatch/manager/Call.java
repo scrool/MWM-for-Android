@@ -156,10 +156,10 @@ public class Call {
 	WatchModes mode = MetaWatchService.getWatchMode();
 	switch(mode) {
 	case APPLICATION:
-	    if (!Application.toApp(context)) {
+	    if (!Application.toCurrentApp(context)) {
 		Application.stopAppMode(context);
-		Idle.getInstance().toIdle(context);
 	    }
+	    break;
 	case IDLE:
 	case NOTIFICATION:
 	case CALL:

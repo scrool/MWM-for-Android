@@ -512,7 +512,6 @@ public class Idle {
 
 	if (idlePages == null)
 	    updateIdlePages(context, true);
-
 	
 	MetaWatchService.clearWatchMode();
 	MetaWatchService.setWatchMode(WatchModes.IDLE);

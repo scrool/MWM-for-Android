@@ -143,7 +143,6 @@ public class Notification {
 		// If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
 		MetaWatchService.mPauseQueue.block();
 		
-		
 		MetaWatchService.setWatchMode(WatchModes.NOTIFICATION);
 
 		if (Preferences.logging)
@@ -505,10 +504,10 @@ public class Notification {
 	WatchModes mode = MetaWatchService.getWatchMode();
 	switch(mode) {
 	case APPLICATION:
-	    if (!Application.toApp(context)) {
+	    if (!Application.toCurrentApp(context)) {
 		Application.stopAppMode(context);
-		Idle.getInstance().toIdle(context);
 	    }
+	    break;
 	case IDLE:
 	case NOTIFICATION:
 	case CALL:

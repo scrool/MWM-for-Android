@@ -39,12 +39,11 @@ public class Application {
     public final static byte EXIT_APP = 100;
     private static ApplicationBase currentApp = null;
     public static void startAppMode(Context context, ApplicationBase internalApp) {
-	if (currentApp != null) {
-	    stopAppMode(context);
-	    Idle.getInstance().toIdle(context);
+	if (MetaWatchService.getWatchMode() != MetaWatchService.WatchModes.APPLICATION) {
+	    MetaWatchService.setWatchMode(WatchModes.APPLICATION);
+	    currentApp = internalApp;
+	    toCurrentApp(context);
 	}
-	MetaWatchService.setWatchMode(WatchModes.APPLICATION);
-	currentApp = internalApp;
     }
 
     public static void stopAppMode(Context context) {
@@ -54,6 +53,7 @@ public class Application {
 	    currentApp.setInactive();
 	}
 	currentApp = null;
+	Idle.getInstance().toIdle(context);
     }
 
     public static void refreshAppScreen(Context context) {
@@ -70,11 +70,10 @@ public class Application {
 	}
     }
 
-    public static boolean toApp(final Context context) {
-	if (currentApp != null && MetaWatchService.getWatchMode() == MetaWatchService.WatchModes.APPLICATION) {
+    public static boolean toCurrentApp(final Context context) {
+	if (currentApp != null && MetaWatchService.getWatchMode() == WatchModes.APPLICATION) {
 	    refreshAppScreen(context);
-	    Idle.getInstance().deactivateButtons(context);
-
+//	    Idle.getInstance().deactivateButtons(context);
 	    int watchType = MetaWatchService.watchType;
 	    currentApp.activate(context, watchType);
 	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
@@ -90,7 +89,6 @@ public class Application {
     public static void buttonPressed(Context context, int button) {
 	if (button == EXIT_APP) {
 	    stopAppMode(context);
-	    Idle.getInstance().toIdle(context);
 	} else if (currentApp != null) {
 	    if (currentApp.buttonPressed(context, button) != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
 		refreshAppScreen(context);

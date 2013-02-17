@@ -121,7 +121,8 @@ public class MetaWatchService extends Service {
     }
     
     public static void previousWatchMode() {
-	watchMode.pop();
+	if (watchMode.size() != 0)
+	    watchMode.pop();
 	if (watchMode.size() == 0)
 	    watchMode.push(WatchModes.IDLE);
     }
@@ -377,7 +378,6 @@ public class MetaWatchService extends Service {
 	switch(watchMode.peek()) {
 	case APPLICATION:
 	    Application.stopAppMode(this);
-	    Idle.getInstance().toIdle(this);
 	    Idle.getInstance().updateIdle(this, true);
 	    break;
 	case CALL:
