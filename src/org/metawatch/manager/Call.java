@@ -130,7 +130,7 @@ public class Call {
     }
 
     static void toCall(Context context) {
-	MetaWatchService.watchMode.push(WatchModes.CALL);
+	MetaWatchService.setWatchMode(WatchModes.CALL);
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Protocol.getInstance(context).enableButton(0, 0, CALL_ANSWER, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // top
@@ -152,27 +152,20 @@ public class Call {
 	    // bottom
 	}
 	
-	MetaWatchService.watchMode.pop();
-	WatchModes mode = MetaWatchService.watchMode.peek();
+	MetaWatchService.previousWatchMode();
+	WatchModes mode = MetaWatchService.getWatchMode();
 	switch(mode) {
 	case APPLICATION:
 	    if (!Application.toApp(context)) {
 		Application.stopAppMode(context);
 		Idle.getInstance().toIdle(context);
 	    }
-	    break;
-	case CALL:
-	    break;
 	case IDLE:
+	case NOTIFICATION:
+	case CALL:
+	default:
 	    Idle.getInstance().toIdle(context);
 	    break;
-	case NOTIFICATION:
-	    Notification.getInstance().replay(context);
-	    break;
-	default:
-	    break;
-	
 	}
     }
-
 }

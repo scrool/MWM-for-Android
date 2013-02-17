@@ -464,7 +464,7 @@ public class Idle {
     }
 
     private void sendLcdIdle(final Context context, final boolean refresh) {
-	if (MetaWatchService.watchMode.peek() != MetaWatchService.WatchModes.IDLE) {
+	if (MetaWatchService.getWatchMode() != MetaWatchService.WatchModes.IDLE) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Ignoring sendLcdIdle as not in idle");
 	    return;
@@ -513,8 +513,9 @@ public class Idle {
 	if (idlePages == null)
 	    updateIdlePages(context, true);
 
-	MetaWatchService.watchMode.clear();
-	MetaWatchService.watchMode.push(WatchModes.IDLE);
+	
+	MetaWatchService.clearWatchMode();
+	MetaWatchService.setWatchMode(WatchModes.IDLE);
 	
 	idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
 
@@ -563,7 +564,7 @@ public class Idle {
 	    return;
 	}
 
-	if (MetaWatchService.watchMode.peek() == MetaWatchService.WatchModes.IDLE) {
+	if (MetaWatchService.getWatchMode() == MetaWatchService.WatchModes.IDLE) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
 	    long timestamp = System.currentTimeMillis();

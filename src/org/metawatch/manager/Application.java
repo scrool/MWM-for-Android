@@ -43,12 +43,12 @@ public class Application {
 	    stopAppMode(context);
 	    Idle.getInstance().toIdle(context);
 	}
-	MetaWatchService.watchMode.push(WatchModes.APPLICATION);
+	MetaWatchService.setWatchMode(WatchModes.APPLICATION);
 	currentApp = internalApp;
     }
 
     public static void stopAppMode(Context context) {
-	MetaWatchService.watchMode.pop();
+	MetaWatchService.previousWatchMode();
 	if (currentApp != null) {
 	    currentApp.deactivate(context, MetaWatchService.watchType);
 	    currentApp.setInactive();
@@ -56,20 +56,14 @@ public class Application {
 	currentApp = null;
     }
 
-    public static void updateAppMode(Context context) {
-	Bitmap bitmap;
-	if (currentApp != null) {
-	    bitmap = currentApp.update(context, false, MetaWatchService.watchType);
-	} else {
-	    bitmap = Protocol.getInstance(context).createTextBitmap(context, "Starting application mode ...");
-	}
-
-	updateAppMode(context, bitmap);
-    }
-
-    public static void updateAppMode(Context context, Bitmap bitmap) {
-	WatchModes currentMode = MetaWatchService.watchMode.peek();
-	if (currentMode == WatchModes.APPLICATION) {
+    public static void refreshAppScreen(Context context) {
+	if (MetaWatchService.getWatchMode() == WatchModes.APPLICATION) {
+	    Bitmap bitmap;
+	    if (currentApp != null) {
+		bitmap = currentApp.update(context, false, MetaWatchService.watchType);
+	    } else {
+		bitmap = Protocol.getInstance(context).createTextBitmap(context, "Starting application mode ...");
+	    }
 	    Protocol.getInstance(context).sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.APPLICATION);
 	    Protocol.getInstance(context).configureIdleBufferSize(false);
 	    Protocol.getInstance(context).updateLcdDisplay(MetaWatchService.WatchBuffers.APPLICATION);
@@ -77,10 +71,11 @@ public class Application {
     }
 
     public static boolean toApp(final Context context) {
-	Idle.getInstance().deactivateButtons(context);
-	int watchType = MetaWatchService.watchType;
-	if (currentApp != null && MetaWatchService.watchMode.peek() == MetaWatchService.WatchModes.APPLICATION) {
-	    updateAppMode(context);
+	if (currentApp != null && MetaWatchService.getWatchMode() == MetaWatchService.WatchModes.APPLICATION) {
+	    refreshAppScreen(context);
+	    Idle.getInstance().deactivateButtons(context);
+
+	    int watchType = MetaWatchService.watchType;
 	    currentApp.activate(context, watchType);
 	    if (watchType == MetaWatchService.WatchType.DIGITAL) {
 		Protocol.getInstance(context).enableButton(0, 1, EXIT_APP, MetaWatchService.WatchBuffers.APPLICATION); // right
@@ -98,7 +93,7 @@ public class Application {
 	    Idle.getInstance().toIdle(context);
 	} else if (currentApp != null) {
 	    if (currentApp.buttonPressed(context, button) != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
-		updateAppMode(context);
+		refreshAppScreen(context);
 	    }
 	} else {
 	    // Broadcast button to external app

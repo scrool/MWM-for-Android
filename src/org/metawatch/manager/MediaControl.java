@@ -218,7 +218,7 @@ public class MediaControl {
 
 	int mediaPlayerState = AppManager.getInstance(context).getAppState(MediaPlayerApp.APP_ID);
 	if (mediaPlayerState == ApplicationBase.ACTIVE_POPUP)
-	    Application.updateAppMode(context);
+	    Application.refreshAppScreen(context);
 
 	if (!MetaWatchService.Preferences.notifyMusic)
 	    return;

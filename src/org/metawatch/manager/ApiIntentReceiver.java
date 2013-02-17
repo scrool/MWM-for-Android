@@ -71,7 +71,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		    if (app.appState == ApplicationBase.ACTIVE_IDLE)
 			Idle.getInstance().updateIdle(context, true);
 		    else if (app.appState == ApplicationBase.ACTIVE_POPUP)
-			Application.updateAppMode(context);
+			Application.refreshAppScreen(context);
 		}
 	    }
 	    return;

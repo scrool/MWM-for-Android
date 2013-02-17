@@ -143,7 +143,8 @@ public class Notification {
 		// If the service has disconnected this will block until a connection is reestablished or the service is shutdown.
 		MetaWatchService.mPauseQueue.block();
 		
-		MetaWatchService.watchMode.push(WatchModes.NOTIFICATION);
+		
+		MetaWatchService.setWatchMode(WatchModes.NOTIFICATION);
 
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "Notification:" + notification.description + " @ " + Utils.ticksToText(context, notification.timestamp));
@@ -500,24 +501,19 @@ public class Notification {
     private void exitNotification(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Notification.exitNotification()");
-	// disable notification mode
-	MetaWatchService.watchMode.pop();
-	WatchModes mode = MetaWatchService.watchMode.peek();
+	MetaWatchService.previousWatchMode();
+	WatchModes mode = MetaWatchService.getWatchMode();
 	switch(mode) {
 	case APPLICATION:
 	    if (!Application.toApp(context)) {
 		Application.stopAppMode(context);
 		Idle.getInstance().toIdle(context);
 	    }
-	    break;
-	case CALL:
-	    break;
 	case IDLE:
-	    Idle.getInstance().toIdle(context);
-	    break;
 	case NOTIFICATION:
-	    break;
+	case CALL:
 	default:
+	    Idle.getInstance().toIdle(context);
 	    break;
 	}
     }

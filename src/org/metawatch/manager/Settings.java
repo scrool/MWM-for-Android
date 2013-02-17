@@ -70,6 +70,9 @@ public class Settings extends SherlockPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	
+	if (getIntent() != null && getIntent().getBooleanExtra("shutdown", false) && (getIntent().getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0)
+	    finish();
 
 	addPreferencesFromResource(R.layout.settings);
 
@@ -296,11 +299,11 @@ public class Settings extends SherlockPreferenceActivity {
     }
 
     void exit() {
+	MetaWatchService.connectionState = MetaWatchService.ConnectionState.DISCONNECTING;
 	stopService(new Intent(this, MetaWatchService.class));
-	MetaWatchService.setPreviousConnectionState(this, false);
-	Intent intent = new Intent(this, MainActivity.class);
+	Intent intent = new Intent(this, Settings.class);
 	intent.putExtra("shutdown", true);
-	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
 	startActivity(intent);
     }
 

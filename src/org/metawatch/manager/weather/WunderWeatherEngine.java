@@ -183,7 +183,7 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 		weatherData.error = false;
 		weatherData.errorString = "";
 
-		if (MetaWatchService.watchMode.peek() == MetaWatchService.WatchModes.IDLE) {
+		if (MetaWatchService.getWatchMode() == MetaWatchService.WatchModes.IDLE) {
 		    Idle.getInstance().updateIdle(context, true);
 		}
 	    }

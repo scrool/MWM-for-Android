@@ -23,9 +23,6 @@ public class MainActivity extends SherlockFragmentActivity {
 	super.onCreate(bundle);
 	requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 	setContentView(R.layout.main_activity);
-	Intent intent = getIntent();
-	if (intent != null && intent.getBooleanExtra("shutdown", false) && (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0)
-	    finish();
     }
 
     private ObjectAnimator downFromTop(final View view) {
