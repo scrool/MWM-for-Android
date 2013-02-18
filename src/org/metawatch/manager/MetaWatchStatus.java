@@ -35,7 +35,6 @@ import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.bluetooth.BluetoothAdapter;
@@ -45,7 +44,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Messenger;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +52,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -62,14 +61,13 @@ import com.actionbarsherlock.internal.nineoldandroids.animation.AnimatorSet;
 import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.bugsense.trace.BugSenseHandler;
 
-public class MetaWatchStatus extends SherlockFragment implements OnClickListener {
+public class MetaWatchStatus extends SherlockFragment implements OnClickListener, Runnable {
 
     public static final String TAG = "MetaWatchStatus";
     public Button mStatistics = null;
     public Button mStartButton = null;
     public Button mShutdownButton = null;
     private SherlockFragmentActivity mContext = null;
-    public Messenger mService = null;
     public long mStartupTime = 0;
     private TextView mStatisticsText = null;
     private TextView mAccessibilityText = null;
@@ -77,7 +75,7 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     private ActionBar mActionBar = null;
     private View mMainView = null;
     public static boolean mShutdownRequested = false;
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    private static Handler mHandler = new Handler(Looper.getMainLooper());
     public static final String DEVICE_SELECTED_AUTO_CONNECT = "DEVICE_SELECTED_AUTO_CONNECT";
     public static final int BLUETOOTH_ENABLE_REQUEST = 34;
 
@@ -183,8 +181,8 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     @Override
     public void onResume() {
 	super.onResume();
-	mHandler.post(mConnectionUpdater);
-	if (mContext.getIntent().getBooleanExtra(DEVICE_SELECTED_AUTO_CONNECT, false)) {
+	mHandler.post(this);
+	if (mContext.getIntent() != null && mContext.getIntent().getBooleanExtra(DEVICE_SELECTED_AUTO_CONNECT, false)) {
 	    mStartButton.performClick();
 	    //Clear auto connect flag;
 	    Intent intent = mContext.getIntent();
@@ -196,17 +194,9 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     @Override
     public void onPause() {
 	super.onPause();
-	mHandler.removeCallbacks(mConnectionUpdater);
+	mHandler.removeCallbacks(this);
     }
     
-    private Runnable mConnectionUpdater = new Runnable() {
- 	@Override
- 	public void run() {
- 	   displayStatus();
- 	    mHandler.postDelayed(mConnectionUpdater, 1000);
- 	}
-     };
-
     private void displayStatus() {
 	getStatistics();
 	if (mActionBar == null)
@@ -304,12 +294,13 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     }
 
     void startService() {
-	if (BluetoothAdapter.getDefaultAdapter() == null || !BluetoothAdapter.getDefaultAdapter().isEnabled()) {
-	    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	    startActivityForResult(intent, BLUETOOTH_ENABLE_REQUEST);
-	} else {
+	try {
+	    BluetoothAdapter.getDefaultAdapter().enable();
 	    mShutdownRequested = false;
 	    mContext.startService(new Intent(mContext, MetaWatchService.class));
+	} catch (Exception e) {
+	    Toast.makeText(mContext, getString(R.string.error_bluetooth_not_supported), Toast.LENGTH_SHORT).show();
+	    e.printStackTrace();
 	}
     }
 
@@ -325,14 +316,8 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     }
     
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-	switch(requestCode) {
-	case BLUETOOTH_ENABLE_REQUEST:
-	    if (resultCode == Activity.RESULT_OK)
-		startService();
-	    break;
-	default:
-	    super.onActivityResult(requestCode, resultCode, data);
-	}
+    public void run() {
+	displayStatus();
+	mHandler.postDelayed(this, 2000);
     }
 }

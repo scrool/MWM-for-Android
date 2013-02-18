@@ -166,9 +166,6 @@ public class MetaWatchService extends Service {
 	Notification.getInstance().startNotificationSender(this);
 	Monitors.getInstance().start(this/* , telephonyManager */);
 
-	// // Initialise theme
-	 BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
-
 	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
 	watchReceiverThread.setPriority(7);
 	watchReceiverThread.start();
@@ -1018,7 +1015,7 @@ public class MetaWatchService extends Service {
 	if (!Preferences.loaded)
 	    loadPreferences(context);
 
-	if (Preferences.autoConnect && getPreviousConnectionState(context) == true) {
+	if (Preferences.autoConnect) {
 	    context.startService(new Intent(context, MetaWatchService.class));
 	    if (Preferences.logging)
 		Log.v(MetaWatchStatus.TAG, "Service auto started");
