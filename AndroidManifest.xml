@@ -71,6 +71,18 @@
 			android:configChanges="keyboardHidden|orientation"
 			android:launchMode="singleTask">
 		</activity>
+		<activity android:label="Send to Watch" android:name="org.metawatch.manager.ImageViewer">
+			<intent-filter>
+				<action	android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="image/*" />
+			</intent-filter>
+			<intent-filter>
+				<action	android:name="android.intent.action.SEND" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="image/*" />
+			</intent-filter>
+		</activity>
         <receiver android:name="org.metawatch.manager.IntentReceiver" android:exported="true">
             <intent-filter>
 				<action android:name="android.bluetooth.adapter.action.STATE_CHANGED"/>
