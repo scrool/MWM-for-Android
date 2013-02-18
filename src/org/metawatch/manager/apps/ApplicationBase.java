@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.metawatch.manager.Application;
 import org.metawatch.manager.FontCache;
-import org.metawatch.manager.Idle;
 import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
 import org.metawatch.manager.MetaWatchService.Preferences;
@@ -155,6 +154,7 @@ public abstract class ApplicationBase {
 	int watchType = MetaWatchService.watchType;
 	if (watchType == MetaWatchService.WatchType.DIGITAL) {
 	    Application.startAppMode(context, this);
+	    Application.toCurrentApp(context);
 	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
 	    // FIXME
 	}

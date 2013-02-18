@@ -339,7 +339,7 @@ public class MetaWatchService extends Service {
 
 	    Protocol.getInstance(MetaWatchService.this).getDeviceType();
 	    
-	    processCurrentWatchState();
+	    NavigationManagement.processWatchConnection(this);
 	    
 	    // Unblock the message protocol queue, and the notification queue.
 	    mPauseQueue.open();
@@ -372,22 +372,6 @@ public class MetaWatchService extends Service {
 		wakeLock.release();
 	}
 	return false;
-    }
-
-    private void processCurrentWatchState() {
-	switch(watchMode.peek()) {
-	case APPLICATION:
-	    Application.stopAppMode(this);
-	    Idle.getInstance().updateIdle(this, true);
-	    break;
-	case CALL:
-	case NOTIFICATION:
-	case IDLE:
-	default:
-	    Idle.getInstance().toIdle(this);
-	    Idle.getInstance().updateIdle(this, true);
-	    break;
-	}
     }
 
     void cleanup() {
@@ -598,6 +582,8 @@ public class MetaWatchService extends Service {
 		    // Activate the last used idle page in this case
 		    Idle.getInstance().toPage(MetaWatchService.this, 0);
 		    Idle.getInstance().toIdle(MetaWatchService.this);
+		    Idle.getInstance().updateIdle(MetaWatchService.this, true);
+
 		}
 	    }
 
@@ -616,7 +602,7 @@ public class MetaWatchService extends Service {
 		    if (Preferences.logging)
 			Log.d(MetaWatchStatus.TAG, "MetaWatchService.readFromDevice(): device type response; analog watch (gen1)");
 
-		    processCurrentWatchState();
+		    NavigationManagement.processWatchConnection(this);
 		    
 		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		    boolean displaySplash = sharedPreferences.getBoolean("DisplaySplashScreen", false);
@@ -648,7 +634,7 @@ public class MetaWatchService extends Service {
 		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, WatchBuffers.APPLICATION);
 		    Protocol.getInstance(MetaWatchService.this).disableButton(0, 0, WatchBuffers.NOTIFICATION);
 
-		    processCurrentWatchState();
+		    NavigationManagement.processWatchConnection(this);
 		    
 		    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		    boolean displaySplash = sharedPreferences.getBoolean("DisplaySplashScreen", false);
@@ -810,11 +796,11 @@ public class MetaWatchService extends Service {
 		    MediaControl.getInstance().answerCall(this);
 		    break;
 		case Call.CALL_DISMISS:
-		    MediaControl.getInstance().ignoreCall(this);
+		    MediaControl.getInstance().dismissCall(this);
 		    break;
-		case Call.CALL_MENU:
-		    ActionManager.getInstance(this).displayCallActions(this);
-		    break;
+//		case Call.CALL_MENU:
+//		    ActionManager.getInstance(this).displayCallActions(this);
+//		    break;
 		default:
 		    Notification.getInstance().buttonPressed(button);
 		    break;

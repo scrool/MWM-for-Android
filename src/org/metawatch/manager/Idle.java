@@ -31,7 +31,6 @@ package org.metawatch.manager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchModes;
@@ -70,7 +69,7 @@ public class Idle {
 
     Bitmap oledIdle = null;
     
-    Vector<IdlePage> idlePages = null;
+    ArrayList<IdlePage> idlePages = null;
     private Map<String, WidgetData> widgetData = null;
     
     private static Idle mInstance = null;
@@ -304,7 +303,7 @@ public class Idle {
 	    AppPage aPage = new AppPage(app);
 
 	    if (idlePages == null)
-		idlePages = new Vector<IdlePage>();
+		idlePages = new ArrayList<IdlePage>();
 	    idlePages.add(aPage);
 	    page = idlePages.indexOf(aPage);
 
@@ -340,7 +339,7 @@ public class Idle {
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 	try {
 
-	    Vector<IdlePage> prevList = idlePages;
+	    ArrayList<IdlePage> prevList = idlePages;
 
 	    List<WidgetRow> rows = WidgetManager.getInstance(context).getDesiredWidgetsFromPrefs(context);
 
@@ -366,7 +365,7 @@ public class Idle {
 		maxScreenSize = 32;
 
 	    // Bucket rows into pages
-	    Vector<IdlePage> screens = new Vector<IdlePage>();
+	    ArrayList<IdlePage> screens = new ArrayList<IdlePage>();
 
 	    int screenSize = 0;
 	    if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
@@ -519,8 +518,6 @@ public class Idle {
 	idlePages.get(currentPage).activate(context, MetaWatchService.watchType);
 
 	if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL) {
-	    sendLcdIdle(context, true);
-	    
 	    if (numPages() > 1) {
 		Protocol.getInstance(context).enableButton(0, 1, IDLE_NEXT_PAGE, MetaWatchService.WatchBuffers.IDLE); // Right
 		// top
@@ -532,12 +529,9 @@ public class Idle {
 		// middle
 		// -
 		// press
-
 	    }
-
 	    Protocol.getInstance(context).enableButton(0, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
 	    Protocol.getInstance(context).enableButton(0, 3, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);
-
 	} else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG) {
 	    Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.IDLE); // Disable
 	    // built
@@ -556,26 +550,23 @@ public class Idle {
     }
 
     public void updateIdle(final Context context, final boolean refresh) {
-
-	if (MetaWatchService.watchType == MetaWatchService.WatchType.UNKNOWN) {
+	if (!MetaWatchService.mIsRunning || MetaWatchService.watchType == MetaWatchService.WatchType.UNKNOWN || MetaWatchService.getWatchMode() != MetaWatchService.WatchModes.IDLE) {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, "Idle.updateIdle() skipped - yet unknown watch type");
 	    return;
 	}
 
-	if (MetaWatchService.getWatchMode() == MetaWatchService.WatchModes.IDLE) {
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
-	    long timestamp = System.currentTimeMillis();
-
-	    if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL)
-		sendLcdIdle(context, refresh);
-	    else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
-		updateOledIdle(context, refresh);
-
-	    if (Preferences.logging)
-		Log.d(MetaWatchStatus.TAG, "updateIdle took " + (System.currentTimeMillis() - timestamp) + " ms");
-	}
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdle()");
+	long timestamp = System.currentTimeMillis();
+	
+	if (MetaWatchService.watchType == MetaWatchService.WatchType.DIGITAL)
+	    sendLcdIdle(context, refresh);
+	else if (MetaWatchService.watchType == MetaWatchService.WatchType.ANALOG)
+	    updateOledIdle(context, refresh);
+	
+	if (Preferences.logging)
+	    Log.d(MetaWatchStatus.TAG, "updateIdle took " + (System.currentTimeMillis() - timestamp) + " ms");
     }
 
     private void updateOledIdle(final Context context, final boolean refresh) {

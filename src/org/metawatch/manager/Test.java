@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Random;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchService.WatchModes;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Notification.VibratePattern;
 import org.metawatch.manager.apps.AppManager;
@@ -206,6 +207,7 @@ public class Test extends SherlockPreferenceActivity {
 		final String incomingNumber = "555-123-4567";
 		Call.inCall = true;
 		Call.phoneNumber = incomingNumber;
+		MetaWatchService.setWatchMode(WatchModes.CALL);
 		Call.startRinging(context, incomingNumber);
 		return true;
 	    }
@@ -216,6 +218,7 @@ public class Test extends SherlockPreferenceActivity {
 		final String incomingNumber = "unknown";
 		Call.inCall = true;
 		Call.phoneNumber = incomingNumber;
+		MetaWatchService.setWatchMode(WatchModes.CALL);
 		Call.startRinging(context, incomingNumber);
 		return true;
 	    }

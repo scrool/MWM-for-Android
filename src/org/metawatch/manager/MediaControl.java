@@ -28,6 +28,8 @@
 
 package org.metawatch.manager;
 
+import java.lang.reflect.Method;
+
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Notification.VibratePattern;
@@ -39,7 +41,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import org.metawatch.manager.Log;
 import android.view.KeyEvent;
 
 public class MediaControl {
@@ -137,28 +138,30 @@ public class MediaControl {
 		audioManager.setSpeakerphoneOn(true);
 	    }
 	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_HEADSETHOOK, "android.permission.CALL_PRIVILEGED");
-	    Call.endRinging(context);
 	}
     }
 
     public void dismissCall(Context context) {
-	// TODO: Find a way of making this actually work (and properly dismiss
-	// to voicemail)
 	if (Call.isRinging) {
-	    sendMediaButtonEvent(context, KeyEvent.KEYCODE_HEADSETHOOK, "android.permission.CALL_PRIVILEGED");
+	    Object iTTelephony = GetItTelephony.TRY();
+	    try {
+		Method endCall = iTTelephony.getClass().getMethod("endCall");
+		endCall.invoke(iTTelephony);
+	    } catch (Exception e) {
+		sendMediaButtonEvent(context, KeyEvent.KEYCODE_HEADSETHOOK, "android.permission.CALL_PRIVILEGED");
+		sendMediaButtonEvent(context, KeyEvent.KEYCODE_HEADSETHOOK, "android.permission.CALL_PRIVILEGED");
+	    }
 	}
-	sendMediaButtonEvent(context, KeyEvent.KEYCODE_HEADSETHOOK, "android.permission.CALL_PRIVILEGED");
-	Call.endRinging(context);
     }
 
-    public void ignoreCall(Context context) {
-	if (Call.isRinging) {
-	    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-	    Call.previousRingerMode = audioManager.getRingerMode();
-	    audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-	    Call.endRinging(context);
-	}
-    }
+//    public void ignoreCall(Context context) {
+//	if (Call.isRinging) {
+//	    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+//	    Call.previousRingerMode = audioManager.getRingerMode();
+//	    audioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+//	    Call.endRinging(context);
+//	}
+//    }
 
     public void setSpeakerphone(Context context, boolean state) {
 	AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -218,11 +221,9 @@ public class MediaControl {
 
 	int mediaPlayerState = AppManager.getInstance(context).getAppState(MediaPlayerApp.APP_ID);
 	if (mediaPlayerState == ApplicationBase.ACTIVE_POPUP)
-	    Application.refreshAppScreen(context);
-
+	    Application.refreshCurrentApp(context);
 	if (!MetaWatchService.Preferences.notifyMusic)
 	    return;
-
 	if (mediaPlayerState != ApplicationBase.INACTIVE) {
 	    VibratePattern vibratePattern = NotificationBuilder.createVibratePatternFromPreference(context, "settingsMusicNumberBuzzes");
 

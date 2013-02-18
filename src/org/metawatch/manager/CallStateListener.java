@@ -29,6 +29,7 @@
 package org.metawatch.manager;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
+import org.metawatch.manager.MetaWatchService.WatchModes;
 import org.metawatch.manager.actions.ActionManager;
 
 import android.content.Context;
@@ -63,6 +64,7 @@ class CallStateListener extends PhoneStateListener {
 	case TelephonyManager.CALL_STATE_RINGING:
 	    Call.inCall = true;
 	    Call.phoneNumber = incomingNumber;
+	    MetaWatchService.setWatchMode(WatchModes.CALL);
 	    Call.startRinging(context, incomingNumber);
 	    break;
 	case TelephonyManager.CALL_STATE_IDLE:

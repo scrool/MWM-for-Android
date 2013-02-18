@@ -323,7 +323,7 @@ public class Notification {
 
 		// We're done with this notification.
 		currentNotification = null;
-		exitNotification(context);
+		NavigationManagement.processEndMode(context);
 	    } catch (InterruptedException ie) {
 		/* If we've been interrupted, exit gracefully. */
 		if (Preferences.logging)
@@ -495,26 +495,6 @@ public class Notification {
 	notification.description = description;
 	addToNotificationQueue(context, notification, false);
 
-    }
-
-    private void exitNotification(Context context) {
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "Notification.exitNotification()");
-	MetaWatchService.previousWatchMode();
-	WatchModes mode = MetaWatchService.getWatchMode();
-	switch(mode) {
-	case APPLICATION:
-	    if (!Application.toCurrentApp(context)) {
-		Application.stopAppMode(context);
-	    }
-	    break;
-	case IDLE:
-	case NOTIFICATION:
-	case CALL:
-	default:
-	    Idle.getInstance().toIdle(context);
-	    break;
-	}
     }
 
     public void replay(Context context) {

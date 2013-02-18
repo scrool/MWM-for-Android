@@ -42,21 +42,19 @@ public class Application {
 	if (MetaWatchService.getWatchMode() != MetaWatchService.WatchModes.APPLICATION) {
 	    MetaWatchService.setWatchMode(WatchModes.APPLICATION);
 	    currentApp = internalApp;
-	    toCurrentApp(context);
 	}
     }
 
     public static void stopAppMode(Context context) {
-	MetaWatchService.previousWatchMode();
 	if (currentApp != null) {
 	    currentApp.deactivate(context, MetaWatchService.watchType);
 	    currentApp.setInactive();
 	}
 	currentApp = null;
-	Idle.getInstance().toIdle(context);
+	NavigationManagement.processEndMode(context);
     }
 
-    public static void refreshAppScreen(Context context) {
+    public static void refreshCurrentApp(Context context) {
 	if (MetaWatchService.getWatchMode() == WatchModes.APPLICATION) {
 	    Bitmap bitmap;
 	    if (currentApp != null) {
@@ -72,7 +70,7 @@ public class Application {
 
     public static boolean toCurrentApp(final Context context) {
 	if (currentApp != null && MetaWatchService.getWatchMode() == WatchModes.APPLICATION) {
-	    refreshAppScreen(context);
+	    refreshCurrentApp(context);
 //	    Idle.getInstance().deactivateButtons(context);
 	    int watchType = MetaWatchService.watchType;
 	    currentApp.activate(context, watchType);
@@ -91,7 +89,7 @@ public class Application {
 	    stopAppMode(context);
 	} else if (currentApp != null) {
 	    if (currentApp.buttonPressed(context, button) != ApplicationBase.BUTTON_USED_DONT_UPDATE) {
-		refreshAppScreen(context);
+		refreshCurrentApp(context);
 	    }
 	} else {
 	    // Broadcast button to external app

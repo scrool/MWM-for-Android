@@ -14,6 +14,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.metawatch.manager.Application;
 import org.metawatch.manager.Idle;
 import org.metawatch.manager.Log;
 import org.metawatch.manager.MetaWatchService;
@@ -182,9 +183,22 @@ public class WunderWeatherEngine extends AbstractWeatherEngine {
 
 		weatherData.error = false;
 		weatherData.errorString = "";
-
-		if (MetaWatchService.getWatchMode() == MetaWatchService.WatchModes.IDLE) {
+		switch(MetaWatchService.getWatchMode()) {
+		case APPLICATION:
+		    Application.refreshCurrentApp(context);
+		    break;
+		case CALL:
+		    break;
+		case IDLE:
 		    Idle.getInstance().updateIdle(context, true);
+		    break;
+		case NOTIFICATION:
+		    break;
+		case OFF:
+		    break;
+		default:
+		    break;
+		
 		}
 	    }
 

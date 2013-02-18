@@ -29,7 +29,6 @@
 package org.metawatch.manager;
 
 import org.metawatch.manager.MetaWatchService.Preferences;
-import org.metawatch.manager.MetaWatchService.WatchModes;
 import org.metawatch.manager.MetaWatchService.WatchType;
 import org.metawatch.manager.Notification.VibratePattern;
 
@@ -55,7 +54,7 @@ public class Call {
     final static byte CALL_MENU = 92;
 
     public static void startRinging(Context context, String number) {
-	toCall(context);
+	enableCallMode(context);
 
 	isRinging = true;
 
@@ -110,7 +109,7 @@ public class Call {
 	    // Draw icons
 	    canvas.drawBitmap(Utils.getBitmap(context, "action_up.bmp"), 87, -2, null);
 	    canvas.drawBitmap(Utils.getBitmap(context, "action_reject.bmp"), 87, 43, null);
-	    canvas.drawBitmap(Utils.getBitmap(context, "menu.bmp"), 87, 87, null);
+//	    canvas.drawBitmap(Utils.getBitmap(context, "menu.bmp"), 87, 87, null);
 
 	    Protocol.getInstance(context).sendLcdBitmap(bitmap, MetaWatchService.WatchBuffers.NOTIFICATION);
 	    Protocol.getInstance(context).configureIdleBufferSize(false);
@@ -126,46 +125,29 @@ public class Call {
 
     public static void endRinging(Context context) {
 	isRinging = false;
-	exitCall(context);
+	disableCallMode(context);
     }
 
-    static void toCall(Context context) {
-	MetaWatchService.setWatchMode(WatchModes.CALL);
+    private static void enableCallMode(Context context) {
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Protocol.getInstance(context).enableButton(0, 0, CALL_ANSWER, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // top
 	    Protocol.getInstance(context).enableButton(1, 0, CALL_DISMISS, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // middle
-	    Protocol.getInstance(context).enableButton(2, 0, CALL_MENU, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-	    // bottom
+//	    Protocol.getInstance(context).enableButton(2, 0, CALL_MENU, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+//	    // bottom
 	}
     }
 
-    static void exitCall(Context context) {
-
+    private static void disableCallMode(Context context) {
 	if (MetaWatchService.watchType == WatchType.DIGITAL) {
 	    Protocol.getInstance(context).disableButton(0, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // top
 	    Protocol.getInstance(context).disableButton(1, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
 	    // middle
-	    Protocol.getInstance(context).disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
-	    // bottom
+//	    Protocol.getInstance(context).disableButton(2, 0, MetaWatchService.WatchBuffers.NOTIFICATION); // Right
+//	    // bottom
 	}
-	
-	MetaWatchService.previousWatchMode();
-	WatchModes mode = MetaWatchService.getWatchMode();
-	switch(mode) {
-	case APPLICATION:
-	    if (!Application.toCurrentApp(context)) {
-		Application.stopAppMode(context);
-	    }
-	    break;
-	case IDLE:
-	case NOTIFICATION:
-	case CALL:
-	default:
-	    Idle.getInstance().toIdle(context);
-	    break;
-	}
+	NavigationManagement.processEndMode(context);
     }
 }

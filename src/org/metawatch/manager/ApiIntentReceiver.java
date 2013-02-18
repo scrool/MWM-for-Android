@@ -59,19 +59,16 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 	    String id = intent.hasExtra("id") ? intent.getStringExtra("id") : "anonymous";
 	    if (intent.hasExtra("array")) {
 		Bitmap bmp = Bitmap.createBitmap(intent.getIntArrayExtra("array"), 96, 96, Bitmap.Config.RGB_565);
-
 		if (Preferences.invertLCD && intent.getBooleanExtra("autoinvert", false)) {
 		    bmp = Utils.invertBitmap(bmp);
 		}
-
 		ApplicationBase app = AppManager.getInstance(context).getApp(id);
 		if (app != null && app instanceof ExternalApp) {
 		    ((ExternalApp) app).setBuffer(bmp);
-
 		    if (app.appState == ApplicationBase.ACTIVE_IDLE)
 			Idle.getInstance().updateIdle(context, true);
 		    else if (app.appState == ApplicationBase.ACTIVE_POPUP)
-			Application.refreshAppScreen(context);
+			Application.refreshCurrentApp(context);
 		}
 	    }
 	    return;
