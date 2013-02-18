@@ -307,8 +307,8 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	if (BluetoothAdapter.getDefaultAdapter() == null || !BluetoothAdapter.getDefaultAdapter().isEnabled()) {
 	    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 	    startActivityForResult(intent, BLUETOOTH_ENABLE_REQUEST);
-
 	} else {
+	    mShutdownRequested = false;
 	    mContext.startService(new Intent(mContext, MetaWatchService.class));
 	}
     }
