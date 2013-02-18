@@ -54,7 +54,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -66,7 +65,6 @@ import com.bugsense.trace.BugSenseHandler;
 public class MetaWatchStatus extends SherlockFragment implements OnClickListener {
 
     public static final String TAG = "MetaWatchStatus";
-    private BluetoothAdapter bluetoothAdapter;
     public Button mStatistics = null;
     public Button mStartButton = null;
     public Button mShutdownButton = null;
@@ -92,7 +90,6 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	super.onCreate(savedInstanceState);
 	mContext = (SherlockFragmentActivity) getActivity();
 	mActionBar = mContext.getSupportActionBar();
-	bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 	LinearLayout statisticsContainer = new LinearLayout(mContext);
 	statisticsContainer.setGravity(Gravity.CENTER);
 	statisticsContainer.setOrientation(LinearLayout.VERTICAL);
