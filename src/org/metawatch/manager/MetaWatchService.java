@@ -304,7 +304,6 @@ public class MetaWatchService extends Service {
 		    //Wait for bluetooth to enable and try again
 		    return false;
 		}
-		    
 
 		wakeLock.acquire();
 		BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(Preferences.watchMacAddress);
@@ -394,6 +393,22 @@ public class MetaWatchService extends Service {
 	} catch (IOException e) {
 	}
 	broadcastConnection(false);
+	switch(watchMode.peek()) {
+	case APPLICATION:
+	    Application.stopAppMode(this);
+	    break;
+	case CALL:
+	    break;
+	case IDLE:
+	    break;
+	case NOTIFICATION:
+	    break;
+	case OFF:
+	    break;
+	default:
+	    break;
+	
+	}
     }
 
     private void resetConnection() {
