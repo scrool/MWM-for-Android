@@ -763,8 +763,24 @@ public class MetaWatchService extends Service {
 			Idle.getInstance().quickButtonAction(MetaWatchService.this, Preferences.quickButtonR);
 			break;
 		    case Idle.IDLE_NEXT_PAGE:
-			Idle.getInstance().nextPage(this);
-			Idle.getInstance().updateIdle(this, true);
+			switch(watchMode.peek()) {
+			case APPLICATION:
+			    Application.stopAppMode(this);
+			    break;
+			case CALL:
+			    break;
+			case IDLE:
+			    Idle.getInstance().nextPage(this);
+			    Idle.getInstance().updateIdle(this, true);
+			    break;
+			case NOTIFICATION:
+			    break;
+			case OFF:
+			    break;
+			default:
+			    break;
+			
+			}
 			break;
 		    case Idle.TOGGLE_SILENT:
 			setSilentMode(!silentMode);
