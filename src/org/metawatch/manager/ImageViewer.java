@@ -72,8 +72,8 @@ public class ImageViewer extends Activity {
 	    Bitmap scaled = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeStream(getContentResolver().openInputStream(u), null, options), 96, 96, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
 	    Bitmap dithered = Utils.ditherTo1bit(scaled, Preferences.invertLCD);
 	    scaled.recycle();
-	    VibratePattern vibratePattern = new VibratePattern(true, 1, 1, 1);
-	    Notification.getInstance().addBitmapNotification(this, dithered, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(this), "Image viewer");
+	    
+	    Notification.getInstance().addBitmapNotification(this, dithered, NotificationBuilder.createVibratePatternFromBuzzes(1), Notification.getInstance().getDefaultNotificationTimeout(this), "Image viewer");
 	} catch (FileNotFoundException e) {
 	    e.printStackTrace();
 	}
