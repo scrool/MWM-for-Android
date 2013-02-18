@@ -28,6 +28,8 @@ public class NavigationManagement {
 	case APPLICATION:
 	    if (!Application.toCurrentApp(context)) {
 		Application.stopAppMode(context);
+	    } else {
+		Application.refreshCurrentApp(context);
 	    }
 	    break;
 	case CALL:

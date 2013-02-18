@@ -155,6 +155,7 @@ public abstract class ApplicationBase {
 	if (watchType == MetaWatchService.WatchType.DIGITAL) {
 	    Application.startAppMode(context, this);
 	    Application.toCurrentApp(context);
+	    Application.refreshCurrentApp(context);
 	} else if (watchType == MetaWatchService.WatchType.ANALOG) {
 	    // FIXME
 	}

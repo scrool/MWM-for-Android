@@ -527,7 +527,6 @@ public class Idle {
 		// press
 		Protocol.getInstance(context).enableButton(5, 0, LEFT_QUICK_BUTTON, MetaWatchService.WatchBuffers.IDLE); // left
 		// middle
-		// -
 		// press
 	    }
 	    Protocol.getInstance(context).enableButton(0, 2, TOGGLE_SILENT, MetaWatchService.WatchBuffers.IDLE);

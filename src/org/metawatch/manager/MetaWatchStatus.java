@@ -35,6 +35,7 @@ import org.metawatch.manager.MetaWatchService.GeolocationMode;
 import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.MetaWatchService.WeatherProvider;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.bluetooth.BluetoothAdapter;
@@ -80,6 +81,7 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     public static boolean mShutdownRequested = false;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     public static final String DEVICE_SELECTED_AUTO_CONNECT = "DEVICE_SELECTED_AUTO_CONNECT";
+    public static final int BLUETOOTH_ENABLE_REQUEST = 34;
 
     public static MetaWatchStatus newInstance() {
 	return new MetaWatchStatus();
@@ -305,15 +307,13 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
     }
 
     void startService() {
-	if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
-	    Toast.makeText(mContext, R.string.error_bluetooth_not_enabled, Toast.LENGTH_SHORT).show();
-	    return;
-	} else if (bluetoothAdapter == null) {
-	    Toast.makeText(mContext, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
-	    return;
+	if (BluetoothAdapter.getDefaultAdapter() == null || !BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+	    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+	    startActivityForResult(intent, BLUETOOTH_ENABLE_REQUEST);
+
+	} else {
+	    mContext.startService(new Intent(mContext, MetaWatchService.class));
 	}
-	mShutdownRequested = false;
-	mContext.startService(new Intent(mContext, MetaWatchService.class));
     }
 
     void stopService() {
@@ -324,6 +324,18 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	    // The service wasn't running
 	    if (Preferences.logging)
 		Log.d(TAG, e.getMessage());
+	}
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	switch(requestCode) {
+	case BLUETOOTH_ENABLE_REQUEST:
+	    if (resultCode == Activity.RESULT_OK)
+		startService();
+	    break;
+	default:
+	    super.onActivityResult(requestCode, resultCode, data);
 	}
     }
 }

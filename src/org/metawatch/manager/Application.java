@@ -70,7 +70,6 @@ public class Application {
 
     public static boolean toCurrentApp(final Context context) {
 	if (currentApp != null && MetaWatchService.getWatchMode() == WatchModes.APPLICATION) {
-	    refreshCurrentApp(context);
 //	    Idle.getInstance().deactivateButtons(context);
 	    int watchType = MetaWatchService.watchType;
 	    currentApp.activate(context, watchType);

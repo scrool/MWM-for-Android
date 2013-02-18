@@ -149,15 +149,17 @@ public class MetaWatchService extends Service {
 	createNotification();
 
 	connectionState = ConnectionState.CONNECTING;
+	
 	watchMode.clear();
 	watchMode.push(WatchModes.IDLE);
+
 	watchType = WatchType.UNKNOWN;
 	watchGen = WatchGen.UNKNOWN;
 	Monitors.getInstance().getRTCTimestamp = 0;
 
-	if (bluetoothAdapter == null)
+	if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled())
 	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
+	
 	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
 
@@ -165,7 +167,7 @@ public class MetaWatchService extends Service {
 	Monitors.getInstance().start(this/* , telephonyManager */);
 
 	// // Initialise theme
-	// BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
+	 BitmapCache.getInstance().getBitmap(MetaWatchService.this, "");
 
 	watchReceiverThread = new WatchReceiverThread("MetaWatch Service Thread");
 	watchReceiverThread.setPriority(7);
@@ -300,8 +302,12 @@ public class MetaWatchService extends Service {
 
 	    if (!MetaWatchService.fakeWatch) {
 
-		if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled())
+		if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+		    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		    //Wait for bluetooth to enable and try again
 		    return false;
+		}
+		    
 
 		wakeLock.acquire();
 		BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(Preferences.watchMacAddress);
