@@ -37,8 +37,6 @@ import org.metawatch.manager.MetaWatchService.Preferences;
 import org.metawatch.manager.weather.WeatherData;
 import org.metawatch.manager.weather.WeatherEngineFactory;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -55,10 +53,6 @@ public class Monitors {
 
     private Executor mExecutor = Executors.newSingleThreadExecutor();
     
-    public AlarmManager alarmManager;
-    public Intent intent;
-    public PendingIntent sender;
-
     GmailMonitor gmailMonitor;
 
     private ContentObserverMessages contentObserverMessages;
@@ -149,10 +143,7 @@ public class Monitors {
 	return count;
     }
 
-    public void start(Context context/*
-					     * , TelephonyManager telephonyManager
-					     */) {
-	// start weather updater
+    public void start(Context context) {
 
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Monitors.start()");
@@ -213,8 +204,6 @@ public class Monitors {
 
 	// temporary one time update
 	updateWeatherData(context);
-
-	startAlarmTicker(context);
     }
 
     public void RefreshLocation() {
@@ -247,7 +236,6 @@ public class Monitors {
 
 	if (contentResolverMessages != null && contentObserverMessages != null)
 	    contentResolverMessages.unregisterContentObserver(contentObserverMessages);
-	stopAlarmTicker();
 
 	if (batteryLevelReceiver != null) {
 	    context.unregisterReceiver(batteryLevelReceiver);
@@ -284,22 +272,6 @@ public class Monitors {
 	weatherData.timeStamp = 0;
 	weatherData.forecastTimeStamp = 0;
 	updateWeatherData(context);
-    }
-
-    void startAlarmTicker(Context context) {
-	if (Preferences.logging)
-	    Log.d(MetaWatchStatus.TAG, "startAlarmTicker()");
-	alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-	intent = new Intent(context, AlarmReceiver.class);
-	intent.putExtra("action_update", "update");
-	sender = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-	alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, 0, AlarmManager.INTERVAL_HALF_HOUR, sender);
-    }
-
-    void stopAlarmTicker() {
-	if (alarmManager != null && sender != null)
-	    alarmManager.cancel(sender);
     }
 
     private class ContentObserverMessages extends ContentObserver {

@@ -334,9 +334,10 @@ public class Idle {
 	idlePages = null;
     }
 
-    synchronized void updateIdlePages(Context context, boolean refresh) {
+    void updateIdlePages(Context context, boolean refresh) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
+
 	try {
 
 	    ArrayList<IdlePage> prevList = idlePages;
@@ -430,7 +431,7 @@ public class Idle {
     /*
      * Only this (central) method need to be synchronized, the one above calls this and will be blocked anyway.
      */
-    Bitmap createIdle(Context context, boolean preview, int page) {
+    synchronized Bitmap createIdle(Context context, boolean preview, int page) {
 	final int width = (MetaWatchService.watchType == WatchType.DIGITAL) ? 96 : 80;
 	final int height = (MetaWatchService.watchType == WatchType.DIGITAL) ? 96 : 32;
 	Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
@@ -479,9 +480,6 @@ public class Idle {
 	    if (MetaWatchService.silentMode()) {
 		showClock = true;
 	    } else {
-		// Update widgets.
-		// Don't do it while on an AppPage in order to not overwrite any
-		// running app.
 		updateIdlePages(context, refresh);
 		showClock = (currentPage == 0 || Preferences.clockOnEveryPage);
 	    }

@@ -500,6 +500,7 @@ public class MetaWatchService extends Service {
 
 		    Intent intent = new Intent(MetaWatchService.this, AlarmReceiver.class);
 		    intent.putExtra("action_poll_voltage", "poll_voltage");
+		    intent.putExtra("action_update", "update");
 		    MetaWatchService.this.sendBroadcast(intent);
 		}
 	    } catch (NumberFormatException nfe) {
@@ -821,7 +822,6 @@ public class MetaWatchService extends Service {
 //		    ActionManager.getInstance(this).displayCallActions(this);
 //		    break;
 		default:
-		    Notification.getInstance().buttonPressed(button);
 		    break;
 		}
 		break;
