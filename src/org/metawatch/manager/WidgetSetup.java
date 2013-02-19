@@ -322,7 +322,7 @@ public class WidgetSetup extends SherlockFragment {
     private void refreshPreview() {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "WidgetSetup.refreshPreview() start");
-	Idle.getInstance().updateIdlePages(mActivity, true);
+	Idle.getInstance().updateIdlePages(mActivity);
 	int pages = Idle.getInstance().numPages();
 	if (mCurrentNumberOfPages != pages)
 	    mIdlePreviews.removeAllViews();

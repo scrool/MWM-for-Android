@@ -334,13 +334,11 @@ public class Idle {
 	idlePages = null;
     }
 
-    void updateIdlePages(Context context, boolean refresh) {
+    void updateIdlePages(Context context) {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "Idle.updateIdlePages start");
 
 	try {
-
-	    ArrayList<IdlePage> prevList = idlePages;
 
 	    List<WidgetRow> rows = WidgetManager.getInstance(context).getDesiredWidgetsFromPrefs(context);
 
@@ -349,10 +347,7 @@ public class Idle {
 		widgetsDesired.addAll(row.getIds());
 	    }
 
-	    if (refresh)
-		widgetData =  WidgetManager.getInstance(context).refreshWidgets(context, widgetsDesired);
-	    else
-		widgetData =  WidgetManager.getInstance(context).getCachedWidgets(context, widgetsDesired);
+	    widgetData = WidgetManager.getInstance(context).refreshWidgets(context, widgetsDesired);
 
 	    for (WidgetRow row : rows) {
 		row.doLayout(widgetData);
@@ -390,32 +385,16 @@ public class Idle {
 	    }
 	    screens.add(new WidgetPage(screenRow, screens.size()));
 
-	    if (prevList == null) {
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-		AppData[] data = AppManager.getInstance(context).getAppInfos();
-		for (AppData appEntry : data) {
-		    if (sharedPreferences.getBoolean(appEntry.getPageSettingName(), false)) {
-			screens.add(new AppPage(AppManager.getInstance(context).getApp(appEntry.id)));
-		    }
-		}
-
-	    } else {
-		// Copy app pages from previous list.
-		for (IdlePage page : prevList) {
-		    if (page instanceof AppPage) {
-			screens.add(page);
-		    }
+	    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+	    
+	    AppData[] data = AppManager.getInstance(context).getAppInfos();
+	    for (AppData appEntry : data) {
+		if (sharedPreferences.getBoolean(appEntry.getPageSettingName(), false)) {
+		    screens.add(new AppPage(AppManager.getInstance(context).getApp(appEntry.id)));
 		}
 	    }
 
 	    idlePages = screens;
-
-	    if (prevList == null) {
-		// First run of this function, activate buttons for initial
-		// screen.
-		toPage(context, currentPage);
-	    }
 
 	} finally {
 	}
@@ -480,7 +459,8 @@ public class Idle {
 	    if (MetaWatchService.silentMode()) {
 		showClock = true;
 	    } else {
-		updateIdlePages(context, refresh);
+		if (refresh)
+		    updateIdlePages(context);
 		showClock = (currentPage == 0 || Preferences.clockOnEveryPage);
 	    }
 	}
@@ -508,7 +488,7 @@ public class Idle {
 	    return;
 
 	if (idlePages == null)
-	    updateIdlePages(context, true);
+	    updateIdlePages(context);
 	
 	MetaWatchService.clearWatchMode();
 	MetaWatchService.setWatchMode(WatchModes.IDLE);
@@ -570,7 +550,7 @@ public class Idle {
 	final int mode = getScreenMode(MetaWatchService.WatchType.ANALOG);
 
 	if (mode == MetaWatchService.WatchBuffers.IDLE)
-	    updateIdlePages(context, refresh);
+	    updateIdlePages(context);
 
 	// get the 32px full screen
 	oledIdle = createIdle(context);

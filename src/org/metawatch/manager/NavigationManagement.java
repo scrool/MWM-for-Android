@@ -41,7 +41,7 @@ public class NavigationManagement {
 	case IDLE:
 	default:
 	    Idle.getInstance().toIdle(context);
-	    Idle.getInstance().updateIdle(context, true);
+	    Idle.getInstance().updateIdle(context, false);
 	    break;
 	}
     }
