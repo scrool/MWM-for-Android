@@ -393,7 +393,6 @@ public class MetaWatchService extends Service {
 	} catch (IOException e) {
 	}
 	broadcastConnection(false);
-	Idle.getInstance().destroy();
     }
 
     private void resetConnection() {

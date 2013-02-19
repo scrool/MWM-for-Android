@@ -65,11 +65,11 @@ public class Idle {
     final static byte TOGGLE_SILENT = 63;
     final static byte LEFT_QUICK_BUTTON = 64;
 
-    int currentPage = 0;
+    private static int currentPage = 0;
 
-    Bitmap oledIdle = null;
+    private Bitmap oledIdle = null;
     
-    ArrayList<IdlePage> idlePages = null;
+    private ArrayList<IdlePage> idlePages = null;
     private Map<String, WidgetData> widgetData = null;
     
     private static Idle mInstance = null;
