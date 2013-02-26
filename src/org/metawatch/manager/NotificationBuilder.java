@@ -120,7 +120,7 @@ public class NotificationBuilder {
 	    } else {
 		bitmaps = new Bitmap[] { smartLines(context, icon, title, new String[] { text }) };
 	    }
-	    Notification.getInstance().addBitmapNotification(context, bitmaps, vibratePattern, -1, description);
+	    Notification.getInstance().addBitmapNotification(context, bitmaps, vibratePattern, Notification.getInstance().getDefaultNotificationTimeout(context), description);
 	} else {
 	    byte[] scroll = new byte[800];
 	    int len = Protocol.getInstance(context).createOled2linesLong(context, text, scroll);

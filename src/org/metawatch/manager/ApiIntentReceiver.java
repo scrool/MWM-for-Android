@@ -177,9 +177,7 @@ public class ApiIntentReceiver extends BroadcastReceiver {
 		    icon = Bitmap.createBitmap(intent.getIntArrayExtra("icon"), intent.getIntExtra("iconWidth", 16), intent.getIntExtra("iconHeight", 16), Bitmap.Config.RGB_565);
 		}
 
-		boolean sticky = intent.getBooleanExtra("sticky", true);
-
-		NotificationBuilder.createSmart(context, title, text, icon, sticky, vibrate);
+		NotificationBuilder.createSmart(context, title, text, icon, false, vibrate);
 
 		if (Preferences.logging)
 		    Log.d(MetaWatchStatus.TAG, "ApiIntentReceiver.onReceive(): sending text notification; text='" + text + "'");
