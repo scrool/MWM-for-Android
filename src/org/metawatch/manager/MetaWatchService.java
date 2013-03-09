@@ -92,7 +92,6 @@ public class MetaWatchService extends Service {
     public static ConditionVariable mPauseQueue = new ConditionVariable(true);
 
     private PowerManager powerManager;
-    public PowerManager.WakeLock wakeLock;
 
     // These are not modified outside of this class, only read
     public static volatile int connectionState;
@@ -157,11 +156,10 @@ public class MetaWatchService extends Service {
 	watchGen = WatchGen.UNKNOWN;
 	Monitors.getInstance().getRTCTimestamp = 0;
 
-	if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled())
+	if (bluetoothAdapter == null)
 	    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 	
 	powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-	wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MetaWatch");
 
 	Notification.getInstance().startNotificationSender(this);
 	Monitors.getInstance().start(this/* , telephonyManager */);
@@ -181,7 +179,7 @@ public class MetaWatchService extends Service {
 	if (Preferences.logging)
 	    Log.d(MetaWatchStatus.TAG, "MetaWatchService.onStartCommand()");
 	if (intent != null) {
-	    switch (intent.getIntExtra(COMMAND_KEY, 0)) {
+	    switch (intent.getIntExtra(COMMAND_KEY, -1)) {
 	    case SILENT_MODE_ENABLE:
 		setSilentMode(true);
 		break;
@@ -196,7 +194,7 @@ public class MetaWatchService extends Service {
 		break;
 	    }
 	}
-	return START_STICKY;
+	return Service.START_STICKY;
     }
 
     private Runnable protocolSender = new Runnable() {
@@ -205,7 +203,6 @@ public class MetaWatchService extends Service {
 	    message = sendQueue.peek();
 	    if (message != null) {
 		try {
-		    wakeLock.acquire();
 		    outputStream.write(message);
 		    outputStream.flush();
 		    sendQueue.remove(message);
@@ -213,8 +210,6 @@ public class MetaWatchService extends Service {
 		    e.printStackTrace();
 		    resetConnection();
 		} finally {
-		    if (wakeLock != null && wakeLock.isHeld())
-			wakeLock.release();
 		}
 	    }
 	    try {
@@ -299,13 +294,12 @@ public class MetaWatchService extends Service {
 
 	    if (!MetaWatchService.fakeWatch) {
 
-		if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+		if (bluetoothAdapter == null)
 		    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		    //Wait for bluetooth to enable and try again
-		    return false;
-		}
 
-		wakeLock.acquire();
+		if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled())
+		    bluetoothAdapter.enable();
+
 		BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(Preferences.watchMacAddress);
 
 		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
@@ -370,8 +364,6 @@ public class MetaWatchService extends Service {
 	    if (Preferences.logging)
 		Log.d(MetaWatchStatus.TAG, e.toString());
 	} finally {
-	    if (wakeLock != null && wakeLock.isHeld())
-		wakeLock.release();
 	}
 	return false;
     }

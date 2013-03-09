@@ -362,7 +362,7 @@ public class IntentReceiver extends BroadcastReceiver {
 		final String url = intent.getStringExtra("url");
 
 		NotificationBuilder.createNMA(context, app, event, desc, prio, url);
-	    } else if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+	    }/* else if (intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
 		final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 		switch (state) {
 		case BluetoothAdapter.STATE_OFF:
@@ -370,7 +370,7 @@ public class IntentReceiver extends BroadcastReceiver {
 			context.stopService(new Intent(context, MetaWatchService.class));
 		    break;
 		}
-	    }
+	    }*/
 	} catch (android.os.BadParcelableException e) {
 	    e.printStackTrace();
 	    // if (Preferences.logging) Log.d(MetaWatchStatus.TAG,

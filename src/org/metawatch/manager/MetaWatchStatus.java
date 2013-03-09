@@ -295,7 +295,6 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 
     void startService() {
 	try {
-	    BluetoothAdapter.getDefaultAdapter().enable();
 	    mShutdownRequested = false;
 	    mContext.startService(new Intent(mContext, MetaWatchService.class));
 	} catch (Exception e) {
