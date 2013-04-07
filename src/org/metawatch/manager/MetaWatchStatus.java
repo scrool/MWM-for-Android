@@ -222,12 +222,19 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	final Resources res = mContext.getResources();
 	mStatisticsText.setText("");
 	if (Preferences.weatherProvider != WeatherProvider.DISABLED) {
-	    if (Monitors.getInstance().weatherData.error) {
+	    if (Preferences.weatherProvider == WeatherProvider.YAHOO) {
+		Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
+		Utils.appendColoredText(mStatisticsText, "Yahoo weather has been discontinued. You must setup WeatherUnderground in the settings to get weather data. Preferences/Watch Widgets/Weather Widgets/Weather Provider. You'll need a WeatherUnderground API key!", Color.RED);
+		mStatisticsText.append("\n\n");
+	    } else if (Preferences.wundergroundKey.equals("")) {
+		Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
+		Utils.appendColoredText(mStatisticsText, "Your WeatherUnderground API key is missing or invalid. You must setup WeatherUnderground in the settings to get weather data. Preferences/Watch Widgets/Weather Widgets/Weather Provider.", Color.RED);
+		mStatisticsText.append("\n\n");
+	    } else if (Monitors.getInstance().weatherData.error) {
 		Utils.appendColoredText(mStatisticsText, "ERROR: ", Color.RED);
 		Utils.appendColoredText(mStatisticsText, Monitors.getInstance().weatherData.errorString, Color.RED);
 		mStatisticsText.append("\n\n");
-	    }
-	    if (Monitors.getInstance().weatherData.received) {
+	    } else if (Monitors.getInstance().weatherData.received) {
 		mStatisticsText.append(res.getString(R.string.status_weather_last_updated));
 		mStatisticsText.append("\n");
 		mStatisticsText.append(res.getString(R.string.status_weather_forecast));
@@ -297,6 +304,8 @@ public class MetaWatchStatus extends SherlockFragment implements OnClickListener
 	try {
 	    mShutdownRequested = false;
 	    mContext.startService(new Intent(mContext, MetaWatchService.class));
+	    if (BluetoothAdapter.getDefaultAdapter() != null && !BluetoothAdapter.getDefaultAdapter().isEnabled())
+		BluetoothAdapter.getDefaultAdapter().enable();
 	} catch (Exception e) {
 	    Toast.makeText(mContext, getString(R.string.error_bluetooth_not_supported), Toast.LENGTH_SHORT).show();
 	    e.printStackTrace();

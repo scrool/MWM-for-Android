@@ -184,13 +184,11 @@
 	<string-array name="settings_weather_provider_names">
 	<item>Disabled</item>
     <item>Weather Underground</item>
-    <item>Yahoo! Weather</item>
     </string-array>
     
     <string-array name="settings_weather_provider_values"> 
 	<item>0</item>
 	<item>2</item>
-	<item>3</item>
 	</string-array>
 	
     <string-array name="settings_geolocation_names">

@@ -461,7 +461,7 @@
 				android:title="@string/settings_weather_provider" 
 				android:negativeButtonText="@string/settings_CancelButton" 
 	 			android:enabled="true" 
-	 			android:defaultValue="3"
+	 			android:defaultValue="1"
 	 			android:summary="@string/settings_weather_provider_desc"
 	 			/>	
 	 		<ListPreference

@@ -297,9 +297,6 @@ public class MetaWatchService extends Service {
 		if (bluetoothAdapter == null)
 		    bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-		if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled())
-		    bluetoothAdapter.enable();
-
 		BluetoothDevice bluetoothDevice = bluetoothAdapter.getRemoteDevice(Preferences.watchMacAddress);
 
 		int currentapiVersion = android.os.Build.VERSION.SDK_INT;

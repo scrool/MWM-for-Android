@@ -166,7 +166,7 @@ public class Utils {
 	    }
 
 	    return number;
-	} catch (java.lang.IllegalStateException e) {
+	} catch (Exception e) {
 	    return number;
 	} finally {
 	    ch.closeAll();
