@@ -67,7 +67,7 @@ public class Call {
 
 	    TextPaint paintSmall = new TextPaint();
 	    paintSmall.setColor(Color.BLACK);
-	    paintSmall.setTextSize(FontCache.instance(context).Get(FontCache.FontSize.AUTO));
+	    paintSmall.setTextSize(FontCache.instance(context).Get(FontCache.FontSize.AUTO).size);
 	    paintSmall.setTypeface(FontCache.instance(context).Small.face);
 
 	    canvas.drawColor(Color.WHITE);
