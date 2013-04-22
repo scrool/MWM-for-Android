@@ -166,7 +166,7 @@ public class Utils {
 	    }
 
 	    return number;
-	} catch (Exception e) {
+	} catch (Throwable e) {
 	    return number;
 	} finally {
 	    ch.closeAll();
@@ -219,7 +219,7 @@ public class Utils {
 	    }
 
 	    return null;
-	} catch (java.lang.IllegalStateException e) {
+	} catch (Throwable e) {
 	    return null;
 	} finally {
 	    ch.closeAll();
